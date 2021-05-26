@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>hello</title>
     <link rel="stylesheet" href="./assets/materialize.min.css" />
-    <script src="./utils.js" type="module"></script>
+    <!-- <script src="./utils.js" type="module"></script> -->
     <script src="./assets/materialize.min.js"></script>
+    <script src="./main.js"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.3.0/chart.min.js"></script> -->
     <script>
       let data;
@@ -18,7 +19,7 @@
     <nav>
       <div class="nav-wrapper">
         <span class="brand-logo center">Logo</span>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <ul id="nav-mobile" class="right hide-on-small-and-down">
           <li><a href="#">about</a></li>
         </ul>
       </div>
@@ -26,6 +27,7 @@
     <div class="container">
       hello
       <button onclick="console.log(add(2,5))">a</button>
+      <button onclick="resetZoom()">reset zoom</button>
       <div class="contianer">
         <input
           type="file"
