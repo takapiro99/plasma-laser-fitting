@@ -1,0 +1,3 @@
+const constants = {
+  a: null
+}

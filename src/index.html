@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hello</title>
+    <link rel="stylesheet" href="./assets/materialize.min.css" />
+    <script src="./utils.js" type="module"></script>
+    <script src="./assets/materialize.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.3.0/chart.min.js"></script> -->
+    <script>
+      let data;
+      let myChart;
+    </script>
+  </head>
+  <body>
+    <nav>
+      <div class="nav-wrapper">
+        <span class="brand-logo center">Logo</span>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="#">about</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container">
+      hello
+      <button onclick="console.log(add(2,5))">a</button>
+      <div class="contianer">
+        <input
+          type="file"
+          onchange="readData(this).then(data=>drawData(ctx, data))"
+          accept=".txt"
+        />
+      </div>
+      <canvas id="myChart" width="400" height="400"></canvas>
+    </div>
+  </body>
+  <script>
+    const ctx = document.getElementById("myChart");
+  </script>
+</html>
