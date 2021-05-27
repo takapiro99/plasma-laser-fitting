@@ -25,20 +25,42 @@
       </div>
     </nav>
     <div class="container">
-      hello
-      <button onclick="console.log(add(2,5))">a</button>
-      <button onclick="resetZoom()">reset zoom</button>
+      <!-- <button onclick="console.log(add(2,5))">a</button> -->
       <div class="contianer">
-        <input
-          type="file"
-          onchange="readData(this).then(data=>drawData(ctx, data))"
-          accept=".txt"
-        />
+        <p>
+          input file here：
+          <input
+            type="file"
+            onchange="readData(this).then(data=>{
+            myChart = drawData(ctx, data)
+          })"
+            accept=".txt"
+          />
+        </p>
       </div>
-      <canvas id="myChart" width="400" height="400"></canvas>
+      <button
+        class="waves-effect waves-light btn small blue"
+        onclick="myChart ? myChart.resetZoom() : null"
+      >
+        reset zoomnn
+      </button>
+      <button class="waves-effect waves-light btn small blue" onclick="go()">
+        print
+      </button>
+      <div class="hoge" style="height: 60vh">
+        <canvas id="myChart" style="height: 100%"></canvas>
+      </div>
+      <button class="waves-effect waves-light btn small blue" onclick="cal()">
+        update
+      </button>
     </div>
   </body>
   <script>
     const ctx = document.getElementById("myChart");
+    const go = () => {
+      console.log("go");
+      let a = calculate1(2);
+      console.log(Array.from(a));
+    };
   </script>
 </html>

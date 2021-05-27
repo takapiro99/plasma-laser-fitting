@@ -4,14 +4,7 @@ import zoomPlugin from "chartjs-plugin-zoom";
 
 Chart.register(zoomPlugin);
 Chart.register(...registerables);
-// Animation, Animations, ArcElement, BarController, BarElement, BasePlatform,
-// BasicPlatform, BubbleController, CategoryScale, Chart, DatasetController,
-// Decimation, DomPlatform, DoughnutController, Element, Filler, Interaction, Legend, LineController, LineElement, LinearScale,
-// LogarithmicScale, PieController, PointElement, PolarAreaController, RadarController, RadialLinearScale, Scale,
-//  ScatterController, Ticks, TimeScale, TimeSeriesScale, Title, Tooltip, _adapters,
-// animator, controllers, defaults, elements, layouts, plugins, registerables, registry, scales
 
-console.log("e");
 export const addData = (chart, label, data) => {
   chart.data.labels.push(label);
   chart.data.datasets.forEach((dataset) => {
@@ -88,14 +81,13 @@ export const drawData = (ctx, data) => {
     type: "line",
     data: foramttedData,
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         xAxis: {
           type: "linear",
           ticks: {
             callback: (val) => ((val * 200) % 10 == 0 ? val : ""),
-            // min: 0,
-            // max: 50,
-            // stepSize: 1,
           },
         },
       },
@@ -108,9 +100,6 @@ export const drawData = (ctx, data) => {
             wheel: {
               enabled: true,
             },
-            // drag: {
-            //   enabled: true,
-            // },
             pinch: {
               enabled: false,
             },
@@ -120,10 +109,13 @@ export const drawData = (ctx, data) => {
       },
     },
   });
+  return myChart;
 };
+import loader from "@assemblyscript/loader";
+import AsBind from "as-bind";
 
 // https://github.com/torch2424/wasm-by-example/blob/master/demo-util/
-const wasmBrowserInstantiate = async (wasmModuleUrl, importObject) => {
+export const wasmBrowserInstantiate = async (wasmModuleUrl, importObject) => {
   let response = undefined;
 
   if (!importObject) {
@@ -135,38 +127,24 @@ const wasmBrowserInstantiate = async (wasmModuleUrl, importObject) => {
   }
 
   // Check if the browser supports streaming instantiation
-  if (WebAssembly.instantiateStreaming) {
-    // Fetch the module, and instantiate it as it is downloading
-    response = await WebAssembly.instantiateStreaming(
-      fetch(wasmModuleUrl),
-      importObject
+  // if (WebAssembly.instantiateStreaming) {
+  //   // Fetch the module, and instantiate it as it is downloading
+  //   response = await WebAssembly.instantiateStreaming(
+  //     fetch(wasmModuleUrl),
+  //     importObject
+  //   );
+  // } else {
+  // Fallback to using fetch to download the entire module
+  // And then instantiate the module
+  const fetchAndInstantiateTask = async () => {
+    const wasmArrayBuffer = await fetch(wasmModuleUrl).then((response) =>
+      response.arrayBuffer()
     );
-  } else {
-    // Fallback to using fetch to download the entire module
-    // And then instantiate the module
-    const fetchAndInstantiateTask = async () => {
-      const wasmArrayBuffer = await fetch(wasmModuleUrl).then((response) =>
-        response.arrayBuffer()
-      );
-      return WebAssembly.instantiate(wasmArrayBuffer, importObject);
-    };
-    response = await fetchAndInstantiateTask();
-  }
+    return AsBind.instantiate(wasmArrayBuffer, importObject);
+  };
+  response = await fetchAndInstantiateTask();
+  // }
+  // const res = await loader.instantiate(fetch(wasmModuleUrl), importObject);
 
   return response;
 };
-
-let add;
-
-const runWasmAdd = async () => {
-  // Instantiate our wasm module
-  const wasmModule = await wasmBrowserInstantiate("./optimized.wasm");
-  // Call the Add function export from wasm, save the result
-  add = wasmModule.instance.exports.add;
-  console.log(add(12, 35));
-  // Set the result onto the body
-};
-
-runWasmAdd().then(() => {
-  console.log("loaded");
-});

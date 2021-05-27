@@ -1,66 +1,142 @@
 // The entry file of your WebAssembly module.
 
-export function add(a: i32, b: i32): i32 {
-  return a + b;
+const arrayMax = (arr: Array<f64>): number =>
+  arr.reduce((a: number, b: number) => Math.max(a, b), f64.MIN_VALUE);
+const arrayMin = (arr: Array<f64>): number =>
+  arr.reduce((a: number, b: number) => Math.min(a, b), f64.MAX_VALUE);
+// plasma parameter
+const ATOMIC_MASS = 12; // Atomic mass
+
+const Te = 7; // eV
+const Ti = 7; // eV
+const ne = 3e24; // m^-3
+const Z = 3.2;
+
+const ICCD_CENTER = 596; // (pixel) rayleigh center on ICCD
+const DS = 25; // (pm) Doppler shift in wavelength
+
+// Experiment parameter
+const D = 0.187; // 逆線分散 (nm/mm)
+const ICCD_PIXEL = 0.013; // pixel per mm on ICCD (mm/pixel)
+const dlICCD = D * ICCD_PIXEL; // wavelength per pixel on ICCD (nm/pixel)
+const RSFWHM = 6; // Rayleigh scattering FWHM (pixel)
+const ANGLE_KI_KS = 135; // angle between ki and ks (degree)
+const FWHM = RSFWHM * dlICCD; // 装置関数幅 nm
+const HWHM = FWHM / 2;
+
+// Rayleigh scattering calibration
+const IR = 4500; // Rayleigh scattering integrated intensity
+const sigma = 1 / 132; // scattering cross section ratio (Ray/Th) ???
+const ELR = 5; // Laser energy
+const ELT = 5;
+const n0 = 2.5e25; // air density for Rayleigh
+const NR = 100; // accumulation shots
+const NT = 3;
+
+const CO_EFF = (sigma * n0 * (NR / NT) * (ELR / ELT)) / 0.8 / IR;
+
+// Constants
+const Me = 9.1e-31;
+const Mi = ATOMIC_MASS * 1836 * Me;
+const e = 1.6e-19; // 電子の電荷量
+const IPSIRON = 8.85e-12; // 真空の誘電率
+const RADIAN_KI_KS = (ANGLE_KI_KS * 2 * Math.PI) / 360; // radian
+const KAPPA = 1.6e-19; // ボルツマン定数 J/eV
+const a = sqrt((2 * KAPPA * Te) / Me); // 電子の熱速度
+const b = sqrt((2 * KAPPA * Ti) / Mi); // イオンの熱速度
+
+const C = 3e8; // 光速m/s
+const lamda: f64 = 532; // レーザー波長 nm
+const ki = (2 * Math.PI) / (lamda * 1e-9); // 入射レーザーの波数 1/m とても大きい
+const KO: f64 = 2 * ki * Math.sin(RADIAN_KI_KS / 2); // 散乱に関わる波数 1/m 大きい
+const DEBYE = sqrt((IPSIRON * KAPPA * Te) / (e ** 2 * ne)); // デバイ長 m
+const ALPHA = 1 / (KO * DEBYE);
+const dlmin = -0.2; // %nm
+const dlmax = 0.2;
+const step = 0.0003;
+const count: i32 = <i32>ceil((dlmax - dlmin) / step);
+
+const PI = Math.PI;
+// # 横軸（波長シフト）-0.2から0.2まで、0.0003ずつプロット, length = 1334
+
+// export function calculate1(z: number): string {
+export function calculate1(z: number): Float64Array {
+  const dl = new Array<f64>(count).map<f64>((_, i) => dlmin + i * step);
+  // dl のそれぞれに色々かけたやつ
+  const xiFact =
+    (C * sqrt(Mi / (2 * KAPPA * Ti))) / 2 / Math.sin(RADIAN_KI_KS / 2);
+  // (KO * b * lamda ** 2);
+  const xi = dl.map<f64>((x) => {
+    return x;
+  });
+  const ximax = arrayMax(xi);
+  const ximin = arrayMin(xi);
+  const N = 2; // precision
+  const IPVxi = new Array<f64>(count);
+  const RPxi = new Array<f64>(count);
+  for (let i = 0; i < count; i++) {
+    const phi = 0.01 * abs(xi[i]) + 1e-6;
+    const dzxi = phi / N;
+    const aa = xi[i] - phi;
+    const bb = xi[i] + phi;
+    let Imxi: f64 = 0;
+    let Ipxi: f64 = 0;
+    for (
+      let j = 0;
+      j < Math.floor((xi[i] - phi - (ximin - 1)) / dzxi) + 1;
+      j++
+    ) {
+      const d = aa - j * dzxi;
+      Imxi += (d * Math.exp(-1 * d ** 2)) / (d - xi[i]);
+    }
+    for (
+      let j = 0;
+      j < Math.floor((ximax + 1 - (xi[i] + phi)) / dzxi) + 1;
+      j++
+    ) {
+      const d = bb + j * dzxi;
+      Ipxi += (d * Math.exp(-1 * d ** 2)) / (d - xi[i]);
+    }
+    IPVxi[i] = dzxi * (Ipxi + Imxi);
+    // # evaluating real pole contribution
+    RPxi[i] = 2 * phi * (1 - 2 * xi[i] ** 2);
+  }
+
+  // putting together dW/dxi
+  const dwXiRe = new Array<f64>(count);
+  const dwXiIm = new Array<f64>(count);
+  for (let i = 0; i < count; i++) {
+    dwXiRe[i] = (RPxi[i] * Math.exp(-1 * xi[i] ** 2) + IPVxi[i]) / sqrt(PI);
+    dwXiIm[i] = (-1 * PI * xi[i] * Math.exp(-1 * xi[i] ** 2)) / sqrt(PI);
+  }
+  // 虚数登場
+  const dw = dl.map<f64>((x) => (x * 2 * PI * C * 1e9) / lamda ** 2);
+
+  const fi0 = new Array<f64>(count);
+  for (let i = 0; i < count; i++) {
+    fi0[i] =
+      sqrt(1 / PI / b ** 2) * Math.exp((-1 * (dw[i] / KO) ** 2) / b ** 2);
+  }
+  const beta = sqrt((((Z * ALPHA ** 2) / (1 + ALPHA ** 2)) * Te) / Ti);
+
+  const icont = new Array<f64>(count);
+  // for (let i = 0; i < count; i++) {
+  //   icont[i] =
+  //     Z *
+  //     (ALPHA ** 2 / (1 + ALPHA ** 2)) ** 2 *
+  //     abs(1 / (1 + beta ** 2 * dwXi[i])) ** 2 *
+  //     fi0[i];
+  // }
+
+  // for i in range(count):
+  //     icont[i] = Z*((ALPHA**2)/(1+ALPHA**2))**2 * \
+  //         abs(1/(1+beta**2*dwXi[i]))**2*fi0[i]
+
+  const inst = dl.map<f64>((x) => Math.exp((-0.5 / HWHM ** 2) * x ** 2)); // 装置関数
+  // # X軸
+  const dl_fit = new Float64Array(dl.length);
+  for (let i = 0; i < dl.length; i++) {
+    dl_fit[i] = dl[i] - DS / 1000;
+  }
+  return dl_fit;
 }
-
-/** Number of discrete color values on the JS side. */
-const NUM_COLORS = 2048;
-
-// const constants = {
-//   HELLO: 3
-// }
-
-// /** Updates the rectangle `width` x `height`. */
-// export function update(width: u32, height: u32, limit: u32): void {
-//   var translateX = width  * (1.0 / 1.6);
-//   var translateY = height * (1.0 / 2.0);
-//   var scale      = 10.0 / min(3 * width, 4 * height);
-//   var realOffset = translateX * scale;
-//   var invLimit   = 1.0 / limit;
-
-//   var minIterations = min(8, limit);
-
-//   for (let y: u32 = 0; y < height; ++y) {
-//     let imaginary = (y - translateY) * scale;
-//     let yOffset   = (y * width) << 1;
-
-//     for (let x: u32 = 0; x < width; ++x) {
-//       let real = x * scale - realOffset;
-
-//       // Iterate until either the escape radius or iteration limit is exceeded
-//       let ix = 0.0, iy = 0.0, ixSq: f64, iySq: f64;
-//       let iteration: u32 = 0;
-//       while ((ixSq = ix * ix) + (iySq = iy * iy) <= 4.0) {
-//         iy = 2.0 * ix * iy + imaginary;
-//         ix = ixSq - iySq + real;
-//         if (iteration >= limit) break;
-//         ++iteration;
-//       }
-
-//       // Do a few extra iterations for quick escapes to reduce error margin
-//       while (iteration < minIterations) {
-//         let ixNew = ix * ix - iy * iy + real;
-//         iy = 2.0 * ix * iy + imaginary;
-//         ix = ixNew;
-//         ++iteration;
-//       }
-
-//       // Iteration count is a discrete value in the range [0, limit] here, but we'd like it to be
-//       // normalized in the range [0, 2047] so it maps to the gradient computed in JS.
-//       // see also: http://linas.org/art-gallery/escape/escape.html
-//       let colorIndex = NUM_COLORS - 1;
-//       let distanceSq = ix * ix + iy * iy;
-//       if (distanceSq > 1.0) {
-//         let fraction = Math.log2(0.5 * Math.log(distanceSq));
-//         colorIndex = <u32>((NUM_COLORS - 1) * clamp<f64>((iteration + 1 - fraction) * invLimit, 0.0, 1.0));
-//       }
-//       store<u16>(yOffset + (x << 1), colorIndex);
-//     }
-//   }
-// }
-
-// /** Clamps a value between the given minimum and maximum. */
-// function clamp<T>(value: T, minValue: T, maxValue: T): T {
-//   return min(max(value, minValue), maxValue);
-// }
