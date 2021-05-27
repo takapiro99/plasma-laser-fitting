@@ -60,18 +60,22 @@ const PI = Math.PI;
 // # 横軸（波長シフト）-0.2から0.2まで、0.0003ずつプロット, length = 1334
 
 // export function calculate1(z: number): string {
-export function calculate1(z: number): Float64Array {
+export function calcYAxis(z: number): Float64Array {
   const dl = new Array<f64>(count).map<f64>((_, i) => dlmin + i * step);
   // dl のそれぞれに色々かけたやつ
   const xiFact =
     (C * sqrt(Mi / (2 * KAPPA * Ti))) / 2 / Math.sin(RADIAN_KI_KS / 2);
   // (KO * b * lamda ** 2);
-  const xi = dl.map<f64>((x) => {
-    return x;
-  });
+  const xi = new Array<f64>(count);
+  // const xi = dl.map<f64>((x) => {
+  //   return x * xiFact;
+  // });
+  for (let i = 0; i < count; i++) {
+    xi[i] = dl[i] * xiFact;
+  }
   const ximax = arrayMax(xi);
   const ximin = arrayMin(xi);
-  const N = 2; // precision
+  const N = 4; // precision
   const IPVxi = new Array<f64>(count);
   const RPxi = new Array<f64>(count);
   for (let i = 0; i < count; i++) {
@@ -120,21 +124,28 @@ export function calculate1(z: number): Float64Array {
   const beta = sqrt((((Z * ALPHA ** 2) / (1 + ALPHA ** 2)) * Te) / Ti);
 
   const icont = new Array<f64>(count);
-  // for (let i = 0; i < count; i++) {
-  //   icont[i] =
-  //     Z *
-  //     (ALPHA ** 2 / (1 + ALPHA ** 2)) ** 2 *
-  //     abs(1 / (1 + beta ** 2 * dwXi[i])) ** 2 *
-  //     fi0[i];
-  // }
-
-  // for i in range(count):
-  //     icont[i] = Z*((ALPHA**2)/(1+ALPHA**2))**2 * \
-  //         abs(1/(1+beta**2*dwXi[i]))**2*fi0[i]
+  const icontFact = Z * (ALPHA ** 2 / (1 + ALPHA ** 2)) ** 2;
+  for (let i = 0; i < count; i++) {
+    icont[i] =
+      (icontFact * fi0[i]) /
+      ((1 + beta ** 2 * dwXiRe[i]) ** 2 + (beta ** 2 * dwXiIm[i]) ** 2);
+  }
 
   const inst = dl.map<f64>((x) => Math.exp((-0.5 / HWHM ** 2) * x ** 2)); // 装置関数
-  // # X軸
-  const dl_fit = new Float64Array(dl.length);
+
+  // w = np.convolve(icont, inst, 'same')
+  // w_fit = list(map(lambda x: x*1.15e5, w)) // y軸
+  // X軸
+  const dl_fit = new Float64Array(count);
+  for (let i = 0; i < dl.length; i++) {
+    dl_fit[i] = dl[i] - DS / 1000;
+  }
+  return dl_fit;
+}
+
+export function calcXAxis(): Float64Array {
+  const dl = new Array<f64>(count).map<f64>((_, i) => dlmin + i * step);
+  const dl_fit = new Float64Array(count);
   for (let i = 0; i < dl.length; i++) {
     dl_fit[i] = dl[i] - DS / 1000;
   }

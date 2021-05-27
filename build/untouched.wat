@@ -11,8 +11,8 @@
  (type $i32_i32_i32_=>_i32 (func (param i32 i32 i32) (result i32)))
  (type $f64_f64_i32_i32_=>_f64 (func (param f64 f64 i32 i32) (result f64)))
  (type $i32_i32_i32_i32_=>_none (func (param i32 i32 i32 i32)))
- (type $f64_=>_f64 (func (param f64) (result f64)))
  (type $none_=>_i32 (func (result i32)))
+ (type $f64_=>_f64 (func (param f64) (result f64)))
  (type $f64_=>_i32 (func (param f64) (result i32)))
  (type $i32_i32_i32_i32_=>_i32 (func (param i32 i32 i32 i32) (result i32)))
  (type $f64_i64_=>_i32 (func (param f64 i64) (result i32)))
@@ -130,14 +130,14 @@
  (data (i32.const 6988) "\1c\00\00\00\00\00\00\00\00\00\00\00\18\00\00\00\08\00\00\00\05\00\00\00\00\00\00\00\00\00\00\00")
  (data (i32.const 7020) "\1c\00\00\00\00\00\00\00\00\00\00\00\18\00\00\00\08\00\00\00\06\00\00\00\00\00\00\00\00\00\00\00")
  (data (i32.const 7052) "\1c\00\00\00\00\00\00\00\00\00\00\00\18\00\00\00\08\00\00\00\07\00\00\00\00\00\00\00\00\00\00\00")
- (data (i32.const 7084) "\1c\00\00\00\00\00\00\00\00\00\00\00\18\00\00\00\08\00\00\00\08\00\00\00\00\00\00\00\00\00\00\00")
- (data (i32.const 7116) "<\00\00\00\00\00\00\00\00\00\00\00\01\00\00\00&\00\00\00~\00l\00i\00b\00/\00a\00r\00r\00a\00y\00b\00u\00f\00f\00e\00r\00.\00t\00s\00\00\00\00\00\00\00")
- (data (i32.const 7180) "<\00\00\00\00\00\00\00\00\00\00\00\01\00\00\00$\00\00\00~\00l\00i\00b\00/\00t\00y\00p\00e\00d\00a\00r\00r\00a\00y\00.\00t\00s\00\00\00\00\00\00\00\00\00")
+ (data (i32.const 7084) "<\00\00\00\00\00\00\00\00\00\00\00\01\00\00\00&\00\00\00~\00l\00i\00b\00/\00a\00r\00r\00a\00y\00b\00u\00f\00f\00e\00r\00.\00t\00s\00\00\00\00\00\00\00")
+ (data (i32.const 7148) "<\00\00\00\00\00\00\00\00\00\00\00\01\00\00\00$\00\00\00~\00l\00i\00b\00/\00t\00y\00p\00e\00d\00a\00r\00r\00a\00y\00.\00t\00s\00\00\00\00\00\00\00\00\00")
+ (data (i32.const 7212) "\1c\00\00\00\00\00\00\00\00\00\00\00\18\00\00\00\08\00\00\00\08\00\00\00\00\00\00\00\00\00\00\00")
  (data (i32.const 7244) "<\00\00\00\00\00\00\00\00\00\00\00\01\00\00\00*\00\00\00O\00b\00j\00e\00c\00t\00 \00a\00l\00r\00e\00a\00d\00y\00 \00p\00i\00n\00n\00e\00d\00\00\00")
  (data (i32.const 7308) "<\00\00\00\00\00\00\00\00\00\00\00\01\00\00\00(\00\00\00O\00b\00j\00e\00c\00t\00 \00i\00s\00 \00n\00o\00t\00 \00p\00i\00n\00n\00e\00d\00\00\00\00\00")
  (data (i32.const 7376) "\19\00\00\00 \00\00\00\00\00\00\00 \00\00\00\00\00\00\00\00\00\00\00\00\00\00\00A\08\00\00\02\00\00\00A\00\00\00\02\00\00\00\81\08\00\00\02\00\00\00\81\00\00\00\02\00\00\00\01\t\00\00\02\00\00\00\01\01\00\00\02\00\00\00\01\19\00\00\02\00\00\00\01\1a\00\00\02\00\00\00\01\n\00\00\02\00\00\00\01\02\00\00\02\00\00\00\02\t\00\00\00\00\00\00\02\n\00\00\00\00\00\00\02A\00\00\00\00\00\00B\00\00\00\00\00\00\00\02A\00\00\00\00\00\00\02A\00\00\00\00\00\00\02A\00\00\00\00\00\00\02A\00\00\00\00\00\00\02\1a\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00")
  (table $0 9 funcref)
- (elem $0 (i32.const 1) $start:assembly/index~anonymous|0~anonymous|0 $start:assembly/index~anonymous|0 $start:assembly/index~anonymous|1~anonymous|0 $start:assembly/index~anonymous|1 $assembly/index/calculate1~anonymous|0 $assembly/index/calculate1~anonymous|1 $assembly/index/calculate1~anonymous|2 $assembly/index/calculate1~anonymous|3)
+ (elem $0 (i32.const 1) $start:assembly/index~anonymous|0~anonymous|0 $start:assembly/index~anonymous|0 $start:assembly/index~anonymous|1~anonymous|0 $start:assembly/index~anonymous|1 $assembly/index/calcYAxis~anonymous|0 $assembly/index/calcYAxis~anonymous|1 $assembly/index/calcYAxis~anonymous|2 $assembly/index/calcXAxis~anonymous|0)
  (export "__asbind_entryfile_flag" (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_entryfile_flag))
  (export "__asbind_String_ID" (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_String_ID))
  (export "__asbind_ArrayBuffer_ID" (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_ArrayBuffer_ID))
@@ -160,7 +160,8 @@
  (export "__asbind_I64ArrayArray_ID" (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_I64ArrayArray_ID))
  (export "__asbind_StringArrayArray_ID" (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_StringArrayArray_ID))
  (export "__asbind_BoolArrayArray_ID" (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_BoolArrayArray_ID))
- (export "calculate1" (func $assembly/index/calculate1))
+ (export "calcYAxis" (func $assembly/index/calcYAxis))
+ (export "calcXAxis" (func $assembly/index/calcXAxis))
  (export "__new" (func $~lib/rt/itcms/__new))
  (export "__pin" (func $~lib/rt/itcms/__pin))
  (export "__unpin" (func $~lib/rt/itcms/__unpin))
@@ -4583,7 +4584,7 @@
   local.get $1
   i32.store offset=12
  )
- (func $assembly/index/calculate1~anonymous|0 (param $0 f64) (param $1 i32) (param $2 i32) (result f64)
+ (func $assembly/index/calcYAxis~anonymous|0 (param $0 f64) (param $1 i32) (param $2 i32) (result f64)
   global.get $assembly/index/dlmin
   local.get $1
   f64.convert_i32_s
@@ -5859,9 +5860,6 @@
   end
   local.get $3
  )
- (func $assembly/index/calculate1~anonymous|1 (param $0 f64) (param $1 i32) (param $2 i32) (result f64)
-  local.get $0
- )
  (func $~lib/array/Array<f64>#__get (param $0 i32) (param $1 i32) (result f64)
   (local $2 f64)
   local.get $1
@@ -5887,6 +5885,193 @@
   i32.const 0
   drop
   local.get $2
+ )
+ (func $~lib/rt/itcms/__renew (param $0 i32) (param $1 i32) (result i32)
+  (local $2 i32)
+  (local $3 i32)
+  (local $4 i32)
+  (local $5 i32)
+  local.get $0
+  i32.const 20
+  i32.sub
+  local.set $2
+  local.get $1
+  local.get $2
+  i32.load
+  i32.const 3
+  i32.const -1
+  i32.xor
+  i32.and
+  i32.const 16
+  i32.sub
+  i32.le_u
+  if
+   local.get $2
+   local.get $1
+   call $~lib/rt/itcms/Object#set:rtSize
+   local.get $0
+   return
+  end
+  local.get $1
+  local.get $2
+  i32.load offset=12
+  call $~lib/rt/itcms/__new
+  local.set $3
+  local.get $3
+  local.get $0
+  local.get $1
+  local.tee $4
+  local.get $2
+  i32.load offset=16
+  local.tee $5
+  local.get $4
+  local.get $5
+  i32.lt_u
+  select
+  call $~lib/memory/memory.copy
+  local.get $3
+ )
+ (func $~lib/array/ensureCapacity (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32)
+  (local $4 i32)
+  (local $5 i32)
+  (local $6 i32)
+  (local $7 i32)
+  (local $8 i32)
+  local.get $0
+  i32.load offset=8
+  local.set $4
+  local.get $1
+  local.get $4
+  local.get $2
+  i32.shr_u
+  i32.gt_u
+  if
+   local.get $1
+   i32.const 1073741820
+   local.get $2
+   i32.shr_u
+   i32.gt_u
+   if
+    i32.const 6512
+    i32.const 6560
+    i32.const 17
+    i32.const 48
+    call $~lib/builtins/abort
+    unreachable
+   end
+   local.get $0
+   i32.load
+   local.set $5
+   local.get $1
+   local.tee $6
+   i32.const 8
+   local.tee $7
+   local.get $6
+   local.get $7
+   i32.gt_u
+   select
+   local.get $2
+   i32.shl
+   local.set $6
+   local.get $3
+   if
+    local.get $4
+    i32.const 1
+    i32.shl
+    local.tee $7
+    i32.const 1073741820
+    local.tee $8
+    local.get $7
+    local.get $8
+    i32.lt_u
+    select
+    local.tee $8
+    local.get $6
+    local.tee $7
+    local.get $8
+    local.get $7
+    i32.gt_u
+    select
+    local.set $6
+   end
+   local.get $5
+   local.get $6
+   call $~lib/rt/itcms/__renew
+   local.set $8
+   local.get $8
+   local.get $4
+   i32.add
+   i32.const 0
+   local.get $6
+   local.get $4
+   i32.sub
+   call $~lib/memory/memory.fill
+   local.get $8
+   local.get $5
+   i32.ne
+   if
+    local.get $0
+    local.get $8
+    i32.store
+    local.get $0
+    local.get $8
+    i32.store offset=4
+    local.get $0
+    local.get $8
+    i32.const 0
+    call $~lib/rt/itcms/__link
+   end
+   local.get $0
+   local.get $6
+   i32.store offset=8
+  end
+ )
+ (func $~lib/array/Array<f64>#__uset (param $0 i32) (param $1 i32) (param $2 f64)
+  local.get $0
+  i32.load offset=4
+  local.get $1
+  i32.const 3
+  i32.shl
+  i32.add
+  local.get $2
+  f64.store
+  i32.const 0
+  drop
+ )
+ (func $~lib/array/Array<f64>#__set (param $0 i32) (param $1 i32) (param $2 f64)
+  local.get $1
+  local.get $0
+  i32.load offset=12
+  i32.ge_u
+  if
+   local.get $1
+   i32.const 0
+   i32.lt_s
+   if
+    i32.const 6800
+    i32.const 6560
+    i32.const 115
+    i32.const 22
+    call $~lib/builtins/abort
+    unreachable
+   end
+   local.get $0
+   local.get $1
+   i32.const 1
+   i32.add
+   i32.const 3
+   i32.const 1
+   call $~lib/array/ensureCapacity
+   local.get $0
+   local.get $1
+   i32.const 1
+   i32.add
+   call $~lib/array/Array<f64>#set:length_
+  end
+  local.get $0
+  local.get $1
+  local.get $2
+  call $~lib/array/Array<f64>#__uset
  )
  (func $~lib/math/NativeMath.exp (param $0 f64) (result f64)
   (local $1 f64)
@@ -6170,194 +6355,7 @@
   end
   return
  )
- (func $~lib/rt/itcms/__renew (param $0 i32) (param $1 i32) (result i32)
-  (local $2 i32)
-  (local $3 i32)
-  (local $4 i32)
-  (local $5 i32)
-  local.get $0
-  i32.const 20
-  i32.sub
-  local.set $2
-  local.get $1
-  local.get $2
-  i32.load
-  i32.const 3
-  i32.const -1
-  i32.xor
-  i32.and
-  i32.const 16
-  i32.sub
-  i32.le_u
-  if
-   local.get $2
-   local.get $1
-   call $~lib/rt/itcms/Object#set:rtSize
-   local.get $0
-   return
-  end
-  local.get $1
-  local.get $2
-  i32.load offset=12
-  call $~lib/rt/itcms/__new
-  local.set $3
-  local.get $3
-  local.get $0
-  local.get $1
-  local.tee $4
-  local.get $2
-  i32.load offset=16
-  local.tee $5
-  local.get $4
-  local.get $5
-  i32.lt_u
-  select
-  call $~lib/memory/memory.copy
-  local.get $3
- )
- (func $~lib/array/ensureCapacity (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32)
-  (local $4 i32)
-  (local $5 i32)
-  (local $6 i32)
-  (local $7 i32)
-  (local $8 i32)
-  local.get $0
-  i32.load offset=8
-  local.set $4
-  local.get $1
-  local.get $4
-  local.get $2
-  i32.shr_u
-  i32.gt_u
-  if
-   local.get $1
-   i32.const 1073741820
-   local.get $2
-   i32.shr_u
-   i32.gt_u
-   if
-    i32.const 6512
-    i32.const 6560
-    i32.const 17
-    i32.const 48
-    call $~lib/builtins/abort
-    unreachable
-   end
-   local.get $0
-   i32.load
-   local.set $5
-   local.get $1
-   local.tee $6
-   i32.const 8
-   local.tee $7
-   local.get $6
-   local.get $7
-   i32.gt_u
-   select
-   local.get $2
-   i32.shl
-   local.set $6
-   local.get $3
-   if
-    local.get $4
-    i32.const 1
-    i32.shl
-    local.tee $7
-    i32.const 1073741820
-    local.tee $8
-    local.get $7
-    local.get $8
-    i32.lt_u
-    select
-    local.tee $8
-    local.get $6
-    local.tee $7
-    local.get $8
-    local.get $7
-    i32.gt_u
-    select
-    local.set $6
-   end
-   local.get $5
-   local.get $6
-   call $~lib/rt/itcms/__renew
-   local.set $8
-   local.get $8
-   local.get $4
-   i32.add
-   i32.const 0
-   local.get $6
-   local.get $4
-   i32.sub
-   call $~lib/memory/memory.fill
-   local.get $8
-   local.get $5
-   i32.ne
-   if
-    local.get $0
-    local.get $8
-    i32.store
-    local.get $0
-    local.get $8
-    i32.store offset=4
-    local.get $0
-    local.get $8
-    i32.const 0
-    call $~lib/rt/itcms/__link
-   end
-   local.get $0
-   local.get $6
-   i32.store offset=8
-  end
- )
- (func $~lib/array/Array<f64>#__uset (param $0 i32) (param $1 i32) (param $2 f64)
-  local.get $0
-  i32.load offset=4
-  local.get $1
-  i32.const 3
-  i32.shl
-  i32.add
-  local.get $2
-  f64.store
-  i32.const 0
-  drop
- )
- (func $~lib/array/Array<f64>#__set (param $0 i32) (param $1 i32) (param $2 f64)
-  local.get $1
-  local.get $0
-  i32.load offset=12
-  i32.ge_u
-  if
-   local.get $1
-   i32.const 0
-   i32.lt_s
-   if
-    i32.const 6800
-    i32.const 6560
-    i32.const 115
-    i32.const 22
-    call $~lib/builtins/abort
-    unreachable
-   end
-   local.get $0
-   local.get $1
-   i32.const 1
-   i32.add
-   i32.const 3
-   i32.const 1
-   call $~lib/array/ensureCapacity
-   local.get $0
-   local.get $1
-   i32.const 1
-   i32.add
-   call $~lib/array/Array<f64>#set:length_
-  end
-  local.get $0
-  local.get $1
-  local.get $2
-  call $~lib/array/Array<f64>#__uset
- )
- (func $assembly/index/calculate1~anonymous|2 (param $0 f64) (param $1 i32) (param $2 i32) (result f64)
+ (func $assembly/index/calcYAxis~anonymous|1 (param $0 f64) (param $1 i32) (param $2 i32) (result f64)
   local.get $0
   f64.const 2
   f64.mul
@@ -6372,7 +6370,7 @@
   call $~lib/math/NativeMath.pow
   f64.div
  )
- (func $assembly/index/calculate1~anonymous|3 (param $0 f64) (param $1 i32) (param $2 i32) (result f64)
+ (func $assembly/index/calcYAxis~anonymous|2 (param $0 f64) (param $1 i32) (param $2 i32) (result f64)
   f64.const -0.5
   global.get $assembly/index/HWHM
   f64.const 2
@@ -6416,7 +6414,7 @@
   i32.ge_u
   if
    i32.const 6800
-   i32.const 7200
+   i32.const 7168
    i32.const 1385
    i32.const 64
    call $~lib/builtins/abort
@@ -6430,6 +6428,14 @@
   i32.add
   local.get $2
   f64.store
+ )
+ (func $assembly/index/calcXAxis~anonymous|0 (param $0 f64) (param $1 i32) (param $2 i32) (result f64)
+  global.get $assembly/index/dlmin
+  local.get $1
+  f64.convert_i32_s
+  global.get $assembly/index/step
+  f64.mul
+  f64.add
  )
  (func $~lib/rt/itcms/__pin (param $0 i32) (result i32)
   (local $1 i32)
@@ -7208,14 +7214,14 @@
   global.set $~lib/memory/__stack_pointer
   local.get $2
  )
- (func $assembly/index/calculate1 (param $0 f64) (result i32)
+ (func $assembly/index/calcYAxis (param $0 f64) (result i32)
   (local $1 i32)
   (local $2 f64)
   (local $3 i32)
-  (local $4 f64)
-  (local $5 f64)
-  (local $6 i32)
-  (local $7 i32)
+  (local $4 i32)
+  (local $5 i32)
+  (local $6 f64)
+  (local $7 f64)
   (local $8 i32)
   (local $9 i32)
   (local $10 f64)
@@ -7297,45 +7303,64 @@
   f64.div
   local.set $2
   global.get $~lib/memory/__stack_pointer
-  local.get $1
-  i32.const 7040
-  local.set $24
-  global.get $~lib/memory/__stack_pointer
-  local.get $24
-  i32.store offset=4
-  local.get $24
-  call $~lib/array/Array<f64>#map<f64>
+  i32.const 0
+  global.get $assembly/index/count
+  call $~lib/array/Array<f64>#constructor
   local.tee $3
   i32.store offset=12
+  i32.const 0
+  local.set $4
+  loop $for-loop|0
+   local.get $4
+   global.get $assembly/index/count
+   i32.lt_s
+   local.set $5
+   local.get $5
+   if
+    local.get $3
+    local.get $4
+    local.get $1
+    local.get $4
+    call $~lib/array/Array<f64>#__get
+    local.get $2
+    f64.mul
+    call $~lib/array/Array<f64>#__set
+    local.get $4
+    i32.const 1
+    i32.add
+    local.set $4
+    br $for-loop|0
+   end
+  end
   local.get $3
   i32.const 1
   global.set $~argumentsLength
   global.get $assembly/index/arrayMax
   i32.load
   call_indirect $0 (type $i32_=>_f64)
-  local.set $4
+  local.set $6
   local.get $3
   i32.const 1
   global.set $~argumentsLength
   global.get $assembly/index/arrayMin
   i32.load
   call_indirect $0 (type $i32_=>_f64)
-  local.set $5
+  local.set $7
   global.get $~lib/memory/__stack_pointer
   i32.const 0
   global.get $assembly/index/count
   call $~lib/array/Array<f64>#constructor
-  local.tee $6
+  local.tee $4
   i32.store offset=16
   global.get $~lib/memory/__stack_pointer
   i32.const 0
   global.get $assembly/index/count
   call $~lib/array/Array<f64>#constructor
-  local.tee $7
+  local.tee $5
   i32.store offset=20
   i32.const 0
   local.set $8
-  loop $for-loop|0
+  loop $for-loop|1
    local.get $8
    global.get $assembly/index/count
    i32.lt_s
@@ -7352,7 +7377,7 @@
     f64.add
     local.set $10
     local.get $10
-    i32.const 2
+    i32.const 4
     f64.convert_i32_s
     f64.div
     local.set $11
@@ -7374,7 +7399,7 @@
     local.set $15
     i32.const 0
     local.set $16
-    loop $for-loop|1
+    loop $for-loop|2
      local.get $16
      f64.convert_i32_s
      local.get $3
@@ -7382,7 +7407,7 @@
      call $~lib/array/Array<f64>#__get
      local.get $10
      f64.sub
-     local.get $5
+     local.get $7
      f64.const 1
      f64.sub
      f64.sub
@@ -7425,15 +7450,15 @@
       i32.const 1
       i32.add
       local.set $16
-      br $for-loop|1
+      br $for-loop|2
      end
     end
     i32.const 0
     local.set $16
-    loop $for-loop|2
+    loop $for-loop|3
      local.get $16
      f64.convert_i32_s
-     local.get $4
+     local.get $6
      f64.const 1
      f64.add
      local.get $3
@@ -7481,10 +7506,10 @@
       i32.const 1
       i32.add
       local.set $16
-      br $for-loop|2
+      br $for-loop|3
      end
     end
-    local.get $6
+    local.get $4
     local.get $8
     local.get $11
     local.get $15
@@ -7492,7 +7517,7 @@
     f64.add
     f64.mul
     call $~lib/array/Array<f64>#__set
-    local.get $7
+    local.get $5
     local.get $8
     f64.const 2
     local.get $10
@@ -7512,7 +7537,7 @@
     i32.const 1
     i32.add
     local.set $8
-    br $for-loop|0
+    br $for-loop|1
    end
   end
   global.get $~lib/memory/__stack_pointer
@@ -7529,7 +7554,7 @@
   i32.store offset=28
   i32.const 0
   local.set $16
-  loop $for-loop|3
+  loop $for-loop|4
    local.get $16
    global.get $assembly/index/count
    i32.lt_s
@@ -7538,7 +7563,7 @@
    if
     local.get $8
     local.get $16
-    local.get $7
+    local.get $5
     local.get $16
     call $~lib/array/Array<f64>#__get
     f64.const -1
@@ -7550,7 +7575,7 @@
     f64.mul
     call $~lib/math/NativeMath.exp
     f64.mul
-    local.get $6
+    local.get $4
     local.get $16
     call $~lib/array/Array<f64>#__get
     f64.add
@@ -7584,12 +7609,12 @@
     i32.const 1
     i32.add
     local.set $16
-    br $for-loop|3
+    br $for-loop|4
    end
   end
   global.get $~lib/memory/__stack_pointer
   local.get $1
-  i32.const 7072
+  i32.const 7040
   local.set $24
   global.get $~lib/memory/__stack_pointer
   local.get $24
@@ -7606,7 +7631,7 @@
   i32.store offset=36
   i32.const 0
   local.set $19
-  loop $for-loop|4
+  loop $for-loop|5
    local.get $19
    global.get $assembly/index/count
    i32.lt_s
@@ -7643,7 +7668,7 @@
     i32.const 1
     i32.add
     local.set $19
-    br $for-loop|4
+    br $for-loop|5
    end
   end
   global.get $assembly/index/Z
@@ -7671,9 +7696,69 @@
   call $~lib/array/Array<f64>#constructor
   local.tee $19
   i32.store offset=40
+  global.get $assembly/index/Z
+  global.get $assembly/index/ALPHA
+  f64.const 2
+  call $~lib/math/NativeMath.pow
+  f64.const 1
+  global.get $assembly/index/ALPHA
+  f64.const 2
+  call $~lib/math/NativeMath.pow
+  f64.add
+  f64.div
+  f64.const 2
+  call $~lib/math/NativeMath.pow
+  f64.mul
+  local.set $14
+  i32.const 0
+  local.set $20
+  loop $for-loop|6
+   local.get $20
+   global.get $assembly/index/count
+   i32.lt_s
+   local.set $21
+   local.get $21
+   if
+    local.get $19
+    local.get $20
+    local.get $14
+    local.get $18
+    local.get $20
+    call $~lib/array/Array<f64>#__get
+    f64.mul
+    f64.const 1
+    local.get $15
+    f64.const 2
+    call $~lib/math/NativeMath.pow
+    local.get $8
+    local.get $20
+    call $~lib/array/Array<f64>#__get
+    f64.mul
+    f64.add
+    f64.const 2
+    call $~lib/math/NativeMath.pow
+    local.get $15
+    f64.const 2
+    call $~lib/math/NativeMath.pow
+    local.get $9
+    local.get $20
+    call $~lib/array/Array<f64>#__get
+    f64.mul
+    f64.const 2
+    call $~lib/math/NativeMath.pow
+    f64.add
+    f64.div
+    call $~lib/array/Array<f64>#__set
+    local.get $20
+    i32.const 1
+    i32.add
+    local.set $20
+    br $for-loop|6
+   end
+  end
   global.get $~lib/memory/__stack_pointer
   local.get $1
-  i32.const 7104
+  i32.const 7072
   local.set $24
   global.get $~lib/memory/__stack_pointer
   local.get $24
@@ -7684,14 +7769,13 @@
   i32.store offset=44
   global.get $~lib/memory/__stack_pointer
   i32.const 0
-  local.get $1
-  call $~lib/array/Array<f64>#get:length
+  global.get $assembly/index/count
   call $~lib/typedarray/Float64Array#constructor
   local.tee $21
   i32.store offset=48
   i32.const 0
   local.set $22
-  loop $for-loop|5
+  loop $for-loop|7
    local.get $22
    local.get $1
    call $~lib/array/Array<f64>#get:length
@@ -7714,7 +7798,7 @@
     i32.const 1
     i32.add
     local.set $22
-    br $for-loop|5
+    br $for-loop|7
    end
   end
   local.get $21
@@ -7724,6 +7808,83 @@
   i32.add
   global.set $~lib/memory/__stack_pointer
   local.get $24
+ )
+ (func $assembly/index/calcXAxis (result i32)
+  (local $0 i32)
+  (local $1 i32)
+  (local $2 i32)
+  (local $3 i32)
+  (local $4 i32)
+  global.get $~lib/memory/__stack_pointer
+  i32.const 16
+  i32.sub
+  global.set $~lib/memory/__stack_pointer
+  call $~stack_check
+  global.get $~lib/memory/__stack_pointer
+  i64.const 0
+  i64.store
+  global.get $~lib/memory/__stack_pointer
+  i64.const 0
+  i64.store offset=8
+  global.get $~lib/memory/__stack_pointer
+  i32.const 0
+  global.get $assembly/index/count
+  call $~lib/array/Array<f64>#constructor
+  local.set $4
+  global.get $~lib/memory/__stack_pointer
+  local.get $4
+  i32.store
+  local.get $4
+  i32.const 7232
+  local.set $4
+  global.get $~lib/memory/__stack_pointer
+  local.get $4
+  i32.store offset=4
+  local.get $4
+  call $~lib/array/Array<f64>#map<f64>
+  local.tee $0
+  i32.store offset=8
+  global.get $~lib/memory/__stack_pointer
+  i32.const 0
+  global.get $assembly/index/count
+  call $~lib/typedarray/Float64Array#constructor
+  local.tee $1
+  i32.store offset=12
+  i32.const 0
+  local.set $2
+  loop $for-loop|0
+   local.get $2
+   local.get $0
+   call $~lib/array/Array<f64>#get:length
+   i32.lt_s
+   local.set $3
+   local.get $3
+   if
+    local.get $1
+    local.get $2
+    local.get $0
+    local.get $2
+    call $~lib/array/Array<f64>#__get
+    global.get $assembly/index/DS
+    i32.const 1000
+    i32.div_s
+    f64.convert_i32_s
+    f64.sub
+    call $~lib/typedarray/Float64Array#__set
+    local.get $2
+    i32.const 1
+    i32.add
+    local.set $2
+    br $for-loop|0
+   end
+  end
+  local.get $1
+  local.set $4
+  global.get $~lib/memory/__stack_pointer
+  i32.const 16
+  i32.add
+  global.set $~lib/memory/__stack_pointer
+  local.get $4
  )
  (func $~lib/array/Array<f64>#constructor (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
@@ -7991,7 +8152,7 @@
   i32.gt_u
   if
    i32.const 6512
-   i32.const 7136
+   i32.const 7104
    i32.const 18
    i32.const 57
    call $~lib/builtins/abort

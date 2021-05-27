@@ -96,17 +96,6 @@ eval("var __WEBPACK_AMD_DEFINE_RESULT__;/*! Hammer.JS - v2.0.7 - 2016-04-22\n * 
 
 /***/ }),
 
-/***/ "./src/constants.js":
-/*!**************************!*\
-  !*** ./src/constants.js ***!
-  \**************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"constants\": () => (/* binding */ constants)\n/* harmony export */ });\nconst constants = {\r\n  a: null\r\n}\n\n//# sourceURL=webpack://gr/./src/constants.js?");
-
-/***/ }),
-
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -114,7 +103,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ \"./src/utils.js\");\n/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ \"./src/constants.js\");\n/* harmony import */ var chartjs_plugin_zoom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! chartjs-plugin-zoom */ \"./node_modules/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.esm.js\");\n\r\n\r\n\r\n\r\nconst loadWasm = async () => {\r\n  const wasmModule = await (0,_utils__WEBPACK_IMPORTED_MODULE_0__.wasmBrowserInstantiate)(\"./optimized.wasm\");\r\n  window.calculate1 = wasmModule.exports.calculate1;\r\n  // const arrPtr = calculate1(1); // pin if necessary\r\n  // console.log(\"hello\", arrPtr);\r\n};\r\n\r\nloadWasm().then(() => {\r\n  console.log(\"loaded\");\r\n});\r\n\r\nwindow.readData = _utils__WEBPACK_IMPORTED_MODULE_0__.readData;\r\nwindow.constants = _constants__WEBPACK_IMPORTED_MODULE_1__.constants;\r\nwindow.drawData = _utils__WEBPACK_IMPORTED_MODULE_0__.drawData;\r\nwindow.resetZoom = chartjs_plugin_zoom__WEBPACK_IMPORTED_MODULE_2__.resetZoom;\r\n\n\n//# sourceURL=webpack://gr/./src/index.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ \"./src/utils.js\");\n/* harmony import */ var chartjs_plugin_zoom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! chartjs-plugin-zoom */ \"./node_modules/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.esm.js\");\n\r\n\r\n\r\nconst loadWasm = async () => {\r\n  const wasmModule = await (0,_utils__WEBPACK_IMPORTED_MODULE_0__.wasmBrowserInstantiate)(\"./optimized.wasm\");\r\n  console.log(wasmModule)\r\n  window.calcXAxis = wasmModule.exports.calcXAxis;\r\n  window.calcYAxis = wasmModule.exports.calcYAxis;\r\n};\r\n\r\nloadWasm().then(() => {\r\n  console.log(\"loaded\");\r\n});\r\n\r\nwindow.readData = _utils__WEBPACK_IMPORTED_MODULE_0__.readData;\r\nwindow.drawData = _utils__WEBPACK_IMPORTED_MODULE_0__.drawData;\r\nwindow.resetZoom = chartjs_plugin_zoom__WEBPACK_IMPORTED_MODULE_1__.resetZoom;\r\n\n\n//# sourceURL=webpack://gr/./src/index.js?");
 
 /***/ }),
 

@@ -59,8 +59,9 @@
     const ctx = document.getElementById("myChart");
     const go = () => {
       console.log("go");
-      let a = calculate1(2);
-      console.log(Array.from(a));
+      let a = calcXAxis();
+      let b = calcYAxis();
+      console.log(Array.from(a), Array.from(b));
     };
   </script>
 </html>
