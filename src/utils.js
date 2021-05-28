@@ -1,4 +1,5 @@
 import { Chart, registerables } from "chart.js";
+import AsBind from "as-bind";
 
 import zoomPlugin from "chartjs-plugin-zoom";
 
@@ -6,10 +7,22 @@ Chart.register(zoomPlugin);
 Chart.register(...registerables);
 
 export const addData = (chart, label, data) => {
-  chart.data.labels.push(label);
-  chart.data.datasets.forEach((dataset) => {
-    dataset.data.push(data);
+  console.log(chart.data);
+  // chart.data.labels.push(...label);
+  chart.data.datasets.push({
+    label: "data",
+    data: label.map((x, i) => ({ x: x, y: data[i] })),
+    fill: false,
+    borderColor: "rgb(200, 10, 10)",
+    tension: 0.1,
+    showLine: true,
+    pointBorderWidth: 0,
+    pointBackgroundColor: "transparent",
+    borderWidth: 1.5,
   });
+  // chart.data.datasets.forEach((dataset) => {
+  //   dataset.data.push(data);
+  // });
   chart.update();
 };
 
@@ -39,9 +52,7 @@ export const readData = async (input) => {
     alert("error reading data", { e });
     return;
   }
-  const vals = rawData
-    .split("\r\n")
-    .map((item) => item.split(",").map((str) => parseFloat(str.trim())));
+  const vals = rawData.split("\r\n").map((item) => item.split(",").map((str) => parseFloat(str.trim())));
   return vals;
 };
 
@@ -55,22 +66,17 @@ export const drawData = (ctx, data) => {
     myChart.clear();
     myChart.destroy();
   }
-  const xAxis = [...Array(data.length).keys()].map(
-    (x) => (x - ICCD_CENTER) * dlICCD
-  );
-  const allData = xAxis
-    .map((item, i) => [item, data[i][2]])
-    .filter((item) => item[0] < 0.4 && item[0] > -0.4);
-  console.log(allData.length);
+  const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
+  const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 0.4 && item[0] > -0.4);
   const foramttedData = {
-    labels: allData.map((item) => item[0]),
     datasets: [
       {
         label: "data",
-        data: allData.map((item) => item[1]),
+        data: allData.map((data, i) => ({ x: data[0], y: data[1] })),
         fill: false,
         borderColor: "rgb(75, 192, 192)",
         tension: 0.1,
+        showLine: true,
         pointBorderWidth: 0,
         pointBackgroundColor: "transparent",
         borderWidth: 1.5,
@@ -78,7 +84,7 @@ export const drawData = (ctx, data) => {
     ],
   };
   myChart = new Chart(ctx, {
-    type: "line",
+    type: "scatter",
     data: foramttedData,
     options: {
       responsive: true,
@@ -111,13 +117,10 @@ export const drawData = (ctx, data) => {
   });
   return myChart;
 };
-import loader from "@assemblyscript/loader";
-import AsBind from "as-bind";
 
 // https://github.com/torch2424/wasm-by-example/blob/master/demo-util/
 export const wasmBrowserInstantiate = async (wasmModuleUrl, importObject) => {
   let response = undefined;
-
   if (!importObject) {
     importObject = {
       env: {
@@ -125,26 +128,10 @@ export const wasmBrowserInstantiate = async (wasmModuleUrl, importObject) => {
       },
     };
   }
-
-  // Check if the browser supports streaming instantiation
-  // if (WebAssembly.instantiateStreaming) {
-  //   // Fetch the module, and instantiate it as it is downloading
-  //   response = await WebAssembly.instantiateStreaming(
-  //     fetch(wasmModuleUrl),
-  //     importObject
-  //   );
-  // } else {
-  // Fallback to using fetch to download the entire module
-  // And then instantiate the module
   const fetchAndInstantiateTask = async () => {
-    const wasmArrayBuffer = await fetch(wasmModuleUrl).then((response) =>
-      response.arrayBuffer()
-    );
+    const wasmArrayBuffer = await fetch(wasmModuleUrl).then((response) => response.arrayBuffer());
     return AsBind.instantiate(wasmArrayBuffer, importObject);
   };
   response = await fetchAndInstantiateTask();
-  // }
-  // const res = await loader.instantiate(fetch(wasmModuleUrl), importObject);
-
   return response;
 };

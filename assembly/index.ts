@@ -1,9 +1,28 @@
 // The entry file of your WebAssembly module.
 
-const arrayMax = (arr: Array<f64>): number =>
-  arr.reduce((a: number, b: number) => Math.max(a, b), f64.MIN_VALUE);
-const arrayMin = (arr: Array<f64>): number =>
-  arr.reduce((a: number, b: number) => Math.min(a, b), f64.MAX_VALUE);
+const arrayMax = (arr: Array<f64>): number => arr.reduce((a: number, b: number) => Math.max(a, b), f64.MIN_VALUE);
+const arrayMin = (arr: Array<f64>): number => arr.reduce((a: number, b: number) => Math.min(a, b), f64.MAX_VALUE);
+
+/**
+ * Produces the same result as numpy.convolve(array, weights, 'same');
+ */
+const convolve = (array: Array<f64>, weights: Array<f64>): Array<f64> => {
+  if (weights.length % 2 !== 1) {
+    throw new Error("weights array must have an odd length");
+  }
+  const al = array.length;
+  const wl = weights.length;
+  const offset = ~~(wl / 2);
+  const output = new Array<f64>(al);
+  for (let i = 0; i < al; i++) {
+    var kmin = i >= offset ? 0 : offset - i;
+    var kmax = i + offset < al ? wl - 1 : al - 1 - i + offset;
+    output[i] = 0;
+    for (var k = kmin; k <= kmax; k++) output[i] += array[i - offset + k] * weights[k];
+  }
+  return output;
+};
+
 // plasma parameter
 const ATOMIC_MASS = 12; // Atomic mass
 
@@ -60,16 +79,12 @@ const PI = Math.PI;
 // # 横軸（波長シフト）-0.2から0.2まで、0.0003ずつプロット, length = 1334
 
 // export function calculate1(z: number): string {
-export function calcYAxis(z: number): Float64Array {
+export function calcYAxis(): Float64Array {
   const dl = new Array<f64>(count).map<f64>((_, i) => dlmin + i * step);
   // dl のそれぞれに色々かけたやつ
-  const xiFact =
-    (C * sqrt(Mi / (2 * KAPPA * Ti))) / 2 / Math.sin(RADIAN_KI_KS / 2);
+  const xiFact = (C * sqrt(Mi / (2 * KAPPA * Ti))) / 2 / Math.sin(RADIAN_KI_KS / 2);
   // (KO * b * lamda ** 2);
   const xi = new Array<f64>(count);
-  // const xi = dl.map<f64>((x) => {
-  //   return x * xiFact;
-  // });
   for (let i = 0; i < count; i++) {
     xi[i] = dl[i] * xiFact;
   }
@@ -85,19 +100,11 @@ export function calcYAxis(z: number): Float64Array {
     const bb = xi[i] + phi;
     let Imxi: f64 = 0;
     let Ipxi: f64 = 0;
-    for (
-      let j = 0;
-      j < Math.floor((xi[i] - phi - (ximin - 1)) / dzxi) + 1;
-      j++
-    ) {
+    for (let j = 0; j < Math.floor((xi[i] - phi - (ximin - 1)) / dzxi) + 1; j++) {
       const d = aa - j * dzxi;
       Imxi += (d * Math.exp(-1 * d ** 2)) / (d - xi[i]);
     }
-    for (
-      let j = 0;
-      j < Math.floor((ximax + 1 - (xi[i] + phi)) / dzxi) + 1;
-      j++
-    ) {
+    for (let j = 0; j < Math.floor((ximax + 1 - (xi[i] + phi)) / dzxi) + 1; j++) {
       const d = bb + j * dzxi;
       Ipxi += (d * Math.exp(-1 * d ** 2)) / (d - xi[i]);
     }
@@ -118,29 +125,30 @@ export function calcYAxis(z: number): Float64Array {
 
   const fi0 = new Array<f64>(count);
   for (let i = 0; i < count; i++) {
-    fi0[i] =
-      sqrt(1 / PI / b ** 2) * Math.exp((-1 * (dw[i] / KO) ** 2) / b ** 2);
+    fi0[i] = sqrt(1 / PI / b ** 2) * Math.exp((-1 * (dw[i] / KO) ** 2) / b ** 2);
   }
   const beta = sqrt((((Z * ALPHA ** 2) / (1 + ALPHA ** 2)) * Te) / Ti);
 
   const icont = new Array<f64>(count);
   const icontFact = Z * (ALPHA ** 2 / (1 + ALPHA ** 2)) ** 2;
   for (let i = 0; i < count; i++) {
-    icont[i] =
-      (icontFact * fi0[i]) /
-      ((1 + beta ** 2 * dwXiRe[i]) ** 2 + (beta ** 2 * dwXiIm[i]) ** 2);
+    icont[i] = (icontFact * fi0[i]) / ((1 + beta ** 2 * dwXiRe[i]) ** 2 + (beta ** 2 * dwXiIm[i]) ** 2);
   }
 
   const inst = dl.map<f64>((x) => Math.exp((-0.5 / HWHM ** 2) * x ** 2)); // 装置関数
-
-  // w = np.convolve(icont, inst, 'same')
-  // w_fit = list(map(lambda x: x*1.15e5, w)) // y軸
-  // X軸
-  const dl_fit = new Float64Array(count);
-  for (let i = 0; i < dl.length; i++) {
-    dl_fit[i] = dl[i] - DS / 1000;
+  if (count % 2 == 0) {
+    icont.push(0);
+    inst.push(0);
   }
-  return dl_fit;
+  const w = convolve(icont, inst);
+  // w_fit = list(map(lambda x: x*1.15e5, w)) // y軸
+  const _w_fit = w.map<f64>((x) => x * 1.15e5);
+  // X軸
+  const w_fit = new Float64Array(count);
+  for (let i = 0; i < count; i++) {
+    w_fit[i] = _w_fit[i];
+  }
+  return w_fit;
 }
 
 export function calcXAxis(): Float64Array {

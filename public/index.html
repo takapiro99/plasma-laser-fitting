@@ -47,6 +47,12 @@
       <button class="waves-effect waves-light btn small blue" onclick="go()">
         print
       </button>
+      <button
+        class="waves-effect waves-light btn small blue"
+        onclick="console.log('hi');addData(myChart, [-1, 0, 1], [10, 30, 400]);"
+      >
+        adddata
+      </button>
       <div class="hoge" style="height: 60vh">
         <canvas id="myChart" style="height: 100%"></canvas>
       </div>
@@ -58,10 +64,13 @@
   <script>
     const ctx = document.getElementById("myChart");
     const go = () => {
-      console.log("go");
       let a = calcXAxis();
       let b = calcYAxis();
-      console.log(Array.from(a), Array.from(b));
+      if (!myChart) {
+        alert("no chart");
+        return;
+      }
+      addData(myChart, Array.from(a), Array.from(b));
     };
   </script>
 </html>

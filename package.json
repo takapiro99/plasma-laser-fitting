@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "assemblyscript": "^0.18.32",
+    "prettier": "^2.3.0",
     "webpack": "^5.37.1",
     "webpack-cli": "^4.7.0",
     "webpack-dev-server": "^3.11.2"
