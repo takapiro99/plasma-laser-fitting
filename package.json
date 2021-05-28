@@ -6,12 +6,13 @@
   "scripts": {
     "test": "node tests",
     "asbuild:untouched": "asc ./node_modules/as-bind/lib/assembly/as-bind.ts assembly/index.ts --exportRuntime --target debug",
-    "asbuild:optimized": "asc assembly/index.ts --target release --exportRuntime --transform as-bind",
+    "asbuild:optimized": "asc ./node_modules/as-bind/lib/assembly/as-bind.ts assembly/index.ts --target release --exportRuntime",
     "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized && cp build/optimized.wasm public/",
     "b": "npm run asbuild:untouched && cp build/untouched.wasm public/optimized.wasm",
     "build": "webpack",
     "start": "webpack serve",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "deploy": "npm run asbuild && npm run build"
   },
   "author": "",
   "license": "ISC",

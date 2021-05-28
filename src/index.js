@@ -7,9 +7,13 @@ const loadWasm = async () => {
   window.calcYAxis = wasmModule.exports.calcYAxis;
 };
 
-loadWasm().then(() => {
-  console.log("loaded");
-});
+loadWasm()
+  .then(() => {
+    console.log("loaded");
+  })
+  .catch((e) => {
+    alert("failed to load module", { e });
+  });
 
 window.readData = readData;
 window.drawData = drawData;

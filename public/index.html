@@ -1,76 +1,124 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>hello</title>
-    <link rel="stylesheet" href="./assets/materialize.min.css" />
-    <!-- <script src="./utils.js" type="module"></script> -->
-    <script src="./assets/materialize.min.js"></script>
-    <script src="./main.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.3.0/chart.min.js"></script> -->
-    <script>
-      let data;
-      let myChart;
-    </script>
-  </head>
-  <body>
-    <nav>
-      <div class="nav-wrapper">
-        <span class="brand-logo center">Logo</span>
-        <ul id="nav-mobile" class="right hide-on-small-and-down">
-          <li><a href="#">about</a></li>
-        </ul>
-      </div>
-    </nav>
-    <div class="container">
-      <!-- <button onclick="console.log(add(2,5))">a</button> -->
-      <div class="contianer">
-        <p>
-          input file here：
-          <input
-            type="file"
-            onchange="readData(this).then(data=>{
-            myChart = drawData(ctx, data)
-          })"
-            accept=".txt"
-          />
-        </p>
-      </div>
-      <button
-        class="waves-effect waves-light btn small blue"
-        onclick="myChart ? myChart.resetZoom() : null"
-      >
-        reset zoomnn
-      </button>
-      <button class="waves-effect waves-light btn small blue" onclick="go()">
-        print
-      </button>
-      <button
-        class="waves-effect waves-light btn small blue"
-        onclick="console.log('hi');addData(myChart, [-1, 0, 1], [10, 30, 400]);"
-      >
-        adddata
-      </button>
-      <div class="hoge" style="height: 60vh">
-        <canvas id="myChart" style="height: 100%"></canvas>
-      </div>
-      <button class="waves-effect waves-light btn small blue" onclick="cal()">
-        update
-      </button>
-    </div>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hello</title>
+  <link rel="stylesheet" href="./assets/materialize.min.css" />
+  <script src="./assets/materialize.min.js"></script>
+  <!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script> -->
+  <!-- <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> -->
+  <script src="./main.js"></script>
   <script>
-    const ctx = document.getElementById("myChart");
-    const go = () => {
-      let a = calcXAxis();
-      let b = calcYAxis();
-      if (!myChart) {
-        alert("no chart");
-        return;
-      }
-      addData(myChart, Array.from(a), Array.from(b));
-    };
+    let data;
+    let myChart;
   </script>
+</head>
+
+<body class="grey lighten-3">
+  <nav class="indigo darken-3">
+    <div class="nav-wrapper">
+      <span class="brand-logo center">Logo</span>
+      <ul id="nav-mobile" class="right hide-on-small-and-down">
+        <li><a href="#">about</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container">
+    <div>
+      <p>
+      <h5>1. input txt file</h5><input type="file" onchange="inputFileAndDraw(this)" accept=".txt" />
+      </p>
+      <p>
+        <!-- <blockquote> -->
+        input file format:<br />
+        <small>
+          1,1,0.95238 <br />
+          2,1,4<br />
+          3,1,1.5238<br />
+          ...
+        </small>
+        <!-- </blockquote> -->
+      </p>
+    </div>
+    <div class="row">
+      <p class="col s4">
+        <label>precision:<input type="number" name="number" value="4"></label>
+      </p>
+      <p class="col s4">
+        <label>precision:<input type="number" name="number" value="4"></label>
+      </p>
+      <p class="col s4">
+        <label>precision:<input type="number" name="number" value="4"></label>
+      </p>
+    </div>
+    <button class="waves-effect waves-light btn-small blue"
+      onclick="updateStatus('calculating...').then(go())">fit</button>
+    <div style="height: 60vh">
+      <p id="status-text"></p>
+      <canvas id="myChart" style="height: 100%;width:100%;border:1px solid lightgrey"></canvas>
+      <p>
+        <button id="reset-zoom-button" class="waves-effect waves-light btn small blue" style="display:none"
+          onclick="myChart ? myChart.resetZoom() : null">reset
+          zoom</button>
+      </p>
+    </div>
+    <!-- <div>
+      <p>
+        一次方程式 \(ax+b=0\) の解はです。
+      </p>
+    </div> -->
+  </div>
+  <div style="height:300px"></div>
+</body>
+<script>
+  const ctx = document.getElementById("myChart");
+  const status = document.getElementById("status-text")
+  const go = () => {
+    (function () {
+      console.log('sds')
+    }());
+    document.getElementById("status-text").style.display = "none"
+    // deal with performance
+    // i, (xi[count//2]-(ximin-1))//((0.01*abs(xi[count//2]))/N)    * 2) * ((dlmax - dlmin) / step) が 10^9 こえたらしんどいかな
+    console.log('hey')
+    let a = calcXAxis();
+    let hello = new Float64Array;
+    hello = Float64Array.from([2])
+    let b = calcYAxis(hello);
+    if (!myChart) {
+      alert("select txt file first");
+      return;
+    }
+    addData(myChart, Array.from(a), Array.from(b));
+    document.getElementById("status-text").style.display = "block"
+    // document.getElementById("status-text").innerText = "done"
+    // status.innerText = "done"
+    console.log('hey2')
+
+  };
+
+  const showButtons = () => {
+    document.getElementById("reset-zoom-button").style.display = "block";
+  }
+
+  const inputFileAndDraw = (input) => {
+    showButtons()
+    readData(input).then((data) => {
+      myChart = drawData(ctx, data);
+      document.getElementById("status-text").innerText = "done"
+    });
+  };
+
+  // const calcStatusUpdate = () => {
+  //   document.getElementById("status-text").innerText = "calculating...";
+  // }
+  const updateStatus = async (text) => {
+    status.innerText = text
+  }
+
+</script>
+
 </html>

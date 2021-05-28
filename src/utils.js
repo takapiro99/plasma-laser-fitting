@@ -1,16 +1,78 @@
 import { Chart, registerables } from "chart.js";
 import AsBind from "as-bind";
-
 import zoomPlugin from "chartjs-plugin-zoom";
 
 Chart.register(zoomPlugin);
 Chart.register(...registerables);
 
+const chartJsOptions = {
+  showTooltips: false,
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: {
+    numbers: { duration: 0 },
+    colors: {
+      type: "color",
+      duration: 500,
+      from: "transparent",
+    },
+  },
+  scales: {
+    x: {
+      display: true,
+      title: {
+        display: true,
+        text: "Δλ",
+        font: {
+          size: 18,
+        },
+      },
+      ticks: {
+        callback: (val) => ((val * 200) % 10 == 0 ? val : ""),
+      },
+    },
+    y: {
+      display: true,
+      title: {
+        display: true,
+        text: "Intensity",
+        font: {
+          size: 18,
+        },
+      },
+    },
+  },
+  plugins: {
+    zoom: {
+      pan: {
+        enabled: true,
+      },
+      zoom: {
+        wheel: {
+          enabled: true,
+        },
+        pinch: {
+          enabled: false,
+        },
+        mode: "xy",
+      },
+    },
+    tooltip: {
+      enabled: false,
+    },
+    title: {
+      display: true,
+      text: "",
+    },
+  },
+};
+
 export const addData = (chart, label, data) => {
-  console.log(chart.data);
-  // chart.data.labels.push(...label);
-  chart.data.datasets.push({
-    label: "data",
+  if (chart.data.datasets.length >= 2) {
+    chart.data.datasets.shift();
+  }
+  chart.data.datasets.unshift({
+    label: "calculated line",
     data: label.map((x, i) => ({ x: x, y: data[i] })),
     fill: false,
     borderColor: "rgb(200, 10, 10)",
@@ -20,9 +82,6 @@ export const addData = (chart, label, data) => {
     pointBackgroundColor: "transparent",
     borderWidth: 1.5,
   });
-  // chart.data.datasets.forEach((dataset) => {
-  //   dataset.data.push(data);
-  // });
   chart.update();
 };
 
@@ -37,7 +96,6 @@ const readFile = (file) => {
       resolve(fr.result);
     };
     fr.onerror = reject;
-    // fr.readAsText(file.blob);
     fr.readAsText(file);
   });
 };
@@ -62,7 +120,6 @@ export const drawData = (ctx, data) => {
   const dlICCD = D * ICCD_PIXEL; //# wavelength per pixel on ICCD (nm/pixel)
   const ICCD_CENTER = 596; //# (pixel) rayleigh center on ICCD
   if (myChart) {
-    console.log("destroyed");
     myChart.clear();
     myChart.destroy();
   }
@@ -86,34 +143,7 @@ export const drawData = (ctx, data) => {
   myChart = new Chart(ctx, {
     type: "scatter",
     data: foramttedData,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        xAxis: {
-          type: "linear",
-          ticks: {
-            callback: (val) => ((val * 200) % 10 == 0 ? val : ""),
-          },
-        },
-      },
-      plugins: {
-        zoom: {
-          pan: {
-            enabled: true,
-          },
-          zoom: {
-            wheel: {
-              enabled: true,
-            },
-            pinch: {
-              enabled: false,
-            },
-            mode: "xy",
-          },
-        },
-      },
-    },
+    options: chartJsOptions,
   });
   return myChart;
 };
