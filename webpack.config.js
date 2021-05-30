@@ -3,8 +3,8 @@ const path = require("path");
 
 module.exports = {
   entry: `./src/index.js`,
-  // mode: "development",
-  mode: "production",
+  mode: "development",
+  // mode: "production",
   // ファイルの出力設定
   output: {
     path: `${__dirname}/public`,

@@ -8,12 +8,14 @@
   <title>hello</title>
   <link rel="stylesheet" href="./assets/materialize.min.css" />
   <script src="./assets/materialize.min.js"></script>
-  <!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script> -->
-  <!-- <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> -->
   <script src="./main.js"></script>
   <script>
     let data;
     let myChart;
+    let dlmin = -0.2; // %nm
+    let dlmax = 0.2;
+    let step = 0.0003;
+    let experimentData = [], fittingData = [];
   </script>
 </head>
 
@@ -29,75 +31,147 @@
   <div class="container">
     <div>
       <p>
-      <h5>1. input txt file</h5><input type="file" onchange="inputFileAndDraw(this)" accept=".txt" />
-      </p>
-      <p>
-        <!-- <blockquote> -->
-        input file format:<br />
+      <h5 style="display: inline-block;margin-right:1em">1. select .txt file</h5><input type="file"
+        onchange="inputFileAndDraw(this)" accept=".txt" />
+      <details style="display: inline-block;margin-right:1em">
+        <summary>input file format:</summary>
         <small>
           1,1,0.95238 <br />
           2,1,4<br />
           3,1,1.5238<br />
           ...
         </small>
-        <!-- </blockquote> -->
+      </details>
       </p>
     </div>
     <div class="row">
-      <p class="col s4">
-        <label>precision:<input type="number" name="number" value="4"></label>
+      <p class="col s2">
+        <label>atomic mass<input id="atomic-mass" type="number" disabled value="12"></label>
       </p>
-      <p class="col s4">
-        <label>precision:<input type="number" name="number" value="4"></label>
+      <p class="col s2">
+        <label>Te(eV)<input type="number" value="7" id='Te'></label>
       </p>
-      <p class="col s4">
-        <label>precision:<input type="number" name="number" value="4"></label>
+      <p class="col s2">
+        <label>Ti(eV)<input type="number" value="7" id='Ti'></label>
+      </p>
+      <p class="col s2">
+        <label>dlmin<input type="number" value=-0.2 disabled></label>
+      </p>
+      <p class="col s2">
+        <label>dlmax<input type="number" value=0.2 disabled></label>
+      </p>
+      <p class="col s2">
+        <label>step<input type="number" value=0.003 disabled></label>
       </p>
     </div>
-    <button class="waves-effect waves-light btn-small blue"
-      onclick="updateStatus('calculating...').then(go())">fit</button>
+    <div class="row">
+      <p class="col s2">
+        <label>precision<input id="precision" type="number" value="4" min="1"></label>
+      </p>
+      <p class="col s2">
+        <label>ne (×10^24)<input type="number" value="3" id="ne"></label>
+      </p>
+      <p class="col s2">
+        <label>Z<input type="number" value="3.2" id="Z"></label>
+      </p>
+      <p class="col s2">
+        <label>(pixel) rayleigh center on ICCD<input type="number" value="596" disabled id="ICCD_CENTER"></label>
+      </p>
+      <p class="col s2">
+        <label>(pm) Doppler shift in wavelength<input type="number" value="25" disabled id="DS"></label>
+      </p>
+      <p class="col s2">
+        <label>逆線分散 (nm/mm)<input type="number" value="0.187" disabled id="D"></label>
+      </p>
+    </div>
+    <div class="row">
+      <p class="col s2">
+        <label>pixel per mm on ICCD (mm/pixel)<input id="precision" type="number" value="0.013" disabled></label>
+      </p>
+      <p class="col s2">
+        <label>Rayleigh scattering FWHM (pixel)<input type="number" value="6" id="RSFWHM" disabled></label>
+      </p>
+      <p class="col s2">
+        <label>angle between ki and ks (degree)<input type="number" value="135" id="ANGLE_KI_KS"></label>
+      </p>
+      <p class="col s2">
+        <label>Rayleigh scattering integrated intensity<input type="number" value="4500" disabled id="IR"></label>
+      </p>
+      <p class="col s2">
+        <label>scattering cross section ratio (Ray/Th)<input type="text" value="1/132" disabled id="sigma"></label>
+      </p>
+      <p class="col s2">
+        <label>Laser energy(ELR)<input type="number" value="5" disabled id="ELR"></label>
+      </p>
+    </div>
+    <div class="row">
+      <p class="col s2"><label>Laser energy(ELT)<input type="number" id="ELT" disabled value="5"></label></p>
+      <p class="col s2"><label>air density for Rayleigh(×10^25)<input type="number" value="2.5" id="n0"></label></p>
+      <p class="col s2"><label>accumulation shots<input type="number" value="100" id="NR"></label></p>
+      <p class="col s2"><label>NT<input type="number" value="3" id="NT"></label></p>
+    </div>
+    <p>
+    <h5 style="display: inline-block;margin-right:1em">2. press the fit button</h5>
+    <button id="fit" class="waves-effect waves-light btn-small blue" onclick="fit()">fit</button>
+    </p>
     <div style="height: 60vh">
       <p id="status-text"></p>
-      <canvas id="myChart" style="height: 100%;width:100%;border:1px solid lightgrey"></canvas>
-      <p>
-        <button id="reset-zoom-button" class="waves-effect waves-light btn small blue" style="display:none"
-          onclick="myChart ? myChart.resetZoom() : null">reset
-          zoom</button>
-      </p>
+      <canvas id="myChart" style="height: 85%;width:100%;border:1px solid lightgrey"></canvas>
     </div>
-    <!-- <div>
-      <p>
-        一次方程式 \(ax+b=0\) の解はです。
-      </p>
-    </div> -->
+    <p>
+      <button id="reset-zoom-button" class="waves-effect waves-light btn small grey darken-1" style="display:none"
+        onclick="myChart ? myChart.resetZoom() : null">reset
+        zoom</button>
+    </p>
+    <p>
+    <h5 style="display: inline-block;margin-right:1em">3. export as .xlsx</h5>
+    <button id="fit" class="waves-effect waves-light btn-small blue"
+      onclick="exportAsExcel(experimentData, fittingData)">download</button>
+    </p>
   </div>
   <div style="height:300px"></div>
 </body>
 <script>
   const ctx = document.getElementById("myChart");
   const status = document.getElementById("status-text")
-  const go = () => {
-    (function () {
-      console.log('sds')
-    }());
-    document.getElementById("status-text").style.display = "none"
-    // deal with performance
-    // i, (xi[count//2]-(ximin-1))//((0.01*abs(xi[count//2]))/N)    * 2) * ((dlmax - dlmin) / step) が 10^9 こえたらしんどいかな
-    console.log('hey')
-    let a = calcXAxis();
-    let hello = new Float64Array;
-    hello = Float64Array.from([2])
-    let b = calcYAxis(hello);
-    if (!myChart) {
-      alert("select txt file first");
-      return;
-    }
-    addData(myChart, Array.from(a), Array.from(b));
-    document.getElementById("status-text").style.display = "block"
-    // document.getElementById("status-text").innerText = "done"
-    // status.innerText = "done"
-    console.log('hey2')
 
+  const statusDone = () => {
+    document.getElementById("status-text").innerText = "done"
+    document.getElementById("fit").disabled = false
+  }
+
+  const fit = () => {
+    document.getElementById("fit").disabled = true
+    document.getElementById("status-text").innerText = "calculating..."
+    const precision = document.getElementById("precision").value
+    // deal with performance
+    const dlmin = -0.2, dlmax = 0.2, step = 0.0003 // when range(-0.2, 0.2, 0.0003)
+    const count = Math.ceil((dlmax - dlmin) / step);
+    // if (((xi[parseInt(count / 2)] - (ximin - 1)) / ((0.01 * abs(xi[parseInt(count / 2)])) / N) * 2) * ((dlmax - dlmin) / step) > 1e10) {
+    const ord = ((-1 * (28 * dlmin - 1)) / (1 / precision) * 2) * ((dlmax - dlmin) / step)
+    console.log(ord, (dlmax - dlmin) / step)
+    // if (((-1 * (ximin - 1)) / (1 / N) * 2) * ((dlmax - dlmin) / step) > 1e10) { }
+    // return
+    if (ord > 1e10) {
+      if (!window.confirm("計算時間が長くなりそうですがいいですか？")) {
+        return
+      }
+    } //が 10^9 こえたらしんどいかな
+    setTimeout(() => {
+      const a = calcXAxis();
+      let hello = new Float64Array;
+      hello = Float64Array.from([precision])
+      let b = calcYAxis(hello);
+      if (!myChart) {
+        alert("select txt file first");
+        statusDone()
+        return;
+      }
+      const data = [Array.from(a), Array.from(b)]
+      fittingData = data[0].map((x, i) => ([x, data[1][i]]))
+      addData(myChart, data[0], data[1]);
+      statusDone()
+    }, 70)
   };
 
   const showButtons = () => {
@@ -105,20 +179,21 @@
   }
 
   const inputFileAndDraw = (input) => {
-    showButtons()
     readData(input).then((data) => {
-      myChart = drawData(ctx, data);
+      showButtons()
+
+      const D = 0.187; //# 逆線分散 (nm/mm)
+      const ICCD_PIXEL = 0.013; //# pixel per mm on ICCD (mm/pixel)
+      const dlICCD = D * ICCD_PIXEL; //# wavelength per pixel on ICCD (nm/pixel)
+      const ICCD_CENTER = 596; //# (pixel) rayleigh center on ICCD
+      const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
+      const allData = xAxis.map((item, i) => [item, data[i][2]])
+      experimentData = allData
+
+      myChart = drawData(ctx, data); // passing raw data here
       document.getElementById("status-text").innerText = "done"
-    });
+    }).catch((e) => alert("something went wrong, sorry"));
   };
-
-  // const calcStatusUpdate = () => {
-  //   document.getElementById("status-text").innerText = "calculating...";
-  // }
-  const updateStatus = async (text) => {
-    status.innerText = text
-  }
-
 </script>
 
 </html>

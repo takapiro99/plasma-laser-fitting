@@ -37,7 +37,6 @@ const Te = 7; // eV
 const Ti = 7; // eV
 const ne = 3e24; // m^-3
 const Z = 3.2;
-
 const ICCD_CENTER = 596; // (pixel) rayleigh center on ICCD
 const DS = 25; // (pm) Doppler shift in wavelength
 
@@ -61,24 +60,28 @@ const NT = 3;
 
 const CO_EFF = (sigma * n0 * (NR / NT) * (ELR / ELT)) / 0.8 / IR;
 
-const Mi = ATOMIC_MASS * 1836 * Me;
-// const a = sqrt((2 * KAPPA * Te) / Me); // 電子の熱速度
-const b = sqrt((2 * KAPPA * Ti) / Mi); // イオンの熱速度
 
-const RADIAN_KI_KS = (ANGLE_KI_KS * 2 * Math.PI) / 360; // radian
+const RADIAN_KI_KS = (ANGLE_KI_KS * 2 * PI) / 360; // radian
+
+const dlmin = -0.2; // nm
+const dlmax = 0.2;
+const step = 0.0003;
 
 const lamda: f64 = 532; // レーザー波長 nm
-const ki = (2 * Math.PI) / (lamda * 1e-9); // 入射レーザーの波数 1/m とても大きい
+
+// no need to change
+const Mi = ATOMIC_MASS * 1836 * Me;
+const ki = (2 * PI) / (lamda * 1e-9); // 入射レーザーの波数 1/m とても大きい
 const KO: f64 = 2 * ki * Math.sin(RADIAN_KI_KS / 2); // 散乱に関わる波数 1/m 大きい
 const DEBYE = sqrt((IPSIRON * KAPPA * Te) / (e ** 2 * ne)); // デバイ長 m
 const ALPHA = 1 / (KO * DEBYE);
-const dlmin = -0.2; // %nm
-const dlmax = 0.2;
-const step = 0.0003;
+
+// const a = sqrt((2 * KAPPA * Te) / Me); // 電子の熱速度
+const b = sqrt((2 * KAPPA * Ti) / Mi); // イオンの熱速度
+
 const count: i32 = <i32>ceil((dlmax - dlmin) / step);
 
 // # 横軸（波長シフト）-0.2から0.2まで、0.0003ずつプロット, length = 1334
-
 export function calcYAxis(props: Float64Array): Float64Array {
   // props = [precision]
   const dl = new Array<f64>(count).map<f64>((_, i) => dlmin + i * step);
