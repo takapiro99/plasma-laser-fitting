@@ -10,9 +10,9 @@
  (type $none_=>_i32 (func (result i32)))
  (type $f64_f64_i32_i32_=>_f64 (func (param f64 f64 i32 i32) (result f64)))
  (type $i32_i32_f64_=>_none (func (param i32 i32 f64)))
+ (type $i32_i32_=>_f64 (func (param i32 i32) (result f64)))
  (type $i32_i32_i32_i32_=>_none (func (param i32 i32 i32 i32)))
  (type $f64_=>_f64 (func (param f64) (result f64)))
- (type $i32_i32_=>_f64 (func (param i32 i32) (result f64)))
  (type $i32_i32_f64_=>_f64 (func (param i32 i32 f64) (result f64)))
  (import "env" "abort" (func $~lib/builtins/abort (param i32 i32 i32 i32)))
  (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_entryfile_flag i32 (i32.const 1))
@@ -50,7 +50,6 @@
  (global $~lib/math/rempio2_y0 (mut f64) (f64.const 0))
  (global $~lib/math/rempio2_y1 (mut f64) (f64.const 0))
  (global $assembly/index/KO (mut f64) (f64.const 0))
- (global $assembly/index/ALPHA (mut f64) (f64.const 0))
  (global $~lib/rt/__rtti_base i32 (i32.const 2480))
  (global $~lib/memory/__stack_pointer (mut i32) (i32.const 19076))
  (memory $0 1)
@@ -83,10 +82,10 @@
  (data (i32.const 1820) "\1c")
  (data (i32.const 1832) "\18\00\00\00\08\00\00\00\05")
  (data (i32.const 1856) "n\83\f9\a2\00\00\00\00\d1W\'\fc)\15DN\99\95b\db\c0\dd4\f5\abcQ\feA\90C<:n$\b7a\c5\bb\de\ea.I\06\e0\d2MB\1c\eb\1d\fe\1c\92\d1\t\f55\82\e8>\a7)\b1&p\9c\e9\84D\bb.9\d6\919A~_\b4\8b_\84\9c\f49S\83\ff\97\f8\1f;(\f9\bd\8b\11/\ef\0f\98\05\de\cf~6m\1fm\nZf?FO\b7\t\cb\'\c7\ba\'u-\ea_\9e\f79\07={\f1\e5\eb\b1_\fbk\ea\92R\8aF0\03V\08]\8d\1f \bc\cf\f0\abk{\fca\91\e3\a9\1d6\f4\9a_\85\99e\08\1b\e6^\80\d8\ff\8d@h\a0\14W\15\06\061\'sM")
- (data (i32.const 2060) "\1c")
- (data (i32.const 2072) "\19\00\00\00\08\00\00\00\06")
- (data (i32.const 2092) "<")
- (data (i32.const 2104) "\01\00\00\00$\00\00\00~\00l\00i\00b\00/\00t\00y\00p\00e\00d\00a\00r\00r\00a\00y\00.\00t\00s")
+ (data (i32.const 2060) "<")
+ (data (i32.const 2072) "\01\00\00\00$\00\00\00~\00l\00i\00b\00/\00t\00y\00p\00e\00d\00a\00r\00r\00a\00y\00.\00t\00s")
+ (data (i32.const 2124) "\1c")
+ (data (i32.const 2136) "\19\00\00\00\08\00\00\00\06")
  (data (i32.const 2156) "\1c")
  (data (i32.const 2168) "\19\00\00\00\08\00\00\00\07")
  (data (i32.const 2188) "\1c")
@@ -2288,6 +2287,29 @@
   i32.add
   f64.load
  )
+ (func $~lib/typedarray/Float64Array#__get (param $0 i32) (param $1 i32) (result f64)
+  local.get $1
+  local.get $0
+  i32.load offset=8
+  i32.const 3
+  i32.shr_u
+  i32.ge_u
+  if
+   i32.const 1632
+   i32.const 2080
+   i32.const 1374
+   i32.const 64
+   call $~lib/builtins/abort
+   unreachable
+  end
+  local.get $0
+  i32.load offset=4
+  local.get $1
+  i32.const 3
+  i32.shl
+  i32.add
+  f64.load
+ )
  (func $assembly/index/calcYAxis~anonymous|0 (param $0 f64) (param $1 i32) (param $2 i32) (result f64)
   local.get $1
   f64.convert_i32_s
@@ -2575,7 +2597,7 @@
   i32.ge_u
   if
    i32.const 1632
-   i32.const 2112
+   i32.const 2080
    i32.const 1385
    i32.const 64
    call $~lib/builtins/abort
@@ -2768,6 +2790,7 @@
   end
  )
  (func $~start
+  (local $0 f64)
   memory.size
   i32.const 16
   i32.shl
@@ -2791,8 +2814,6 @@
   global.set $~lib/math/rempio2_y1
   f64.const 21822956.031123538
   global.set $assembly/index/KO
-  f64.const 4.033540163009735
-  global.set $assembly/index/ALPHA
  )
  (func $~stack_check
   global.get $~lib/memory/__stack_pointer
@@ -2852,11 +2873,11 @@
   global.set $~lib/memory/__stack_pointer
  )
  (func $assembly/index/calcYAxis (param $0 i32) (result i32)
-  (local $1 i32)
-  (local $2 f64)
+  (local $1 f64)
+  (local $2 i32)
   (local $3 i32)
-  (local $4 i32)
-  (local $5 f64)
+  (local $4 f64)
+  (local $5 i32)
   (local $6 f64)
   (local $7 f64)
   (local $8 i32)
@@ -2865,13 +2886,15 @@
   (local $11 f64)
   (local $12 f64)
   (local $13 f64)
-  (local $14 i32)
-  (local $15 i32)
+  (local $14 f64)
+  (local $15 f64)
   (local $16 i32)
-  (local $17 f64)
+  (local $17 i32)
   (local $18 f64)
   (local $19 f64)
   (local $20 f64)
+  (local $21 f64)
+  (local $22 f64)
   global.get $~lib/memory/__stack_pointer
   i32.const 60
   i32.sub
@@ -2901,20 +2924,43 @@
   global.get $~lib/memory/__stack_pointer
   i32.const 0
   i32.store offset=56
+  local.get $0
+  i32.const 0
+  call $~lib/typedarray/Float64Array#__get
+  local.set $18
+  local.get $0
+  i32.const 1
+  call $~lib/typedarray/Float64Array#__get
+  local.set $4
+  local.get $0
+  i32.const 2
+  call $~lib/typedarray/Float64Array#__get
+  local.set $15
+  f64.const 1
+  global.get $assembly/index/KO
+  f64.const 9.912e-30
+  local.get $4
+  f64.const 2.56e-38
+  f64.mul
+  f64.div
+  f64.sqrt
+  f64.mul
+  f64.div
+  local.set $4
   global.get $~lib/memory/__stack_pointer
   i32.const 1334
   call $~lib/array/Array<f64>#constructor
-  local.set $3
+  local.set $0
   global.get $~lib/memory/__stack_pointer
-  local.get $3
+  local.get $0
   i32.store
   global.get $~lib/memory/__stack_pointer
-  i32.const 2080
+  i32.const 2144
   i32.store offset=4
-  local.get $3
-  i32.const 2080
+  local.get $0
+  i32.const 2144
   call $~lib/array/Array<f64>#map<f64>
-  local.tee $8
+  local.tee $10
   i32.store offset=8
   f64.const 1884955592153875712
   global.get $assembly/index/KO
@@ -2923,117 +2969,102 @@
   f64.const 283024
   f64.mul
   f64.div
-  local.set $2
+  local.set $1
   global.get $~lib/memory/__stack_pointer
   i32.const 1334
   call $~lib/array/Array<f64>#constructor
-  local.tee $3
+  local.tee $2
   i32.store offset=12
   loop $for-loop|0
-   local.get $1
+   local.get $5
    i32.const 1334
    i32.lt_s
    if
-    local.get $3
-    local.get $1
-    local.get $8
-    local.get $1
-    call $~lib/array/Array<f64>#__get
     local.get $2
+    local.get $5
+    local.get $10
+    local.get $5
+    call $~lib/array/Array<f64>#__get
+    local.get $1
     f64.mul
     call $~lib/array/Array<f64>#__set
-    local.get $1
+    local.get $5
     i32.const 1
     i32.add
-    local.set $1
+    local.set $5
     br $for-loop|0
    end
   end
-  local.get $3
+  local.get $2
   i32.const 1088
   i32.load
   call_indirect $0 (type $i32_=>_f64)
-  local.set $17
-  local.get $3
+  local.set $19
+  local.get $2
   i32.const 1152
   i32.load
   call_indirect $0 (type $i32_=>_f64)
-  local.set $18
+  local.set $20
   global.get $~lib/memory/__stack_pointer
   i32.const 1334
   call $~lib/array/Array<f64>#constructor
-  local.tee $14
+  local.tee $5
   i32.store offset=16
   global.get $~lib/memory/__stack_pointer
   i32.const 1334
   call $~lib/array/Array<f64>#constructor
-  local.tee $15
+  local.tee $16
   i32.store offset=20
   loop $for-loop|1
-   local.get $4
+   local.get $3
    i32.const 1334
    i32.lt_s
    if
+    local.get $2
     local.get $3
-    local.get $4
     call $~lib/array/Array<f64>#__get
     f64.abs
     f64.const 0.01
     f64.mul
     f64.const 1e-06
     f64.add
-    local.tee $2
-    local.get $0
-    i32.load offset=8
-    i32.const 3
-    i32.shr_u
-    i32.eqz
-    if
-     i32.const 1632
-     i32.const 2112
-     i32.const 1374
-     i32.const 64
-     call $~lib/builtins/abort
-     unreachable
-    end
-    local.get $0
-    i32.load offset=4
-    f64.load
+    local.tee $1
+    local.get $18
     f64.div
-    local.set $5
-    local.get $3
-    local.get $4
-    call $~lib/array/Array<f64>#__get
+    local.set $6
     local.get $2
+    local.get $3
+    call $~lib/array/Array<f64>#__get
+    local.get $1
     f64.sub
     local.set $11
-    local.get $3
-    local.get $4
-    call $~lib/array/Array<f64>#__get
     local.get $2
+    local.get $3
+    call $~lib/array/Array<f64>#__get
+    local.get $1
     f64.add
-    local.set $19
-    f64.const 0
-    local.set $6
+    local.set $21
     f64.const 0
     local.set $12
+    f64.const 0
+    local.set $13
     i32.const 0
-    local.set $1
-    local.get $18
+    local.set $0
+    local.get $20
     f64.const 1
     f64.sub
-    local.set $13
+    local.set $14
     loop $for-loop|2
-     local.get $1
+     local.get $0
      f64.convert_i32_s
-     local.get $3
-     local.get $4
-     call $~lib/array/Array<f64>#__get
      local.get $2
+     local.get $3
+     call $~lib/array/Array<f64>#__get
+     local.get $1
      f64.sub
-     local.get $13
+     local.get $14
      f64.sub
-     local.get $5
+     local.get $6
      f64.div
      f64.floor
      f64.const 1
@@ -3041,177 +3072,177 @@
      f64.lt
      if
       local.get $11
-      local.get $1
+      local.get $0
       f64.convert_i32_s
-      local.get $5
+      local.get $6
       f64.mul
       f64.sub
       local.tee $7
       local.get $7
       f64.mul
-      local.set $20
-      local.get $6
+      local.set $22
+      local.get $12
       local.get $7
       f64.const -0
-      local.get $20
+      local.get $22
       f64.sub
       call $~lib/math/NativeMath.exp
       f64.mul
       local.get $7
+      local.get $2
       local.get $3
-      local.get $4
       call $~lib/array/Array<f64>#__get
       f64.sub
       f64.div
       f64.add
-      local.set $6
-      local.get $1
+      local.set $12
+      local.get $0
       i32.const 1
       i32.add
-      local.set $1
+      local.set $0
       br $for-loop|2
      end
     end
     i32.const 0
-    local.set $1
-    local.get $17
+    local.set $0
+    local.get $19
     f64.const 1
     f64.add
     local.set $11
     loop $for-loop|3
-     local.get $1
+     local.get $0
      f64.convert_i32_s
      local.get $11
-     local.get $3
-     local.get $4
-     call $~lib/array/Array<f64>#__get
      local.get $2
+     local.get $3
+     call $~lib/array/Array<f64>#__get
+     local.get $1
      f64.add
      f64.sub
-     local.get $5
+     local.get $6
      f64.div
      f64.floor
      f64.const 1
      f64.add
      f64.lt
      if
-      local.get $19
-      local.get $1
+      local.get $21
+      local.get $0
       f64.convert_i32_s
-      local.get $5
+      local.get $6
       f64.mul
       f64.add
       local.tee $7
       local.get $7
       f64.mul
-      local.set $13
-      local.get $12
+      local.set $14
+      local.get $13
       local.get $7
       f64.const -0
-      local.get $13
+      local.get $14
       f64.sub
       call $~lib/math/NativeMath.exp
       f64.mul
       local.get $7
+      local.get $2
       local.get $3
-      local.get $4
       call $~lib/array/Array<f64>#__get
       f64.sub
       f64.div
       f64.add
-      local.set $12
-      local.get $1
+      local.set $13
+      local.get $0
       i32.const 1
       i32.add
-      local.set $1
+      local.set $0
       br $for-loop|3
      end
     end
-    local.get $14
-    local.get $4
     local.get $5
-    local.get $12
+    local.get $3
     local.get $6
+    local.get $13
+    local.get $12
     f64.add
     f64.mul
     call $~lib/array/Array<f64>#__set
-    local.get $15
-    local.get $4
-    local.get $2
-    local.get $2
+    local.get $16
+    local.get $3
+    local.get $1
+    local.get $1
     f64.add
     f64.const 1
+    local.get $2
     local.get $3
-    local.get $4
     call $~lib/array/Array<f64>#__get
-    local.tee $2
-    local.get $2
+    local.tee $1
+    local.get $1
     f64.mul
-    local.tee $2
-    local.get $2
+    local.tee $1
+    local.get $1
     f64.add
     f64.sub
     f64.mul
     call $~lib/array/Array<f64>#__set
-    local.get $4
+    local.get $3
     i32.const 1
     i32.add
-    local.set $4
+    local.set $3
     br $for-loop|1
    end
   end
   global.get $~lib/memory/__stack_pointer
   i32.const 1334
   call $~lib/array/Array<f64>#constructor
-  local.tee $4
+  local.tee $3
   i32.store offset=24
   global.get $~lib/memory/__stack_pointer
   i32.const 1334
   call $~lib/array/Array<f64>#constructor
-  local.tee $16
+  local.tee $17
   i32.store offset=28
   i32.const 0
-  local.set $1
+  local.set $0
   loop $for-loop|4
-   local.get $1
+   local.get $0
    i32.const 1334
    i32.lt_s
    if
-    local.get $4
-    local.get $1
-    local.get $15
-    local.get $1
+    local.get $3
+    local.get $0
+    local.get $16
+    local.get $0
     call $~lib/array/Array<f64>#__get
     f64.const -0
-    local.get $3
-    local.get $1
-    call $~lib/array/Array<f64>#__get
-    local.tee $2
     local.get $2
+    local.get $0
+    call $~lib/array/Array<f64>#__get
+    local.tee $1
+    local.get $1
     f64.mul
     f64.sub
     call $~lib/math/NativeMath.exp
     f64.mul
-    local.get $14
-    local.get $1
+    local.get $5
+    local.get $0
     call $~lib/array/Array<f64>#__get
     f64.add
     f64.const 1.7724538509055159
     f64.div
     call $~lib/array/Array<f64>#__set
-    local.get $16
-    local.get $1
-    local.get $3
-    local.get $1
+    local.get $17
+    local.get $0
+    local.get $2
+    local.get $0
     call $~lib/array/Array<f64>#__get
     f64.const -3.141592653589793
     f64.mul
     f64.const -0
-    local.get $3
-    local.get $1
-    call $~lib/array/Array<f64>#__get
-    local.tee $2
     local.get $2
+    local.get $0
+    call $~lib/array/Array<f64>#__get
+    local.tee $1
+    local.get $1
     f64.mul
     f64.sub
     call $~lib/math/NativeMath.exp
@@ -3219,10 +3250,10 @@
     f64.const 1.7724538509055159
     f64.div
     call $~lib/array/Array<f64>#__set
-    local.get $1
+    local.get $0
     i32.const 1
     i32.add
-    local.set $1
+    local.set $0
     br $for-loop|4
    end
   end
@@ -3230,7 +3261,7 @@
   i32.const 2176
   i32.store offset=4
   global.get $~lib/memory/__stack_pointer
-  local.get $8
+  local.get $10
   i32.const 2176
   call $~lib/array/Array<f64>#map<f64>
   local.tee $0
@@ -3238,23 +3269,23 @@
   global.get $~lib/memory/__stack_pointer
   i32.const 1334
   call $~lib/array/Array<f64>#constructor
-  local.tee $3
+  local.tee $5
   i32.store offset=36
   loop $for-loop|5
-   local.get $9
+   local.get $8
    i32.const 1334
    i32.lt_s
    if
-    local.get $3
-    local.get $9
+    local.get $5
+    local.get $8
     f64.const -0
     local.get $0
-    local.get $9
+    local.get $8
     call $~lib/array/Array<f64>#__get
     global.get $assembly/index/KO
     f64.div
-    local.tee $2
-    local.get $2
+    local.tee $1
+    local.get $1
     f64.mul
     f64.sub
     f64.const 111725601.92168036
@@ -3263,22 +3294,20 @@
     f64.const 5.337633029993743e-05
     f64.mul
     call $~lib/array/Array<f64>#__set
-    local.get $9
+    local.get $8
     i32.const 1
     i32.add
-    local.set $9
+    local.set $8
     br $for-loop|5
    end
   end
-  global.get $assembly/index/ALPHA
-  local.tee $2
-  local.get $2
+  local.get $15
+  local.get $4
+  local.get $4
   f64.mul
-  f64.const 3.2
   f64.mul
-  global.get $assembly/index/ALPHA
-  local.tee $2
-  local.get $2
+  local.get $4
+  local.get $4
   f64.mul
   f64.const 1
   f64.add
@@ -3288,29 +3317,27 @@
   f64.const 7
   f64.div
   f64.sqrt
-  local.set $2
+  local.set $1
   global.get $~lib/memory/__stack_pointer
   i32.const 1334
   call $~lib/array/Array<f64>#constructor
-  local.tee $1
+  local.tee $2
   i32.store offset=40
-  global.get $assembly/index/ALPHA
-  local.tee $5
-  local.get $5
+  local.get $15
+  local.get $4
+  local.get $4
   f64.mul
-  global.get $assembly/index/ALPHA
-  local.tee $5
-  local.get $5
+  local.get $4
+  local.get $4
   f64.mul
   f64.const 1
   f64.add
   f64.div
-  local.tee $5
-  local.get $5
+  local.tee $4
+  local.get $4
   f64.mul
-  f64.const 3.2
   f64.mul
-  local.set $5
+  local.set $4
   i32.const 0
   local.set $0
   loop $for-loop|6
@@ -3318,17 +3345,17 @@
    i32.const 1334
    i32.lt_s
    if
-    local.get $1
+    local.get $2
     local.get $0
+    local.get $4
     local.get $5
-    local.get $3
     local.get $0
     call $~lib/array/Array<f64>#__get
     f64.mul
-    local.get $2
-    local.get $2
+    local.get $1
+    local.get $1
     f64.mul
-    local.get $4
+    local.get $3
     local.get $0
     call $~lib/array/Array<f64>#__get
     f64.mul
@@ -3337,10 +3364,10 @@
     local.tee $6
     local.get $6
     f64.mul
-    local.get $2
-    local.get $2
+    local.get $1
+    local.get $1
     f64.mul
-    local.get $16
+    local.get $17
     local.get $0
     call $~lib/array/Array<f64>#__get
     f64.mul
@@ -3361,17 +3388,17 @@
   i32.const 2208
   i32.store offset=4
   global.get $~lib/memory/__stack_pointer
-  local.get $8
+  local.get $10
   i32.const 2208
   call $~lib/array/Array<f64>#map<f64>
   local.tee $0
   i32.store offset=44
-  local.get $1
+  local.get $2
   call $~lib/array/Array<f64>#push
   local.get $0
   call $~lib/array/Array<f64>#push
   global.get $~lib/memory/__stack_pointer
-  local.get $1
+  local.get $2
   local.get $0
   i32.const 1840
   i32.load
@@ -3385,27 +3412,27 @@
   local.get $0
   i32.const 2240
   call $~lib/array/Array<f64>#map<f64>
-  local.tee $1
+  local.tee $2
   i32.store offset=52
   global.get $~lib/memory/__stack_pointer
   call $~lib/typedarray/Float64Array#constructor
   local.tee $0
   i32.store offset=56
   loop $for-loop|7
-   local.get $10
+   local.get $9
    i32.const 1334
    i32.lt_s
    if
     local.get $0
-    local.get $10
-    local.get $1
-    local.get $10
+    local.get $9
+    local.get $2
+    local.get $9
     call $~lib/array/Array<f64>#__get
     call $~lib/typedarray/Float64Array#__set
-    local.get $10
+    local.get $9
     i32.const 1
     i32.add
-    local.set $10
+    local.set $9
     br $for-loop|7
    end
   end

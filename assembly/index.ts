@@ -35,8 +35,8 @@ const KAPPA = 1.6e-19; // ボルツマン定数 J/eV
 const ATOMIC_MASS = 12; // Atomic mass
 const Te = 7; // eV
 const Ti = 7; // eV
-const ne = 3e24; // m^-3
-const Z = 3.2;
+// const ne = 3e24; // m^-3
+// const Z = 3.2;/
 const ICCD_CENTER = 596; // (pixel) rayleigh center on ICCD
 const DS = 25; // (pm) Doppler shift in wavelength
 
@@ -60,7 +60,6 @@ const NT = 3;
 
 const CO_EFF = (sigma * n0 * (NR / NT) * (ELR / ELT)) / 0.8 / IR;
 
-
 const RADIAN_KI_KS = (ANGLE_KI_KS * 2 * PI) / 360; // radian
 
 const dlmin = -0.2; // nm
@@ -73,8 +72,6 @@ const lamda: f64 = 532; // レーザー波長 nm
 const Mi = ATOMIC_MASS * 1836 * Me;
 const ki = (2 * PI) / (lamda * 1e-9); // 入射レーザーの波数 1/m とても大きい
 const KO: f64 = 2 * ki * Math.sin(RADIAN_KI_KS / 2); // 散乱に関わる波数 1/m 大きい
-const DEBYE = sqrt((IPSIRON * KAPPA * Te) / (e ** 2 * ne)); // デバイ長 m
-const ALPHA = 1 / (KO * DEBYE);
 
 // const a = sqrt((2 * KAPPA * Te) / Me); // 電子の熱速度
 const b = sqrt((2 * KAPPA * Ti) / Mi); // イオンの熱速度
@@ -83,7 +80,16 @@ const count: i32 = <i32>ceil((dlmax - dlmin) / step);
 
 // # 横軸（波長シフト）-0.2から0.2まで、0.0003ずつプロット, length = 1334
 export function calcYAxis(props: Float64Array): Float64Array {
-  // props = [precision]
+  // props = [precision, ne, Z]
+  const precision = props[0];
+  const ne = props[1];
+  const Z = props[2];
+
+  // from above
+  const DEBYE = sqrt((IPSIRON * KAPPA * Te) / (e ** 2 * ne)); // デバイ長 m
+  const ALPHA = 1 / (KO * DEBYE);
+  // const [precision, ne, Z] = props
+
   const dl = new Array<f64>(count).map<f64>((_, i) => dlmin + i * step);
   const xiFact = (2 * PI * C * 1e9) / (KO * b * lamda ** 2);
   const xi = new Array<f64>(count);
@@ -96,7 +102,7 @@ export function calcYAxis(props: Float64Array): Float64Array {
   const RPxi = new Array<f64>(count);
   for (let i = 0; i < count; i++) {
     const phi = 0.01 * abs(xi[i]) + 1e-6;
-    const dzxi = phi / props[0];
+    const dzxi = phi / precision;
     const aa = xi[i] - phi;
     const bb = xi[i] + phi;
     let Imxi: f64 = 0;

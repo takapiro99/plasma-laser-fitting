@@ -62,7 +62,7 @@ const chartJsOptions = {
     },
     title: {
       display: true,
-      text: "",
+      text: "ここに条件など",
     },
   },
 };

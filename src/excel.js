@@ -1,14 +1,4 @@
-import { saveAs } from "file-saver";
-import XLSX from "xlsx";
-
-// const s2ab = (s) => {
-//   var buf = new ArrayBuffer(s.length);
-//   var view = new Uint8Array(buf);
-//   for (var i = 0; i != s.length; ++i) {
-//     view[i] = s.charCodeAt(i) & 0xff;
-//   }
-//   return buf;
-// };
+import { utils, writeFile } from "xlsx";
 
 export const exportAsExcel = (experimentData, fittingData, fileName = new Date().toISOString().split("T")[0]) => {
   if (!experimentData.length || !fittingData.length) {
@@ -21,7 +11,6 @@ export const exportAsExcel = (experimentData, fittingData, fileName = new Date()
       return;
     }
   }
-  console.log(experimentData, fittingData);
 
   let formattedData;
   if (experimentData.length >= fittingData.length) {
@@ -29,10 +18,10 @@ export const exportAsExcel = (experimentData, fittingData, fileName = new Date()
       if (fittingData.length - 1 >= i) {
         return [...x, ...fittingData[i]];
       } else {
-        return [...x, "", ""];
+        return [...x];
       }
     });
-  }else{
+  } else {
     formattedData = fittingData.map((x, i) => {
       if (experimentData.length - 1 >= i) {
         return [...experimentData[i], ...x];
@@ -41,25 +30,9 @@ export const exportAsExcel = (experimentData, fittingData, fileName = new Date()
       }
     });
   }
-  console.log(formattedData)
-  console.log("export as excel here");
+  const workbook = utils.book_new();
+  const sheet = utils.aoa_to_sheet(formattedData.unshift(["実験データ", "", "フィッティングしたデータ"]));
 
-  const wb = XLSX.utils.book_new();
-
-  const sheet = XLSX.utils.aoa_to_sheet(formattedData);
-  XLSX.utils.book_append_sheet(wb, sheet);
-  XLSX.writeFile(wb, `${fileName}.xlsx`);
-  // document.querySelectorAll("table.table-to-export").forEach(function (currentValue, index) {
-  //   // sheet_to_workbook()の実装を参考に記述
-  //   var n = currentValue.getAttribute("data-sheet-name");
-  //   if (!n) {
-  //     n = "Sheet" + index;
-  //   }
-  //   workbook.SheetNames.push(n);
-  //   workbook.Sheets[n] = XLSX.utils.table_to_sheet(currentValue, wopts);
-  // });
-
-  // const wbout = XLSX.write(workbook, wopts);
-
-  // saveAs(new Blob([s2ab(wbout)], { type: "application/octet-stream" }), `${filename}.xlsx`);
+  utils.book_append_sheet(workbook, sheet);
+  writeFile(workbook, `${fileName}.xlsx`);
 };
