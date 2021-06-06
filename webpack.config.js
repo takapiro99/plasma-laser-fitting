@@ -1,25 +1,16 @@
-const path = require("path");
-// const HtmlWebpackPlugin = require("html-webpack-plugin");
-
 module.exports = {
-  entry: `./src/index.js`,
-  mode: "production",
-  // ファイルの出力設定
+  entry: {
+    main: "./src/index.js",
+    "cross-section": "./src/cross-section/index.js"
+  },
   output: {
     path: `${__dirname}/public`,
-    publicPath: `${__dirname}/public/`,
-    filename: "main.js",
+    filename: "[name].js",
   },
   devServer: {
-    contentBase: "./public",
-    open: true,
-    hot: true,
+    contentBase: `public/`,
     watchContentBase: true,
+    open: true,
   },
   target: "web",
-  // plugins: [
-  //   new HtmlWebpackPlugin({
-  //     title: "Hot Module Replacement",
-  //   }),
-  // ],
 };

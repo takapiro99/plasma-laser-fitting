@@ -9,8 +9,8 @@
     "asbuild:optimized": "asc ./node_modules/as-bind/lib/assembly/as-bind.ts assembly/index.ts --target release --exportRuntime",
     "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized && cp build/optimized.wasm public/",
     "b": "npm run asbuild:untouched && cp build/untouched.wasm public/optimized.wasm",
-    "build": "webpack",
-    "start": "webpack serve",
+    "build": "webpack --mode=production",
+    "start": "webpack serve --mode=development",
     "watch": "webpack --watch",
     "deploy": "npm run asbuild && npm run build"
   },

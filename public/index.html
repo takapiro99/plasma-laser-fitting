@@ -16,9 +16,6 @@
     let dlmax = 0.2;
     let step = 0.0003;
     let experimentData = [], fittingData = [];
-
-
-
   </script>
 </head>
 
@@ -27,6 +24,7 @@
     <div class="nav-wrapper">
       <span class="brand-logo center">under construction</span>
       <ul id="nav-mobile" class="right hide-on-small-and-down">
+        <li><a href="cross-section.html"><b>cross-section</b></a></li>
         <li><a href="#">about</a></li>
       </ul>
     </div>
@@ -122,7 +120,7 @@
       </div>
       <p>
       <h5 style="display: inline-block;margin-right:1em">3. press the draw button</h5>
-      <button id="fit" class="waves-effect waves-light btn-small blue" >draw</button>
+      <button id="fit" class="waves-effect waves-light btn-small blue">draw</button>
       </p>
     </form>
     <div style="height: 60vh">
@@ -200,7 +198,6 @@
       e.preventDefault()
       fit()
     }
-
 
     const showButtons = () => {
       document.getElementById("reset-zoom-button").style.display = "block";
