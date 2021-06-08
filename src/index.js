@@ -13,7 +13,7 @@ loadWasm()
     console.log("loaded");
   })
   .catch((e) => {
-    alert("failed to load module", { e });
+    alert("failed to load module. please reload.", { e });
   });
 
 const updateStatus = async (text) => {
