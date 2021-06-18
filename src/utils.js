@@ -124,7 +124,8 @@ export const drawData = (ctx, data) => {
     myChart.destroy();
   }
   const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
-  const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 0.4 && item[0] > -0.4);
+  // TODO 範囲決めれるようにしたいかも
+  const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 1 && item[0] > -1);
   const foramttedData = {
     datasets: [
       {

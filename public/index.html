@@ -204,7 +204,8 @@
     }
 
     const inputFileAndDraw = (input) => {
-      readData(input).then((data) => {
+      readData(input).then((d) => {
+        const [data, fileName] = d;
         showButtons()
 
         const D = 0.187; //# 逆線分散 (nm/mm)
