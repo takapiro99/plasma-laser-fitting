@@ -214,7 +214,7 @@
         const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
         const allData = xAxis.map((item, i) => [item, data[i][2]])
         experimentData = allData
-
+        console.log(data)
         myChart = drawData(ctx, data); // passing raw data here
         document.getElementById("status-text").innerText = "done"
       }).catch((e) => alert("something went wrong, sorry"));
