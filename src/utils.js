@@ -111,7 +111,7 @@ export const readData = async (input) => {
     return;
   }
   const vals = rawData.split("\r\n").map((item) => item.split(",").map((str) => parseFloat(str.trim())));
-  return vals;
+  return [vals, file.name];
 };
 
 export const drawData = (ctx, data) => {

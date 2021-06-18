@@ -42,10 +42,10 @@ const rgbStringFromRGB = (r, g, b) => {
 export const intensity2Color = (val, min = 0, max = 1) => {
   if (min > val) return rgbStringFromRGB(_r(0), _g(0), _b(0));
   if (max < val) return rgbStringFromRGB(_r(1), _g(1), _b(1));
-  const sVal = (val - min) / (max - min);
+  const sVal = 1 - (val - min) / (max - min);
   // https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/_cm.py#L142
   const ans = rgbStringFromRGB(Math.floor(_r(sVal) * 255), Math.floor(_g(sVal) * 255), Math.floor(_b(sVal) * 255));
-  console.log({ ans });
+  // console.log({ ans });
   return ans;
 };
 

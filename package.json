@@ -24,6 +24,8 @@
     "chartjs-plugin-zoom": "^1.0.0",
     "d3": "^6.7.0",
     "d3-contour": "^3.0.1",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.6.0",
     "xlsx": "^0.17.0"
   },
   "devDependencies": {

@@ -36,28 +36,59 @@
       </p>
       <p id="input-file-status"></p>
     </div>
-    <p>
-    <h5>2. preview</h5>
-    </p>
-    <div id="heatmap" class="heatmap"></div>
+    <!-- <div id="console" style="pointer-events:none;color:lightgrey !important;"> -->
+    <div id="console" style="color:lightgrey !important;">
+
+      <p>
+      <h5><s> 2. preview</s></h5>
+      準備中
+      </p>
+      <form onsubmit="event.preventDefault();downloadZip();">
+        <div>
+          <h5>3. parameters</h5>
+          <div class="row">
+            <p class="col s4">
+              <label for="min">from<input type="number" name="min" value="700" id='min' min="1" max="1024"></label>
+            </p>
+            <p class="col s4">
+              <label for="max">to<input type="number" name="max" id="max" value="720" min="1" max="1024"></label>
+            </p>
+            <p class="col s4">
+              <label for="step">step<input type="number" name="step" id="step" value="9" min="1" max="1024"></label>
+            </p>
+          </div>
+          <p class="grey-text">output will be calculated as average</p>
+          <!-- <div class="row">
+        <p class="col s6">
+          <label>
+            <input name="mode" type="radio" checked />
+            <span>average</span>
+          </label>
+          <label>
+            <input name="mode" type="radio" />
+            <span>sum</span>
+          </label>
+        </p>
+      </div> -->
+        </div>
+        <div>
+          <h5>4. Download as zip</h5>
+          <p>
+            <button type="submit" id="downloadButton" class="waves-effect waves-light btn-small indigo">download</button>
+            <!-- <a onclick="downloadZip()" id="downloadButton" class="waves-effect waves-light btn-small indigo disabled">download</a> -->
+          </p>
+        </div>
+      </form>
+      <!-- <div id="heatmap" class="heatmap"></div> -->
+    </div>
   </div>
+
   <div style="height:300px"></div>
+
+  <script src="./cross-section.js"></script>
   <script>
-    // let rawData = null
-    // const inputFileAndDraw = (input) => {
-    //   document.getElementById("input-file-status").innerHTML = "input running... please wait"
-    //   setTimeout(() => {
-    //     readData(input).then((data) => {
-    //       console.log(data)
-    //       // console.log(data.flatMap(x=>x).sort())
-    //       rawData = Data
-    //       document.getElementById("input-file-status").innerHTML = "input complete"
-    //     }).catch((e) => alert("something went wrong, sorry"));
-    //   }, 70)
-    // };
 
   </script>
-  <script src="./cross-section.js"></script>
 </body>
 
 </html>
