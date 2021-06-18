@@ -58,10 +58,14 @@ automatically adjust and continue anyway?`)
       max = min + step * sectionCount - 1;
     }
   }
+  const sectionCount = Math.round((max - min + 1) / step);
+  if (sectionCount > 100) {
+    alert(`too many sections: ${sectionCount}
+over 100 sections will be aborted`);
+    return;
+  }
   // proceed
   const count = 1024;
-  const sectionCount = Math.round((max - min + 1) / step);
-  const dataChunks = [];
   const min_index = min - 1;
   const max_index = max - 1;
   const fixedDataObj = rawData.slice(count * (min - 1), count * max).reduce((acc, cur) => {
@@ -94,7 +98,7 @@ automatically adjust and continue anyway?`)
   // M.toast({ html: "preparing files...", classes: "light-blue lighten-3 black-text" });
   const zip = new JSZip();
   fixedData.forEach((item, i) => {
-    zip.file(`${rawFileName}__${min + step * i}_${min + step * (i + 1) - 1}.txt`, item.map((s) => s.join(",")).join("\r\n"));
+    zip.file(`${rawFileName}__${min + step * i}_${min + step * (i + 1) - 1}.txt`, `${item.map((s) => s.join(",")).join("\r\n")}\r\n`);
   });
   // M.toast({ html: "zipping...", classes: "light-blue lighten-3 black-text" });
   zip.generateAsync({ type: "blob" }).then((content) => {
