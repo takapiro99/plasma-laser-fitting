@@ -64,7 +64,8 @@
         <!-- <p class="col s2">
           <label>step<input type="number" value=0.003 disabled></label>
         </p> -->
-        <label class="col s2">ne (×10^24)<input type="number" value="3" id="ne"></label>
+        <label class="col s3">ne before (×10^24)(used to draw graph)<input type="number" value="3" id="ne"></label>
+        <label class="col s2">ne after (×10^24)<input type="number" value="3" id="ne_after"></label>
         <label class="col s2">Z<input type="number" value="3.2" id="Z"></label>
       </div>
       <div class="row 2">
@@ -90,14 +91,21 @@
         <label class="col s2">air density for Rayleigh(×10^25)<input type="number" value="2.5" id="n0"></label>
         <label class="col s2">accumulation shots<input type="number" value="100" id="NR"></label>
       </div>
+      <div class="row 4">
+        <label class="col s2">w_fit coefficient(×10^5)<input id="w_fit_coeff" type="number" value="1.15"></label>
+        <label class="col s12">custom title<input type="text" id="customTitle"></label>
+      </div>
       <p>
       <h5 style="display: inline-block;margin-right:1em">3. draw</h5>
       <button id="fit" class="waves-effect waves-light btn-small blue">draw</button>
+      <button id="print" onclick="_print()" class="waves-effect waves-light btn-small orange lighten-2"
+        type="button">print data</button><span class="grey-text text-darken-1">if hover chart, text will dissapear,
+        sorry...</span>
       </p>
     </form>
     <div style="height: 60vh;margin-bottom:5em">
       <p id="status-text"></p>
-      <canvas id="myChart" style="height: 85%;width:100%;border:1px solid lightgrey"></canvas>
+      <canvas id="myChart" style="height: 85%;width:100%;border:1px solid lightgrey;"></canvas>
     </div>
     <p>
       <button id="reset-zoom-button" class="waves-effect waves-light btn small grey darken-1" style="display:none"
@@ -109,6 +117,14 @@
     <h5 style="display: inline-block;margin-right:1em">4. export as .xlsx</h5>
     <button id="fit" class="waves-effect waves-light btn-small blue"
       onclick="exportAsExcel(experimentData, fittingData)">download</button>
+    </p>
+    <p>
+    <p>&nbsp;</p>
+    <h6 style="display: inline-block;margin-right:1em">その他</h6>
+    <ul>
+      <li>enlarge the window for high quality image</li>
+      <!-- <li></li> -->
+    </ul>
     </p>
   </div>
   <div style="height:300px"></div>
@@ -129,11 +145,12 @@
       document.getElementById("fit").disabled = false
     }
 
-    const go = () => {
+    const go = (willReturnVal = false) => {
       document.getElementById("fit").disabled = true
       document.getElementById("status-text").innerText = "calculating..."
       const precision = 3
       const ne = document.getElementById("ne").value
+      const ne_after = document.getElementById("ne_after").value
       const Z = document.getElementById("Z").value
       const atomicMass = document.getElementById("atomic-mass").value
       const Te = document.getElementById("Te").value
@@ -150,18 +167,36 @@
       const ELT = document.getElementById("ELT").value
       const airDensity = document.getElementById("n0").value
       const accumulationShots = document.getElementById("NR").value
+      const w_fit_coeff = document.getElementById("w_fit_coeff").value
       // deal with performance
       const dlmin = -0.2, dlmax = 0.2, step = 0.0003 // when range(-0.2, 0.2, 0.0003)
-
+      let props_true = new Float64Array;
+      let props_false = new Float64Array;
+      // props = [precision, ne, Z, atomic_mass, Te, Ti, center, shiftWaveLength, 逆線分散D, ppmm-ICCD, FHWM, NT, akiks, integratedIntensity, ELR, ELT, airDensity, shots]
+      props_false = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, false, ne_after * 1e24])
+      props_true = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, true, ne_after * 1e24])
+      console.log(props_true)
+      if (willReturnVal) {
+        const lamda = 532; // レーザー波長 nm
+        const C = 3e8; // 光速m/s
+        const RADIAN_KI_KS = (ANGLE_KI_KS * 2 * Math.PI) / 360; // radian
+        const ki = 2 * Math.PI / (lamda * 1e-9)
+        const vska = 90 - (180 - ANGLE_KI_KS) / 2  // angle between Vs and KO
+        const KO = 2 * ki * Math.sin(RADIAN_KI_KS / 2);
+        const Vs = (2 * Math.PI * C / Math.cos(vska * 2 * Math.PI / 360) / KO) * (1 / lamda - (1 / (lamda + dopplerShift / 1000))) * 1e9  // ion velocity
+        // ne, ne_real, ne_real_before, Te, Vs, Z
+        const a = calcYAxis(props_true)
+        // console.log(a)
+        const ne_real = a[10]
+        const ne_real_after = a[11]
+        return [ne, ne_real, ne_real_after, Te, Vs, Z]
+      }
       setTimeout(() => {
-        let calcXAxisProps =  new Float64Array;
+        let calcXAxisProps = new Float64Array;
         calcXAxisProps = Float64Array.from([dopplerShift])
         const a = calcXAxis(calcXAxisProps);
-        let props = new Float64Array;
-        // props = [precision, ne, Z, atomic_mass, Te, Ti, center, shiftWaveLength, 逆線分散D, ppmm-ICCD, FHWM, NT, akiks, integratedIntensity, ELR, ELT, airDensity, shots]
-        props = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots])
-        console.log(props)
-        let b = calcYAxis(props);
+
+        let b = calcYAxis(props_false);
         if (!myChart) {
           alert("select txt file first");
           statusDone()
@@ -170,9 +205,40 @@
         const data = [Array.from(a), Array.from(b)]
         fittingData = data[0].map((x, i) => ([x, data[1][i]]))
         addData(myChart, data[0], data[1]);
+        const customTitle = document.getElementById("customTitle").value
+        if (customTitle) {
+          chart.options.plugins.title.text = customTitle;
+          chart.update();
+        }
         statusDone()
       }, 70)
     };
+
+    const _print = () => {
+      if (!myChart) {
+        // alert("draw first");
+        go();
+        statusDone()
+        return
+      }
+      const vals = go(true)
+      const fVals = vals.map((x) => {
+        return (x - 0).toPrecision(5)
+      })
+      console.log(vals)
+      const canvas = document.getElementById("myChart");
+      const ctx = canvas.getContext("2d");
+      const x = canvas.clientWidth - 200
+      const y = 100
+      const step = 20
+      ctx.font = "15px Arial";
+      ctx.fillText(`ne:              ${fVals[0]}`, x, y + step * 0)
+      ctx.fillText(`ne(real) before: ${fVals[1]}`, x, y + step * 1)
+      ctx.fillText(`ne(real) after:  ${fVals[2]}`, x, y + step * 2)
+      ctx.fillText(`Te:              ${fVals[3]}`, x, y + step * 3)
+      ctx.fillText(`Vs:              ${fVals[4]}`, x, y + step * 4)
+      statusDone()
+    }
 
     const submit = (e) => {
       console.log('submit!')
@@ -205,7 +271,7 @@
         const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
         const allData = xAxis.map((item, i) => [item, data[i][2]])
         experimentData = allData
-        console.log(data)
+        // console.log(data)
         myChart = drawData(ctx, data); // passing raw data here
         document.getElementById("status-text").innerText = "done"
       }).catch((e) => { alert("something went wrong, sorry"); console.error(e) });
@@ -215,5 +281,3 @@
 </body>
 
 </html>
-
-

@@ -6,6 +6,7 @@ Chart.register(zoomPlugin);
 Chart.register(...registerables);
 
 const chartJsOptions = {
+  hover: { mode: null },
   showTooltips: false,
   responsive: true,
   maintainAspectRatio: false,
@@ -62,7 +63,7 @@ const chartJsOptions = {
     },
     title: {
       display: true,
-      text: "ここに条件など",
+      text: new Date().toISOString().split("T").join(" ").slice(0, -8),
     },
   },
 };
@@ -72,15 +73,23 @@ export const addData = (chart, label, data) => {
     chart.data.datasets.shift();
   }
   chart.data.datasets.unshift({
-    label: "calculated line",
+    label: "computed",
     data: label.map((x, i) => ({ x: x, y: data[i] })),
     fill: false,
-    borderColor: "rgb(200, 10, 10)",
+    borderColor: "#f44336", //,"rgb(200, 10, 10)",
     tension: 0.1,
     showLine: true,
     pointBorderWidth: 0,
     pointBackgroundColor: "transparent",
     borderWidth: 1.5,
+    options: {
+      plugins: {
+        subtitle: {
+          display: true,
+          text: "Custom Chart Subtitle",
+        },
+      },
+    },
   });
   chart.update();
 };
@@ -132,7 +141,7 @@ export const drawData = (ctx, data) => {
         label: "data",
         data: allData.map((data, i) => ({ x: data[0], y: data[1] })),
         fill: false,
-        borderColor: "rgb(75, 192, 192)",
+        borderColor: "#64b5f6", //"rgb(75, 192, 192)",
         tension: 0.1,
         showLine: true,
         pointBorderWidth: 0,

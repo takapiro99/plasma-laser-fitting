@@ -51,7 +51,7 @@ const KAPPA = 1.6e-19; // ボルツマン定数 J/eV
 
 // Rayleigh scattering calibration
 // const IR = 4500; // Rayleigh scattering integrated intensity
-const sigma = 1 / 132; // scattering cross section ratio (Ray/Th) ???
+const sigma: f64 = 1 / 132; // scattering cross section ratio (Ray/Th) ???
 // const ELR = 5; // Laser energy
 // const ELT = 5;
 // const n0 = 2.5e25; // air density for Rayleigh
@@ -80,7 +80,8 @@ const count: i32 = <i32>ceil((dlmax - dlmin) / step);
 
 // # 横軸（波長シフト）-0.2から0.2まで、0.0003ずつプロット, length = 1334
 export function calcYAxis(props: Float64Array): Float64Array {
-  // props = [precision, ne, Z, atomic_mass, Te, Ti, center, shiftWaveLength, 逆線分散D, ppmm-ICCD, FHWM, NT, akiks, integratedIntensity, ELR, ELT, airDensity, shots]
+  // props = [precision, ne, Z, atomic_mass, Te, Ti, center, shiftWaveLength, 逆線分散D, ppmm-ICCD,
+  // FHWM, NT, akiks, integratedIntensity, ELR, ELT, airDensity, shots, w_fit_coeff, flag, ne_after]
   const precision = props[0];
   const ne = props[1];
   const Z = props[2];
@@ -99,6 +100,9 @@ export function calcYAxis(props: Float64Array): Float64Array {
   const ELT = props[15];
   const n0 = props[16];
   const NR = props[17];
+  const w_fit_coeff = props[18];
+  const calcParams = props[19];
+  const ne_after = props[20];
   //
   const Mi = ATOMIC_MASS * 1836 * Me;
   const b = sqrt((2 * KAPPA * Ti) / Mi); // イオンの熱速度
@@ -111,8 +115,9 @@ export function calcYAxis(props: Float64Array): Float64Array {
   const KO: f64 = 2 * ki * Math.sin(RADIAN_KI_KS / 2); // 散乱に関わる波数 1/m 大きい
   // from above
   const DEBYE = sqrt((IPSIRON * KAPPA * Te) / (e ** 2 * ne)); // デバイ長 m
+  const DEBYE_after = sqrt((IPSIRON * KAPPA * Te) / (e ** 2 * ne_after)); // デバイ長 m
   const ALPHA = 1 / (KO * DEBYE);
-  // const [precision, ne, Z] = props
+  const ALPHA_after = 1 / (KO * DEBYE_after);
 
   const dl = new Array<f64>(count).map<f64>((_, i) => dlmin + i * step);
   const xiFact = (2 * PI * C * 1e9) / (KO * b * lamda ** 2);
@@ -158,9 +163,12 @@ export function calcYAxis(props: Float64Array): Float64Array {
     fi0[i] = sqrt(1 / PI / b ** 2) * Math.exp((-1 * (dw[i] / KO) ** 2) / b ** 2);
   }
   const beta = sqrt((((Z * ALPHA ** 2) / (1 + ALPHA ** 2)) * Te) / Ti);
+  const beta_after = sqrt((((Z * ALPHA_after ** 2) / (1 + ALPHA_after ** 2)) * Te) / Ti);
 
   const icont = new Array<f64>(count);
+  const icont_after = new Array<f64>(count);
   const icontFact = Z * (ALPHA ** 2 / (1 + ALPHA ** 2)) ** 2;
+  const icontFact_after = Z * (ALPHA_after ** 2 / (1 + ALPHA_after ** 2)) ** 2;
 
   for (let i = 0; i < count; i++) {
     icont[i] = (icontFact * fi0[i]) / ((1 + beta ** 2 * dwXiRe[i]) ** 2 + (beta ** 2 * dwXiIm[i]) ** 2);
@@ -168,20 +176,90 @@ export function calcYAxis(props: Float64Array): Float64Array {
 
   // const inst = dl.map<f64>((x) => Math.exp((-0.5 / HWHM ** 2) * x ** 2)); // 装置関数
   let inst = new Array<f64>(dl.length);
-  for(let i=0;i<inst.length;i++){
-    inst[i] = Math.exp((-0.5 / HWHM ** 2) * dl[i] ** 2)
+  for (let i = 0; i < inst.length; i++) {
+    inst[i] = Math.exp((-0.5 / HWHM ** 2) * dl[i] ** 2);
   }
+
   if (count % 2 == 0) {
     icont.push(0);
     inst.push(0);
   }
+
   const w = convolve(icont, inst);
   // y軸
-  const _w_fit = w.map<f64>((x) => x * 1.15e5);
+  let _w_fit = new Array<number>(count);
+  for (let i = 0; i < count; i++) {
+    _w_fit[i] = w[i] * w_fit_coeff;
+  }
+  // const _w_fit = w.map<f64>((x) => x * w_fit_coeff);
   const w_fit = new Float64Array(count);
   for (let i = 0; i < count; i++) {
     w_fit[i] = _w_fit[i];
   }
+
+  if (calcParams) {
+    for (let i = 0; i < count; i++) {
+      icont_after[i] = (icontFact_after * fi0[i]) / ((1 + beta_after ** 2 * dwXiRe[i]) ** 2 + (beta_after ** 2 * dwXiIm[i]) ** 2);
+    }
+    let inst_after = new Array<f64>(dl.length);
+    for (let i = 0; i < inst_after.length; i++) {
+      inst_after[i] = Math.exp((-0.5 / HWHM ** 2) * dl[i] ** 2);
+    }
+    if (count % 2 == 0) {
+      icont_after.push(0);
+      inst_after.push(0);
+    }
+    const w_after = convolve(icont_after, inst_after);
+    // const _w_fit = w_after.map<f64>((x) => x * w_fit_coeff);
+    let _w_fit_after = new Array<number>(count);
+    for (let i = 0; i < count; i++) {
+      _w_fit_after[i] = w_after[i] * w_fit_coeff;
+    }
+    const w_fit_after = new Float64Array(count);
+    for (let i = 0; i < count; i++) {
+      w_fit_after[i] = _w_fit_after[i];
+    }
+    let fitarea = new Array<f64>(count);
+    let fitarea_after = new Array<f64>(count);
+    for (let i = 0; i < count; i++) {
+      fitarea[i] = (w_fit[i] * 3e-4) / dlICCD;
+      fitarea_after[i] = (w_fit_after[i] * 3e-4) / dlICCD;
+    }
+    let fitarea_sum: f64 = 0; //fitarea.reduce<f64>((a,b)=>a+b, 0)
+    let fitarea_after_sum: f64 = 0; // fitarea_after.reduce<f64>((a,b)=>a+b, 0)
+    for (let i = 0; i < count; i++) {
+      fitarea_sum += fitarea[i];
+      fitarea_after_sum += fitarea_after[i];
+    }
+    // const fitarea = w_fit.map((x) => (x * 3e-4) / dlICCD).reduce((a, b) => a + b, 0); //sum(list(map(lambda x: x * 3e-4/dlICCD, w_fit)))
+    // const fitarea_after = w_fit_after.map((x) => (x * 3e-4) / dlICCD).reduce((a, b) => a + b, 0); //sum(list(map(lambda x: x * 3e-4/dlICCD, w_fit)))
+    const ne_real = fitarea_sum * CO_EFF;
+    const ne_real_after = fitarea_after_sum * CO_EFF;
+    let params = new Float64Array(12);
+    // params[0] = ne_real;
+    // params[1] = ne_real_after;
+    params[0] = fitarea_sum;
+    params[1] = fitarea_after_sum;
+    params[2] = CO_EFF;
+    params[3] = sigma;
+    params[4] = n0;
+    params[5] = NR;
+    params[6] = NT;
+    params[7] = ELR;
+    params[8] = ELT;
+    params[9] = IR;
+    params[10] = ne_real;
+    params[11] = ne_real_after;
+    // const CO_EFF = (sigma * n0 * (NR / NT) * (ELR / ELT)) / 0.8 / IR;
+    return params;
+  }
+
+  // n_e     : 3e+24
+  // n_e_real: 1.1789734655122692e+25
+  // Te      : 7
+  // Vs      : 19936.28441855617
+  // Z       : 3.2
+
   return w_fit;
 }
 
