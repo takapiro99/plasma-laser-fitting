@@ -32,35 +32,35 @@ const IPSIRON = 8.85e-12; // 真空の誘電率
 const KAPPA = 1.6e-19; // ボルツマン定数 J/eV
 
 // plasma parameter
-const ATOMIC_MASS = 12; // Atomic mass
-const Te = 7; // eV
-const Ti = 7; // eV
+// const ATOMIC_MASS = 12; // Atomic mass
+// const Te = 7; // eV
+// const Ti = 7; // eV
 // const ne = 3e24; // m^-3
 // const Z = 3.2;/
-const ICCD_CENTER = 596; // (pixel) rayleigh center on ICCD
-const DS = 25; // (pm) Doppler shift in wavelength
+// const ICCD_CENTER = 596; // (pixel) rayleigh center on ICCD
+// const DS = 25; // (pm) Doppler shift in wavelength
 
 // Experiment parameter
-const D = 0.187; // 逆線分散 (nm/mm)
-const ICCD_PIXEL = 0.013; // pixel per mm on ICCD (mm/pixel)
-const dlICCD = D * ICCD_PIXEL; // wavelength per pixel on ICCD (nm/pixel)
-const RSFWHM = 6; // Rayleigh scattering FWHM (pixel)
-const ANGLE_KI_KS = 135; // angle between ki and ks (degree)
-const FWHM = RSFWHM * dlICCD; // 装置関数幅 nm
-const HWHM = FWHM / 2;
+// const D = 0.187; // 逆線分散 (nm/mm)
+
+// const RSFWHM = 6; // Rayleigh scattering FWHM (pixel)
+// const ANGLE_KI_KS = 135; // angle between ki and ks (degree)
+// const FWHM = RSFWHM * dlICCD; // 装置関数幅 nm
+// const FWHM = RSFWHM * 1; // 装置関数幅 nm
+// const HWHM = FWHM / 2;
 
 // Rayleigh scattering calibration
-const IR = 4500; // Rayleigh scattering integrated intensity
+// const IR = 4500; // Rayleigh scattering integrated intensity
 const sigma = 1 / 132; // scattering cross section ratio (Ray/Th) ???
-const ELR = 5; // Laser energy
-const ELT = 5;
-const n0 = 2.5e25; // air density for Rayleigh
-const NR = 100; // accumulation shots
-const NT = 3;
+// const ELR = 5; // Laser energy
+// const ELT = 5;
+// const n0 = 2.5e25; // air density for Rayleigh
+// const NR = 100; // accumulation shots
+// const NT = 3;
 
-const CO_EFF = (sigma * n0 * (NR / NT) * (ELR / ELT)) / 0.8 / IR;
+// const CO_EFF = (sigma * n0 * (NR / NT) * (ELR / ELT)) / 0.8 / IR;
 
-const RADIAN_KI_KS = (ANGLE_KI_KS * 2 * PI) / 360; // radian
+// const RADIAN_KI_KS = (ANGLE_KI_KS * 2 * PI) / 360; // radian
 
 const dlmin = -0.2; // nm
 const dlmax = 0.2;
@@ -69,22 +69,46 @@ const step = 0.0003;
 const lamda: f64 = 532; // レーザー波長 nm
 
 // no need to change
-const Mi = ATOMIC_MASS * 1836 * Me;
+// const Mi = ATOMIC_MASS * 1836 * Me;
 const ki = (2 * PI) / (lamda * 1e-9); // 入射レーザーの波数 1/m とても大きい
-const KO: f64 = 2 * ki * Math.sin(RADIAN_KI_KS / 2); // 散乱に関わる波数 1/m 大きい
+// const KO: f64 = 2 * ki * Math.sin(RADIAN_KI_KS / 2); // 散乱に関わる波数 1/m 大きい
 
 // const a = sqrt((2 * KAPPA * Te) / Me); // 電子の熱速度
-const b = sqrt((2 * KAPPA * Ti) / Mi); // イオンの熱速度
+// const b = sqrt((2 * KAPPA * Ti) / Mi); // イオンの熱速度
 
 const count: i32 = <i32>ceil((dlmax - dlmin) / step);
 
 // # 横軸（波長シフト）-0.2から0.2まで、0.0003ずつプロット, length = 1334
 export function calcYAxis(props: Float64Array): Float64Array {
-  // props = [precision, ne, Z]
+  // props = [precision, ne, Z, atomic_mass, Te, Ti, center, shiftWaveLength, 逆線分散D, ppmm-ICCD, FHWM, NT, akiks, integratedIntensity, ELR, ELT, airDensity, shots]
   const precision = props[0];
   const ne = props[1];
   const Z = props[2];
+  const ATOMIC_MASS = props[3];
+  const Te = props[4];
+  const Ti = props[5];
+  const ICCD_CENTER = props[6];
+  const DS = props[7];
+  const D = props[8];
+  const ICCD_PIXEL = props[9];
+  const RSFWHM = props[10];
+  const NT = props[11];
+  const ANGLE_KI_KS = props[12];
+  const IR = props[13];
+  const ELR = props[14];
+  const ELT = props[15];
+  const n0 = props[16];
+  const NR = props[17];
+  //
+  const Mi = ATOMIC_MASS * 1836 * Me;
+  const b = sqrt((2 * KAPPA * Ti) / Mi); // イオンの熱速度
+  const dlICCD = D * ICCD_PIXEL; // wavelength per pixel on ICCD (nm/pixel)
 
+  const FWHM = RSFWHM * dlICCD; // 装置関数幅 nm
+  const HWHM = FWHM / 2;
+  const CO_EFF = (sigma * n0 * (NR / NT) * (ELR / ELT)) / 0.8 / IR;
+  const RADIAN_KI_KS = (ANGLE_KI_KS * 2 * PI) / 360; // radian
+  const KO: f64 = 2 * ki * Math.sin(RADIAN_KI_KS / 2); // 散乱に関わる波数 1/m 大きい
   // from above
   const DEBYE = sqrt((IPSIRON * KAPPA * Te) / (e ** 2 * ne)); // デバイ長 m
   const ALPHA = 1 / (KO * DEBYE);
@@ -142,7 +166,11 @@ export function calcYAxis(props: Float64Array): Float64Array {
     icont[i] = (icontFact * fi0[i]) / ((1 + beta ** 2 * dwXiRe[i]) ** 2 + (beta ** 2 * dwXiIm[i]) ** 2);
   }
 
-  const inst = dl.map<f64>((x) => Math.exp((-0.5 / HWHM ** 2) * x ** 2)); // 装置関数
+  // const inst = dl.map<f64>((x) => Math.exp((-0.5 / HWHM ** 2) * x ** 2)); // 装置関数
+  let inst = new Array<f64>(dl.length);
+  for(let i=0;i<inst.length;i++){
+    inst[i] = Math.exp((-0.5 / HWHM ** 2) * dl[i] ** 2)
+  }
   if (count % 2 == 0) {
     icont.push(0);
     inst.push(0);
@@ -157,7 +185,13 @@ export function calcYAxis(props: Float64Array): Float64Array {
   return w_fit;
 }
 
-export function calcXAxis(): Float64Array {
+/**
+ * calculates x axis
+ * @param props Array
+ * @returns dl_fit
+ */
+export function calcXAxis(props: Float64Array): Float64Array {
+  const DS = props[0];
   const dl = new Array<f64>(count).map<f64>((_, i) => dlmin + i * step);
   const dl_fit = new Float64Array(count);
   for (let j = 0; j < count; j++) {
