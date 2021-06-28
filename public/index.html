@@ -10,7 +10,7 @@
   <script src="./assets/materialize.min.js"></script>
   <script src="./main.js"></script>
   <script>
-    let data;
+    let data, helloData;
     let myChart;
     // let dlmin = -0.2; // %nm
     // let dlmax = 0.2;
@@ -188,6 +188,8 @@
       props_false = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, false, ne_after * 1e24])
       props_true = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, true, ne_after * 1e24])
       console.log(props_true)
+      //
+      drawData(ctx, helloData, true)
       if (willReturnVal) {
         const lamda = 532; // レーザー波長 nm
         const C = 3e8; // 光速m/s
@@ -207,9 +209,7 @@
         let calcXAxisProps = new Float64Array;
         calcXAxisProps = Float64Array.from([dopplerShift])
         const a = calcXAxis(calcXAxisProps);
-
         let b = calcYAxis(props_false);
-
         const data = [Array.from(a), Array.from(b)]
         fittingData = data[0].map((x, i) => ([x, data[1][i]]))
         addData(myChart, data[0], data[1]);
@@ -325,13 +325,13 @@ ${_Vs}`
       readData(input).then((d) => {
         const [data, name] = d;
         fileName = name;
+        helloData = data;
         showButtons()
-
         const D = document.getElementById("D").value; //# 逆線分散 (nm/mm)
         const ICCD_PIXEL = document.getElementById("ppICCD").value; //# pixel per mm on ICCD (mm/pixel)
         const dlICCD = D * ICCD_PIXEL; //# wavelength per pixel on ICCD (nm/pixel)
         const ICCD_CENTER = document.getElementById("ICCD_CENTER").value; //# (pixel) rayleigh center on ICCD
-        const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
+        const xAxis = [...Array(helloData.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
         const allData = xAxis.map((item, i) => [item, data[i][2]])
         experimentData = allData
         // console.log(data)

@@ -68,7 +68,7 @@ const chartJsOptions = {
   },
 };
 
-export const addData = (chart, label, data) => {
+export const addData = (chart, label, data, helloUpdate = false, helloData) => {
   if (chart.data.datasets.length >= 2) {
     chart.data.datasets.shift();
   }
@@ -123,15 +123,12 @@ export const readData = async (input) => {
   return [vals, file.name];
 };
 
-export const drawData = (ctx, data) => {
-  const D = 0.187; //# 逆線分散 (nm/mm)
-  const ICCD_PIXEL = 0.013; //# pixel per mm on ICCD (mm/pixel)
+export const drawData = (ctx, data, shouldUpdate = false) => {
+  const D = document.getElementById("D").value; //# 逆線分散 (nm/mm)
+  const ICCD_PIXEL = document.getElementById("ppICCD").value; //# pixel per mm on ICCD (mm/pixel)
   const dlICCD = D * ICCD_PIXEL; //# wavelength per pixel on ICCD (nm/pixel)
-  const ICCD_CENTER = 596; //# (pixel) rayleigh center on ICCD
-  if (myChart) {
-    myChart.clear();
-    myChart.destroy();
-  }
+  const ICCD_CENTER = document.getElementById("ICCD_CENTER").value; //# (pixel) rayleigh center on ICCD
+
   const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
   // TODO 範囲決めれるようにしたいかも
   const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 0.6 && item[0] > -0.6);
@@ -140,7 +137,7 @@ export const drawData = (ctx, data) => {
     datasets: [
       {
         label: "data",
-        data: allData.map((data, i) => ({ x: data[0], y: data[1] })),
+        data: allData.map((data) => ({ x: data[0], y: data[1] })),
         fill: false,
         borderColor: "#64b5f6", //"rgb(75, 192, 192)",
         tension: 0.1,
@@ -151,6 +148,35 @@ export const drawData = (ctx, data) => {
       },
     ],
   };
+  if (shouldUpdate) {
+    const chart = myChart;
+    // return;
+    if (chart.data.datasets.length >= 2) {
+      // chart.data.datasets.shift();
+      chart.data.datasets.pop();
+    }
+    const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
+    // TODO 範囲決めれるようにしたいかも
+    const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 0.6 && item[0] > -0.6);
+    // chart.data.datasets.unshift({
+    chart.data.datasets.push({
+      label: "data",
+      data: allData.map((data) => ({ x: data[0], y: data[1] })),
+      fill: false,
+      borderColor: "#64b5f6", //"rgb(75, 192, 192)",
+      tension: 0.1,
+      showLine: true,
+      pointBorderWidth: 0,
+      pointBackgroundColor: "transparent",
+      borderWidth: 1.5,
+    });
+    chart.update();
+    return;
+  }
+  if (myChart) {
+    myChart.clear();
+    myChart.destroy();
+  }
   myChart = new Chart(ctx, {
     type: "scatter",
     data: foramttedData,
