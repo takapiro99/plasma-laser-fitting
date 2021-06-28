@@ -17,6 +17,8 @@
     // let step = 0.0003;
     let experimentData = [], fittingData = [];
     let fileName;
+    let _ne, _neReal, _Te, _Vs;
+
   </script>
 </head>
 
@@ -101,6 +103,11 @@
       <button id="print" onclick="_print()" class="waves-effect waves-light btn-small orange lighten-2"
         type="button">print data</button><span class="grey-text text-darken-1">if hover chart, text will dissapear,
         sorry...</span>
+      <button id="print" onclick="_copy()" class="waves-effect waves-light btn-small green lighten-2" type="button">copy
+        data</button>
+      <span id="clipboardStatus" class="green-text text-lighten-2">&nbsp;</span>
+      <span>&nbsp;&nbsp;copies (ne, ne(real), Te, Vs) in a row.</span>
+
       </p>
     </form>
     <div style="height: 60vh;margin-bottom:5em">
@@ -146,6 +153,11 @@
     }
 
     const go = (willReturnVal = false) => {
+      if (!myChart) {
+        alert("select txt file first");
+        statusDone()
+        return;
+      }
       document.getElementById("fit").disabled = true
       document.getElementById("status-text").innerText = "calculating..."
       const precision = 3
@@ -197,11 +209,7 @@
         const a = calcXAxis(calcXAxisProps);
 
         let b = calcYAxis(props_false);
-        if (!myChart) {
-          alert("select txt file first");
-          statusDone()
-          return;
-        }
+
         const data = [Array.from(a), Array.from(b)]
         fittingData = data[0].map((x, i) => ([x, data[1][i]]))
         addData(myChart, data[0], data[1]);
@@ -214,29 +222,84 @@
       }, 70)
     };
 
-    const _print = () => {
+    const _print = (shouldPrint = true) => {
       if (!myChart) {
-        // alert("draw first");
         go();
         statusDone()
         return
       }
       const vals = go(true)
-      const fVals = vals.map((x) => {
-        return (x - 0).toPrecision(5)
-      })
+      const fVals = vals.map((x) => (x - 0).toPrecision(5))
       console.log(vals)
       const canvas = document.getElementById("myChart");
       const ctx = canvas.getContext("2d");
       const x = canvas.clientWidth - 200
       const y = 100
       const step = 20
-      ctx.font = "15px Arial";
-      ctx.fillText(`ne:              ${fVals[0]}`, x, y + step * 0)
-      ctx.fillText(`ne(real) before: ${fVals[1]}`, x, y + step * 1)
-      ctx.fillText(`ne(real) after:  ${fVals[2]}`, x, y + step * 2)
-      ctx.fillText(`Te:              ${fVals[3]}`, x, y + step * 3)
-      ctx.fillText(`Vs:              ${fVals[4]}`, x, y + step * 4)
+      if (shouldPrint) {
+        ctx.font = "15px Arial";
+        ctx.fillText(`ne       : ${fVals[0]}`, x, y + step * 0)
+        ctx.fillText(`ne(real) : ${fVals[1]}`, x, y + step * 1)
+        // ctx.fillText(`ne(real) after:  ${fVals[2]}`, x, y + step * 2)
+        ctx.fillText(`Te:      : ${fVals[3]}`, x, y + step * 2)
+        ctx.fillText(`Vs       : ${fVals[4]}`, x, y + step * 3)
+      }
+      _ne = fVals[0];
+      _neReal = fVals[1];
+      _Te = fVals[3];
+      _Vs = fVals[4];
+      statusDone()
+    }
+
+    function execCopy(string) {
+      // 空div 生成
+      var tmp = document.createElement("div");
+      // 選択用のタグ生成
+      var pre = document.createElement('pre');
+      // 親要素のCSSで user-select: none だとコピーできないので書き換える
+      pre.style.webkitUserSelect = 'auto';
+      pre.style.userSelect = 'auto';
+      tmp.appendChild(pre).textContent = string;
+      // 要素を画面外へ
+      var s = tmp.style;
+      s.position = 'fixed';
+      s.right = '200%';
+      // body に追加
+      document.body.appendChild(tmp);
+      // 要素を選択
+      document.getSelection().selectAllChildren(tmp);
+      // クリップボードにコピー
+      var result = document.execCommand("copy");
+      // 要素削除
+      document.body.removeChild(tmp);
+      return result;
+    }
+
+    const showClipboardCopied = () => {
+      const ele = document.getElementById("clipboardStatus")
+      console.log('hi')
+      ele.innerText = "copied!"
+      setTimeout(() => { ele.innerText = "" }, 3000)
+    }
+
+    const _copy = () => {
+
+      if (!_ne) {
+        _print(false)
+      }
+      const target = `${_ne}
+${_neReal}
+${_Te}
+${_Vs}`
+      if (myChart) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(target).then(() => {
+            showClipboardCopied()
+          })
+        } else {
+          execCopy(target)
+        }
+      }
       statusDone()
     }
 
