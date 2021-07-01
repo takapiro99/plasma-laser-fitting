@@ -14,10 +14,8 @@
     let myChart;
     let experimentData = [], fittingData = [];
     let fileName;
-    let _ne, _neReal, _Te, _Vs;
-
+    let _ne, _neReal, _Te, _Vs, _Z;
   </script>
-
 </head>
 
 <body class="grey lighten-3">
@@ -26,7 +24,7 @@
       <span class="brand-logo center">under construction</span>
       <ul id="nav-mobile" class="right hide-on-small-and-down">
         <li><a href="cross-section.html"><b>cross-section</b></a></li>
-        <li><a href="#">about</a></li>
+        <li><a href="https://github.com/takapiro99/plasma-laser-fitting/">about</a></li>
       </ul>
     </div>
   </nav>
@@ -200,8 +198,6 @@
       // props = [precision, ne, Z, atomic_mass, Te, Ti, center, shiftWaveLength, 逆線分散D, ppmm-ICCD, FHWM, NT, akiks, integratedIntensity, ELR, ELT, airDensity, shots]
       props_false = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, false, ne_after * 1e24])
       props_true = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, true, ne_after * 1e24])
-      console.log(props_true, props_false)
-      //
       drawData(ctx, helloData, true)
       if (willReturnVal) {
         const lamda = 532; // レーザー波長 nm
@@ -213,7 +209,6 @@
         const Vs = (2 * Math.PI * C / Math.cos(vska * 2 * Math.PI / 360) / KO) * (1 / lamda - (1 / (lamda + dopplerShift / 1000))) * 1e9  // ion velocity
         // ne, ne_real, ne_real_before, Te, Vs, Z
         const a = calcYAxis(props_true)
-        // console.log(a)
         const ne_real = a[10]
         const ne_real_after = a[11]
         return [ne, ne_real, ne_real_after, Te, Vs, Z]
@@ -239,7 +234,6 @@
       statusCalculating()
       const vals = go(true)
       const fVals = vals.map((x) => (x - 0).toPrecision(5))
-      console.log({ vals })
       const canvas = document.getElementById("myChart");
       const ctx = canvas.getContext("2d");
       const x = canvas.clientWidth - 270
@@ -254,16 +248,15 @@
           ctx.fillText(`Te　　　　 : ${fVals[3]}`, x, y + step * 2)
           ctx.fillText(`Vs　　　　 : ${fVals[4]}`, x, y + step * 3)
           ctx.fillText(`Z　　　　　: ${fVals[5]}`, x, y + step * 4)
-          console.log(ctx)
           statusDone()
 
         }, 200)
       }
-      console.log(">>>")
       _ne = fVals[0];
       _neReal = fVals[1];
       _Te = fVals[3];
       _Vs = fVals[4];
+      _Z = fVals[5]
     }
 
     const execCopy = (string) => {
@@ -284,13 +277,11 @@
 
     const showClipboardCopied = () => {
       const ele = document.getElementById("clipboardStatus")
-      console.log('hi')
       ele.innerText = "copied!"
       setTimeout(() => { ele.innerText = "" }, 3000)
     }
 
     const _copy = () => {
-
       if (!_ne) {
         _print(false)
       }
@@ -298,7 +289,8 @@
       const target = `${_ne * 1e24}
 ${_neReal}
 ${_Te}
-${_Vs}`
+${_Vs}
+${_Z}`
       if (myChart) {
         if (navigator.clipboard) {
           navigator.clipboard.writeText(target).then(() => {
@@ -325,7 +317,7 @@ ${_Vs}`
     const saveAsPNG = () => {
       const a = document.createElement('a');
       a.href = myChart.toBase64Image();
-      a.download = `${fileName.slice(0, -4)}-${new Date().toISOString().slice(0, 10)}.png`;
+      a.download = `${fileName.slice(0, -4)}.png`;
       a.click();
     }
 
@@ -343,7 +335,7 @@ ${_Vs}`
         const xAxis = [...Array(helloData.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
         const allData = xAxis.map((item, i) => [item, data[i][2]])
         experimentData = allData
-        // console.log(data)
+        // g(data)
         myChart = drawData(ctx, data); // passing raw data here
         myChart.options.plugins.title.text = `${fileName.slice(0, -4)}`;
         myChart.update();
@@ -353,29 +345,14 @@ ${_Vs}`
 
   </script>
   <style>
-    input[type=file] {
-      white-space: nowrap;
-      overflow: auto;
-      /* text-overflow: ellipsis; */
-      width: 100%;
-    }
-
-    input[type=file]>button {
-
-      /* text-overflow: ellipsis; */
-      /* width: 100%; */
-      padding: 5px;
-    }
-
     .uploadFileInput>input {
       display: none;
-      /* アップロードボタンのスタイルを無効にする */
     }
 
     .uploadFileInput {
       color: darkslategray;
       background-color: lightgrey;
-      padding: 12px;
+      padding: 12px 18px;
       border-radius: 6px;
       font-size: 1.3rem;
       /* 2dp elevation modified*/

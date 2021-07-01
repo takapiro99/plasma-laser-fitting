@@ -11,7 +11,6 @@ export const exportAsExcel = (experimentData, fittingData, fileName = new Date()
       return;
     }
   }
-  console.log(experimentData, fittingData)
   let formattedData;
   if (experimentData.length >= fittingData.length) {
     formattedData = experimentData.map((x, i) => {

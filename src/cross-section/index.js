@@ -14,7 +14,6 @@ const inputFileAndDraw = (input) => {
       .then((d) => {
         const [data, fileName] = d;
         console.log(data, fileName);
-        // console.log(data.flatMap(x=>x).sort())
         rawData = data;
         rawFileName = fileName.slice(0, -4);
         window.rawData = data;
@@ -23,7 +22,6 @@ const inputFileAndDraw = (input) => {
         document.getElementById("console").style.pointerEvents = "auto";
         document.getElementById("console").style.color = "inherit";
         document.getElementById("downloadButton").classList.remove("disabled");
-        // console.log("draw from now");
         // draw2D(data);
       })
       .catch((e) => {
