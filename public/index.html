@@ -12,9 +12,6 @@
   <script>
     let data, helloData;
     let myChart;
-    // let dlmin = -0.2; // %nm
-    // let dlmax = 0.2;
-    // let step = 0.0003;
     let experimentData = [], fittingData = [];
     let fileName;
     let _ne, _neReal, _Te, _Vs;
@@ -131,7 +128,7 @@
     <p>
     <h5 style="display: inline-block;margin-right:1em">4. export as .xlsx</h5>
     <button id="fit" class="waves-effect waves-light btn-small blue"
-      onclick="exportAsExcel(experimentData, fittingData)">download</button>
+      onclick="exportAsExcel(experimentData, fittingData, fileName)">download</button>
     </p>
     <p>
     <p>&nbsp;</p>
@@ -245,12 +242,12 @@
       console.log({ vals })
       const canvas = document.getElementById("myChart");
       const ctx = canvas.getContext("2d");
-      const x = canvas.clientWidth - 300
-      const y = 140
-      const step = 40
+      const x = canvas.clientWidth - 270
+      const y = 110
+      const step = 35
       if (shouldPrint) {
         setTimeout(() => {
-          ctx.font = "25px Arial";
+          ctx.font = "22px Arial";
           ctx.fillText(`ne　　　　 : ${fVals[0] * 1e24}`, x, y + step * 0)
           ctx.fillText(`ne(real)　　: ${fVals[1]}`, x, y + step * 1)
           // ctx.fillText(`ne(real) after:  ${fVals[2]}`, x, y + step * 2)
@@ -258,6 +255,8 @@
           ctx.fillText(`Vs　　　　 : ${fVals[4]}`, x, y + step * 3)
           ctx.fillText(`Z　　　　　: ${fVals[5]}`, x, y + step * 4)
           console.log(ctx)
+          statusDone()
+
         }, 200)
       }
       console.log(">>>")
@@ -265,29 +264,20 @@
       _neReal = fVals[1];
       _Te = fVals[3];
       _Vs = fVals[4];
-      statusDone()
     }
 
-    function execCopy(string) {
-      // 空div 生成
-      var tmp = document.createElement("div");
-      // 選択用のタグ生成
-      var pre = document.createElement('pre');
+    const execCopy = (string) => {
+      const tmp = document.createElement("div");
+      const pre = document.createElement('pre');
       // 親要素のCSSで user-select: none だとコピーできないので書き換える
       pre.style.webkitUserSelect = 'auto';
       pre.style.userSelect = 'auto';
       tmp.appendChild(pre).textContent = string;
-      // 要素を画面外へ
-      var s = tmp.style;
-      s.position = 'fixed';
-      s.right = '200%';
-      // body に追加
+      tmp.style.position = 'fixed';
+      tmp.style.right = '200%';
       document.body.appendChild(tmp);
-      // 要素を選択
       document.getSelection().selectAllChildren(tmp);
-      // クリップボードにコピー
-      var result = document.execCommand("copy");
-      // 要素削除
+      const result = document.execCommand("copy");
       document.body.removeChild(tmp);
       return result;
     }
@@ -387,6 +377,7 @@ ${_Vs}`
       background-color: lightgrey;
       padding: 12px;
       border-radius: 6px;
+      font-size: 1.3rem;
       /* 2dp elevation modified*/
       -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
       box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);

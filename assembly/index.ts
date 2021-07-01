@@ -31,36 +31,7 @@ const e = 1.6e-19; // 電子の電荷量
 const IPSIRON = 8.85e-12; // 真空の誘電率
 const KAPPA = 1.6e-19; // ボルツマン定数 J/eV
 
-// plasma parameter
-// const ATOMIC_MASS = 12; // Atomic mass
-// const Te = 7; // eV
-// const Ti = 7; // eV
-// const ne = 3e24; // m^-3
-// const Z = 3.2;/
-// const ICCD_CENTER = 596; // (pixel) rayleigh center on ICCD
-// const DS = 25; // (pm) Doppler shift in wavelength
-
-// Experiment parameter
-// const D = 0.187; // 逆線分散 (nm/mm)
-
-// const RSFWHM = 6; // Rayleigh scattering FWHM (pixel)
-// const ANGLE_KI_KS = 135; // angle between ki and ks (degree)
-// const FWHM = RSFWHM * dlICCD; // 装置関数幅 nm
-// const FWHM = RSFWHM * 1; // 装置関数幅 nm
-// const HWHM = FWHM / 2;
-
-// Rayleigh scattering calibration
-// const IR = 4500; // Rayleigh scattering integrated intensity
 const sigma: f64 = 1 / 132; // scattering cross section ratio (Ray/Th) ???
-// const ELR = 5; // Laser energy
-// const ELT = 5;
-// const n0 = 2.5e25; // air density for Rayleigh
-// const NR = 100; // accumulation shots
-// const NT = 3;
-
-// const CO_EFF = (sigma * n0 * (NR / NT) * (ELR / ELT)) / 0.8 / IR;
-
-// const RADIAN_KI_KS = (ANGLE_KI_KS * 2 * PI) / 360; // radian
 
 const dlmin = -0.2; // nm
 const dlmax = 0.2;

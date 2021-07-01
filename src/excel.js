@@ -11,7 +11,7 @@ export const exportAsExcel = (experimentData, fittingData, fileName = new Date()
       return;
     }
   }
-
+  console.log(experimentData, fittingData)
   let formattedData;
   if (experimentData.length >= fittingData.length) {
     formattedData = experimentData.map((x, i) => {
@@ -31,8 +31,8 @@ export const exportAsExcel = (experimentData, fittingData, fileName = new Date()
     });
   }
   const workbook = utils.book_new();
-  const sheet = utils.aoa_to_sheet(formattedData.unshift(["実験データ", "", "フィッティングしたデータ"]));
-
+  formattedData.unshift(["実験データ", "", "フィッティングしたデータ"])
+  const sheet = utils.aoa_to_sheet(formattedData);
   utils.book_append_sheet(workbook, sheet);
   writeFile(workbook, `${fileName}.xlsx`);
 };
