@@ -20,6 +20,7 @@
     let _ne, _neReal, _Te, _Vs;
 
   </script>
+
 </head>
 
 <body class="grey lighten-3">
@@ -36,9 +37,13 @@
     <p>&nbsp;</p>
     <div>
       <p>
-      <h5 style="display: inline-block;margin-right:1em">1. select .txt file</h5><input type="file"
-        onchange="inputFileAndDraw(this)" accept=".txt" />
-      <details style="display: inline-block;margin-right:1em">
+      <h5 style="display: inline-block;margin-right:1em">1. select .txt file</h5>
+      <label class='uploadFileInput' for="txtfile">
+        select file
+        <input id="txtfile" type="file" onchange="inputFileAndDraw(this)" accept=".txt" />
+      </label>
+      <p id="fileName" class="grey-text text-darken-1" style="margin-left: 30px;">no file selected</p>
+      <!-- <details style="display: inline-block;margin-right:1em">
         <summary>input file format:</summary>
         <small>
           1,1,0.95238 <br />
@@ -46,7 +51,7 @@
           3,1,1.5238<br />
           ...
         </small>
-      </details>
+      </details> -->
       </p>
     </div>
     <p>
@@ -66,8 +71,11 @@
         <!-- <p class="col s2">
           <label>step<input type="number" value=0.003 disabled></label>
         </p> -->
-        <label class="col s3">ne <!--before (×10^24)(used to draw graph)--><input type="number" value="3" id="ne"></label>
-        <label class="col s2" style="display: none;">ne after (×10^24)<input type="number" value="3" id="ne_after"></label>
+        <label class="col s3">ne (×10^24)
+          <!--before (×10^24)(used to draw graph)--><input type="number" value="3" id="ne">
+        </label>
+        <label class="col s2" style="display: none;">ne after (×10^24)<input type="number" value="3"
+            id="ne_after"></label>
         <label class="col s2">Z<input type="number" value="3.2" id="Z"></label>
       </div>
       <div class="row 2">
@@ -100,10 +108,10 @@
       <p>
       <h5 style="display: inline-block;margin-right:1em">3. draw</h5>
       <button id="fit" class="waves-effect waves-light btn-small blue">draw</button>
-      <button id="print" onclick="_print()" class="waves-effect waves-light btn-small orange lighten-2"
+      <button id="print" onclick="_print(true)" class="waves-effect waves-light btn-small orange lighten-2"
         type="button">print data</button><span class="grey-text text-darken-1">if hover chart, text will dissapear,
         sorry...</span>
-      <button id="print" onclick="_copy()" class="waves-effect waves-light btn-small green lighten-2" type="button">copy
+      <button id="copy" onclick="_copy()" class="waves-effect waves-light btn-small green lighten-2" type="button">copy
         data</button>
       <span id="clipboardStatus" class="green-text text-lighten-2">&nbsp;</span>
       <span>&nbsp;&nbsp;copies (ne, ne(real), Te, Vs) in a row.</span>
@@ -112,7 +120,7 @@
     </form>
     <div style="height: 60vh;margin-bottom:5em">
       <p id="status-text"></p>
-      <canvas id="myChart" style="height: 85%;width:100%;border:1px solid lightgrey;"></canvas>
+      <canvas id="myChart" width=1000 height=1000 style="height: 85%;width:100%;border:1px solid lightgrey;"></canvas>
     </div>
     <p>
       <button id="reset-zoom-button" class="waves-effect waves-light btn small grey darken-1" style="display:none"
@@ -150,6 +158,15 @@
     const statusDone = () => {
       document.getElementById("status-text").innerText = "done"
       document.getElementById("fit").disabled = false
+      document.getElementById("print").disabled = false
+      document.getElementById("copy").disabled = false
+    }
+
+    const statusCalculating = () => {
+      document.getElementById("status-text").innerText = "calculating..."
+      document.getElementById("fit").disabled = true
+      document.getElementById("print").disabled = true
+      document.getElementById("copy").disabled = true
     }
 
     const go = (willReturnVal = false) => {
@@ -158,8 +175,7 @@
         statusDone()
         return;
       }
-      document.getElementById("fit").disabled = true
-      document.getElementById("status-text").innerText = "calculating..."
+      statusCalculating()
       const precision = 3
       const ne = document.getElementById("ne").value
       const ne_after = document.getElementById("ne_after").value
@@ -187,7 +203,7 @@
       // props = [precision, ne, Z, atomic_mass, Te, Ti, center, shiftWaveLength, 逆線分散D, ppmm-ICCD, FHWM, NT, akiks, integratedIntensity, ELR, ELT, airDensity, shots]
       props_false = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, false, ne_after * 1e24])
       props_true = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, true, ne_after * 1e24])
-      console.log(props_true)
+      console.log(props_true, props_false)
       //
       drawData(ctx, helloData, true)
       if (willReturnVal) {
@@ -213,11 +229,6 @@
         const data = [Array.from(a), Array.from(b)]
         fittingData = data[0].map((x, i) => ([x, data[1][i]]))
         addData(myChart, data[0], data[1]);
-        const customTitle = document.getElementById("customTitle").value
-        if (customTitle) {
-          chart.options.plugins.title.text = customTitle;
-          chart.update();
-        }
         statusDone()
       }, 70)
     };
@@ -228,22 +239,28 @@
         statusDone()
         return
       }
+      statusCalculating()
       const vals = go(true)
       const fVals = vals.map((x) => (x - 0).toPrecision(5))
-      console.log(vals)
+      console.log({ vals })
       const canvas = document.getElementById("myChart");
       const ctx = canvas.getContext("2d");
-      const x = canvas.clientWidth - 200
-      const y = 100
-      const step = 20
+      const x = canvas.clientWidth - 300
+      const y = 140
+      const step = 40
       if (shouldPrint) {
-        ctx.font = "15px Arial";
-        ctx.fillText(`ne       : ${fVals[0]}`, x, y + step * 0)
-        ctx.fillText(`ne(real) : ${fVals[1]}`, x, y + step * 1)
-        // ctx.fillText(`ne(real) after:  ${fVals[2]}`, x, y + step * 2)
-        ctx.fillText(`Te:      : ${fVals[3]}`, x, y + step * 2)
-        ctx.fillText(`Vs       : ${fVals[4]}`, x, y + step * 3)
+        setTimeout(() => {
+          ctx.font = "25px Arial";
+          ctx.fillText(`ne　　　　 : ${fVals[0] * 1e24}`, x, y + step * 0)
+          ctx.fillText(`ne(real)　　: ${fVals[1]}`, x, y + step * 1)
+          // ctx.fillText(`ne(real) after:  ${fVals[2]}`, x, y + step * 2)
+          ctx.fillText(`Te　　　　 : ${fVals[3]}`, x, y + step * 2)
+          ctx.fillText(`Vs　　　　 : ${fVals[4]}`, x, y + step * 3)
+          ctx.fillText(`Z　　　　　: ${fVals[5]}`, x, y + step * 4)
+          console.log(ctx)
+        }, 200)
       }
+      console.log(">>>")
       _ne = fVals[0];
       _neReal = fVals[1];
       _Te = fVals[3];
@@ -287,7 +304,8 @@
       if (!_ne) {
         _print(false)
       }
-      const target = `${_ne}
+      // TODO: stop using magic number for ne
+      const target = `${_ne * 1e24}
 ${_neReal}
 ${_Te}
 ${_Vs}`
@@ -326,6 +344,7 @@ ${_Vs}`
         const [data, name] = d;
         fileName = name;
         helloData = data;
+        document.getElementById("fileName").innerText = fileName
         showButtons()
         const D = document.getElementById("D").value; //# 逆線分散 (nm/mm)
         const ICCD_PIXEL = document.getElementById("ppICCD").value; //# pixel per mm on ICCD (mm/pixel)
@@ -336,11 +355,44 @@ ${_Vs}`
         experimentData = allData
         // console.log(data)
         myChart = drawData(ctx, data); // passing raw data here
+        myChart.options.plugins.title.text = `${fileName.slice(0, -4)}`;
+        myChart.update();
         document.getElementById("status-text").innerText = "done"
       }).catch((e) => { alert("something went wrong, sorry"); console.error(e) });
     };
 
   </script>
+  <style>
+    input[type=file] {
+      white-space: nowrap;
+      overflow: auto;
+      /* text-overflow: ellipsis; */
+      width: 100%;
+    }
+
+    input[type=file]>button {
+
+      /* text-overflow: ellipsis; */
+      /* width: 100%; */
+      padding: 5px;
+    }
+
+    .uploadFileInput>input {
+      display: none;
+      /* アップロードボタンのスタイルを無効にする */
+    }
+
+    .uploadFileInput {
+      color: darkslategray;
+      background-color: lightgrey;
+      padding: 12px;
+      border-radius: 6px;
+      /* 2dp elevation modified*/
+      -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+  </style>
 </body>
 
 </html>
