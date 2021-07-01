@@ -78,16 +78,16 @@
           <label>precision (the smaller the faster)<input id="precision" type="number" value="3" min="1"
               max="6"></label>
         </p> -->
-        <label class="col s2">rayleigh center(pixel)<input type="number" value="596" id="ICCD_CENTER"></label>
+        <label class="col s2">rayleigh center(pixel)<input type="number" value="510" id="ICCD_CENTER"></label>
         <label class="col s2">Doppler shift(pm)<input type="number" value="25" id="DS"></label>
-        <label class="col s2">逆線分散 (nm/mm)<input type="number" value="0.187" id="D"></label>
+        <label class="col s2">逆線分散 (nm/mm)<input type="number" value="0.18" id="D"></label>
         <label class="col s2">ICCD (mm/pixel)<input id="ppICCD" type="number" value="0.013"></label>
         <label class="col s2">RS FWHM (pixel)<input type="number" value="6" id="RSFWHM"></label>
         <label class="col s1">NT<input type="number" value="3" id="NT"></label>
       </div>
       <div class="row 3">
         <label class="col s2">angle between ki and ks (degree)<input type="number" value="135" id="ANGLE_KI_KS"></label>
-        <label class="col s2">RS integrated intensity<input type="number" value="4500" id="IR"></label>
+        <label class="col s2">RS integrated intensity<input type="number" value="10000" id="IR"></label>
         <!-- <p class="col s2">
           <label>scattering cross section ratio (Ray/Th)<input type="text" value="1/132" disabled id="sigma"></label>
         </p> -->
@@ -97,7 +97,7 @@
         <label class="col s2">accumulation shots<input type="number" value="100" id="NR"></label>
       </div>
       <div class="row 4">
-        <label class="col s2">w_fit coefficient(×10^5)<input id="w_fit_coeff" type="number" value="1.15"></label>
+        <label class="col s2">w_fit coefficient(×10^5)<input id="w_fit_coeff" type="number" value="10"></label>
         <label class="col s12">custom title<input type="text" id="customTitle"></label>
       </div>
       <p>
@@ -242,15 +242,15 @@
       if (shouldPrint) {
         setTimeout(() => {
           ctx.font = "22px Arial";
-          ctx.fillText(`ne　　　　 : ${fVals[0] * 1e24}`, x, y + step * 0)
-          ctx.fillText(`ne(real)　　: ${fVals[1]}`, x, y + step * 1)
+          // ctx.fillText(`ne　　　　 : ${fVals[0] * 1e24}`, x, y + step * 0)
+          ctx.fillText(`ne(real)　　: ${fVals[1]}`, x, y + step * 0)
           // ctx.fillText(`ne(real) after:  ${fVals[2]}`, x, y + step * 2)
-          ctx.fillText(`Te　　　　 : ${fVals[3]}`, x, y + step * 2)
-          ctx.fillText(`Vs　　　　 : ${fVals[4]}`, x, y + step * 3)
-          ctx.fillText(`Z　　　　　: ${fVals[5]}`, x, y + step * 4)
+          ctx.fillText(`Te　　　　 : ${fVals[3]}`, x, y + step * 1)
+          ctx.fillText(`Vs　　　　 : ${fVals[4]}`, x, y + step * 2)
+          ctx.fillText(`Z　　　　　: ${fVals[5]}`, x, y + step * 3)
           statusDone()
 
-        }, 200)
+        }, 400)
       }
       _ne = fVals[0];
       _neReal = fVals[1];
@@ -286,7 +286,8 @@
         _print(false)
       }
       // TODO: stop using magic number for ne
-      const target = `${_ne * 1e24}
+      // ${_ne * 1e24}
+      const target = `
 ${_neReal}
 ${_Te}
 ${_Vs}
