@@ -72,7 +72,7 @@ const chartJsOptions = {
   },
 };
 
-export const addData = (chart, label, data, helloUpdate = false, helloData) => {
+export const addData = (chart, label, data) => {
   if (chart.data.datasets.length >= 2) {
     chart.data.datasets.shift();
   }
@@ -80,7 +80,7 @@ export const addData = (chart, label, data, helloUpdate = false, helloData) => {
     label: "computed",
     data: label.map((x, i) => ({ x: x, y: data[i] })),
     fill: false,
-    borderColor: "#f44336", //,"rgb(200, 10, 10)",
+    borderColor: "#f44336",
     tension: 0.1,
     showLine: true,
     pointBorderWidth: 0,
@@ -136,16 +136,13 @@ export const drawData = (ctx, data, shouldUpdate = false) => {
   const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
   // TODO 範囲決めれるようにしたいかも
   const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 0.4 && item[0] > -0.4);
-  // const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 1 && item[0] > -1);
-  console.log(baseline);
-  console.log(allData.map((data) => ({ x: data[0], y: parseFloat(data[1]) + parseFloat(baseline) }))[0]);
   const foramttedData = {
     datasets: [
       {
         label: "data",
         data: allData.map((data) => ({ x: data[0], y: parseFloat(data[1]) + parseFloat(baseline) })),
         fill: false,
-        borderColor: "#64b5f6", //"rgb(75, 192, 192)",
+        borderColor: "#64b5f6",
         tension: 0.1,
         showLine: true,
         pointBorderWidth: 0,
@@ -156,20 +153,14 @@ export const drawData = (ctx, data, shouldUpdate = false) => {
   };
   if (shouldUpdate) {
     const chart = myChart;
-    // return;
     if (chart.data.datasets.length >= 2) {
-      // chart.data.datasets.shift();
       chart.data.datasets.pop();
     }
-    const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
-    // TODO 範囲決めれるようにしたいかも
-    const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 0.6 && item[0] > -0.6);
-    // chart.data.datasets.unshift({
     chart.data.datasets.push({
       label: "data",
       data: allData.map((data) => ({ x: data[0], y: parseFloat(data[1]) + parseFloat(baseline) })),
       fill: false,
-      borderColor: "#64b5f6", //"rgb(75, 192, 192)",
+      borderColor: "#64b5f6",
       tension: 0.1,
       showLine: true,
       pointBorderWidth: 0,
