@@ -132,16 +132,18 @@ export const drawData = (ctx, data, shouldUpdate = false) => {
   const ICCD_PIXEL = document.getElementById("ppICCD").value; //# pixel per mm on ICCD (mm/pixel)
   const dlICCD = D * ICCD_PIXEL; //# wavelength per pixel on ICCD (nm/pixel)
   const ICCD_CENTER = document.getElementById("ICCD_CENTER").value; //# (pixel) rayleigh center on ICCD
-
+  const baseline = document.getElementById("baseline").value;
   const xAxis = [...Array(data.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
   // TODO 範囲決めれるようにしたいかも
   const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 0.4 && item[0] > -0.4);
   // const allData = xAxis.map((item, i) => [item, data[i][2]]).filter((item) => item[0] < 1 && item[0] > -1);
+  console.log(baseline);
+  console.log(allData.map((data) => ({ x: data[0], y: parseFloat(data[1]) + parseFloat(baseline) }))[0]);
   const foramttedData = {
     datasets: [
       {
         label: "data",
-        data: allData.map((data) => ({ x: data[0], y: data[1] })),
+        data: allData.map((data) => ({ x: data[0], y: parseFloat(data[1]) + parseFloat(baseline) })),
         fill: false,
         borderColor: "#64b5f6", //"rgb(75, 192, 192)",
         tension: 0.1,
@@ -165,7 +167,7 @@ export const drawData = (ctx, data, shouldUpdate = false) => {
     // chart.data.datasets.unshift({
     chart.data.datasets.push({
       label: "data",
-      data: allData.map((data) => ({ x: data[0], y: data[1] })),
+      data: allData.map((data) => ({ x: data[0], y: parseFloat(data[1]) + parseFloat(baseline) })),
       fill: false,
       borderColor: "#64b5f6", //"rgb(75, 192, 192)",
       tension: 0.1,

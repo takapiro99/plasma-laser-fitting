@@ -57,49 +57,34 @@
         <label class="col s2">atomic mass<input id="atomic-mass" type="number" value="12"></label>
         <label class="col s1">Te(eV)<input type="number" value="7" id='Te'></label>
         <label class="col s1">Ti(eV)<input type="number" value="7" id='Ti'></label>
-        <!-- <p class="col s2">
-          <label>dlmin<input type="number" value=-0.2 disabled></label>
-        </p>
-        <p class="col s2">
-          <label>dlmax<input type="number" value=0.2 disabled></label>
-        </p> -->
-        <!-- <p class="col s2">
-          <label>step<input type="number" value=0.003 disabled></label>
-        </p> -->
-        <label class="col s3">ne (×10^24)
-          <!--before (×10^24)(used to draw graph)--><input type="number" value="3" id="ne">
+        <label class="col s2">ne (×10^24)<input type="number" value="3" id="ne">
         </label>
         <label class="col s2" style="display: none;">ne after (×10^24)<input type="number" value="3"
             id="ne_after"></label>
-        <label class="col s2">Z<input type="number" value="3.2" id="Z"></label>
+        <label class="col s1">Z<input type="number" value="3.2" id="Z"></label>
+        <label class="col s1">NT<input type="number" value="3" id="NT"></label>
+        <label class="col s2">w_fit coefficient(×10^5)<input id="w_fit_coeff" type="number" value="10"></label>
+        <label class="col s2">baseline<input id="baseline" type="number" value="0"></label>
       </div>
       <div class="row 2">
-        <!-- <p class="col s2">
-          <label>precision (the smaller the faster)<input id="precision" type="number" value="3" min="1"
-              max="6"></label>
-        </p> -->
         <label class="col s2">rayleigh center(pixel)<input type="number" value="510" id="ICCD_CENTER"></label>
         <label class="col s2">Doppler shift(pm)<input type="number" value="25" id="DS"></label>
         <label class="col s2">逆線分散 (nm/mm)<input type="number" value="0.18" id="D"></label>
         <label class="col s2">ICCD (mm/pixel)<input id="ppICCD" type="number" value="0.013"></label>
         <label class="col s2">RS FWHM (pixel)<input type="number" value="6" id="RSFWHM"></label>
-        <label class="col s1">NT<input type="number" value="3" id="NT"></label>
+        <label class="col s2">w_fit coefficient(×10^5)<input id="w_fit_coeff" type="number" value="10"></label>
       </div>
       <div class="row 3">
         <label class="col s2">angle between ki and ks (degree)<input type="number" value="135" id="ANGLE_KI_KS"></label>
         <label class="col s2">RS integrated intensity<input type="number" value="10000" id="IR"></label>
-        <!-- <p class="col s2">
-          <label>scattering cross section ratio (Ray/Th)<input type="text" value="1/132" disabled id="sigma"></label>
-        </p> -->
         <label class="col s2">Laser energy(ELR)<input type="number" value="5" id="ELR"></label>
         <label class="col s2">Laser energy(ELT)<input type="number" id="ELT" value="5"></label>
         <label class="col s2">air density for Rayleigh(×10^25)<input type="number" value="2.5" id="n0"></label>
         <label class="col s2">accumulation shots<input type="number" value="100" id="NR"></label>
       </div>
-      <div class="row 4">
-        <label class="col s2">w_fit coefficient(×10^5)<input id="w_fit_coeff" type="number" value="10"></label>
-        <label class="col s12">custom title<input type="text" id="customTitle"></label>
-      </div>
+      <!-- <div class="row 4">
+        <!-- <label class="col s12">custom title<input type="text" id="customTitle"></label> -->
+      <!-- </div> -->
       <p>
       <h5 style="display: inline-block;margin-right:1em">3. draw</h5>
       <button id="fit" class="waves-effect waves-light btn-small blue">draw</button>
@@ -109,7 +94,7 @@
       <button id="copy" onclick="_copy()" class="waves-effect waves-light btn-small green lighten-2" type="button">copy
         data</button>
       <span id="clipboardStatus" class="green-text text-lighten-2">&nbsp;</span>
-      <span>&nbsp;&nbsp;copies (ne, ne(real), Te, Vs) in a row.</span>
+      <span>&nbsp;&nbsp;copies (ne, Te, Vs, z) in a row.</span>
 
       </p>
     </form>
@@ -145,10 +130,8 @@
   </style>
   <script>
 
-
     const ctx = document.getElementById("myChart");
     const status = document.getElementById("status-text")
-
 
     const statusDone = () => {
       document.getElementById("status-text").innerText = "done"
@@ -198,6 +181,7 @@
       // props = [precision, ne, Z, atomic_mass, Te, Ti, center, shiftWaveLength, 逆線分散D, ppmm-ICCD, FHWM, NT, akiks, integratedIntensity, ELR, ELT, airDensity, shots]
       props_false = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, false, ne_after * 1e24])
       props_true = Float64Array.from([precision, ne * 1e24, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity * 1e25, accumulationShots, w_fit_coeff * 1e5, true, ne_after * 1e24])
+      const baseline = document.getElementById("baseline").value
       drawData(ctx, helloData, true)
       if (willReturnVal) {
         const lamda = 532; // レーザー波長 nm
@@ -336,7 +320,7 @@ ${_Z}`
         const xAxis = [...Array(helloData.length).keys()].map((x) => (x - ICCD_CENTER) * dlICCD);
         const allData = xAxis.map((item, i) => [item, data[i][2]])
         experimentData = allData
-        // g(data)
+        const baseline = document.getElementById("baseline").value
         myChart = drawData(ctx, data); // passing raw data here
         myChart.options.plugins.title.text = `${fileName.slice(0, -4)}`;
         myChart.update();
