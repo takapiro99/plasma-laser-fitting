@@ -2,6 +2,15 @@
 *.py
 *.txt
 *.m
+*.csv
 
 d/
 proto/
+
+memo.*
+
+*.pyc
+
+hello.html
+
+/files
