@@ -31,9 +31,12 @@
   <div class="container">
     <div>
       <p>
-      <h5 style="display: inline-block;margin-right:1em">1. select .txt file</h5><input type="file"
-        onchange="inputFileAndDraw(this)" accept=".txt" />
+      <h5 style="display: inline-block;margin-right:1em">1. select .txt file</h5>
+      <input type="file" onchange="inputFileAndDraw(this)" accept=".txt" id="fileInput" />
       </p>
+      <div style="cursor: default; user-select: none;">
+        <p id="dropZone" style="text-align: center;height:50px;width:70%;background: lightyellow;line-height: 50px;margin:0 auto;border-radius:7px;transition: all .16s ease;">or drop here</p>
+      </div>
       <p id="input-file-status"></p>
     </div>
     <div id="console" style="pointer-events:none;color:lightgrey !important;">
@@ -79,7 +82,6 @@
           </p>
         </div>
       </form>
-      <!-- <div id="heatmap" class="heatmap"></div> -->
     </div>
   </div>
 
@@ -87,7 +89,31 @@
 
   <script src="./cross-section.js"></script>
   <script>
+    const dropZone = document.getElementById("dropZone")
+    const fileInput = document.getElementById("fileInput")
 
+
+  dropZone.addEventListener('dragover', function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    this.style.background = '#a1a7f0';
+  }, false);
+
+    dropZone.addEventListener('dragleave', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = 'lightyellow';
+    }, false);
+
+  dropZone.addEventListener('drop', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = 'lightyellow'; //背景色を白に戻す
+        var files = e.dataTransfer.files; //ドロップしたファイルを取得
+        if (files.length !== 1) {return alert('アップロードできるファイルは1つだけです。');}
+        fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
+        inputFileAndDraw(fileInput)
+    }, false);
   </script>
 </body>
 

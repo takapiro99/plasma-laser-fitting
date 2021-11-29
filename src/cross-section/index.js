@@ -8,6 +8,15 @@ let rawData = null;
 let rawFileName = null;
 
 const inputFileAndDraw = (input) => {
+  if(!input.files[0].name){
+    return
+  }
+  const filenamechunk = input.files[0].name.split(".")
+  console.log()
+  if(filenamechunk[filenamechunk.length - 1] !== "txt"){
+    input.value = ""
+    return alert("this was not .txt file")
+  }
   document.getElementById("input-file-status").innerHTML = "input running... please wait";
   setTimeout(() => {
     readData(input)
@@ -26,7 +35,7 @@ const inputFileAndDraw = (input) => {
       })
       .catch((e) => {
         console.error(e);
-        alert("something went wrong, sorry");
+        alert("something went wrong, sorry.  " + e);
       });
   }, 70);
 };
