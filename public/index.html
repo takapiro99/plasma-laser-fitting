@@ -311,7 +311,7 @@ ${_Z}`
         const [data, name] = d;
         fileName = name;
         helloData = data;
-        document.getElementById("fileName").innerHTML = `${fileName} : ${data.length} rows ${data.length !== 1024 ? "<br/><b style='color:tomato'><big>1024 行ではないけど、OK?</big></b>" : ""}`
+        document.getElementById("fileName").innerHTML = `${fileName} : ${data.length} rows ${data.length !== (1024 + 1) ? "<br/><b style='color:tomato'><big>1024 行ではないけど、OK?</big></b>" : ""}`
         showButtons()
         const D = document.getElementById("D").value; //# 逆線分散 (nm/mm)
         const ICCD_PIXEL = document.getElementById("ppICCD").value; //# pixel per mm on ICCD (mm/pixel)
