@@ -33,20 +33,12 @@
     <div>
       <p>
       <h5 style="display: inline-block;margin-right:1em">1. select .txt file</h5>
-      <label class='uploadFileInput' for="txtfile">
+      <label id="fileInput" class='uploadFileInput' for="txtfile">
         select file
         <input id="txtfile" type="file" onchange="inputFileAndDraw(this)" accept=".txt" />
       </label>
+      <p id="dropZone" style="cursor: default; user-select: none;text-align: center;height:50px;width:70%;background: lightyellow;line-height: 50px;margin:20px auto;border-radius:7px;transition: all .16s ease;">or drop here</p>
       <p id="fileName" class="grey-text text-darken-1" style="margin-left: 30px;">no file selected</p>
-      <!-- <details style="display: inline-block;margin-right:1em">
-        <summary>input file format:</summary>
-        <small>
-          1,1,0.95238 <br />
-          2,1,4<br />
-          3,1,1.5238<br />
-          ...
-        </small>
-      </details> -->
       </p>
     </div>
     <p>
@@ -307,11 +299,19 @@ ${_Z}`
     }
 
     const inputFileAndDraw = (input) => {
+      if(!input.files[0].name){
+        return
+      }
+      const filenamechunk = input.files[0].name.split(".")
+      if(filenamechunk[filenamechunk.length - 1] !== "txt"){
+        input.value = ""
+        return alert("this was not .txt file")
+      }
       readData(input).then((d) => {
         const [data, name] = d;
         fileName = name;
         helloData = data;
-        document.getElementById("fileName").innerText = fileName
+        document.getElementById("fileName").innerHTML = `${fileName} : ${data.length} rows ${data.length !== 1024 ? "<br/><b style='color:tomato'><big>1024 行ではないけど、OK?</big></b>" : ""}`
         showButtons()
         const D = document.getElementById("D").value; //# 逆線分散 (nm/mm)
         const ICCD_PIXEL = document.getElementById("ppICCD").value; //# pixel per mm on ICCD (mm/pixel)
@@ -328,21 +328,47 @@ ${_Z}`
       }).catch((e) => { alert("something went wrong, sorry"); console.error(e) });
     };
 
+    const dropZone = document.getElementById("dropZone")
+    const fileInput = document.getElementById("fileInput")
+
+
+  dropZone.addEventListener('dragover', function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    this.style.background = '#a1a7f0';
+  }, false);
+
+    dropZone.addEventListener('dragleave', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = 'lightyellow';
+    }, false);
+
+  dropZone.addEventListener('drop', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.style.background = 'lightyellow'; //背景色を白に戻す
+        var files = e.dataTransfer.files; //ドロップしたファイルを取得
+        if (files.length !== 1) {return alert('アップロードできるファイルは1つだけです。');}
+        fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
+        inputFileAndDraw(fileInput)
+    }, false);
+
+
   </script>
   <style>
-    .uploadFileInput>input {
+   .uploadFileInput>input {
       display: none;
     }
 
     .uploadFileInput {
-      color: darkslategray;
+      color: black;
       background-color: lightgrey;
-      padding: 12px 18px;
+      padding: 5px 9px;
       border-radius: 6px;
-      font-size: 1.3rem;
-      /* 2dp elevation modified*/
-      -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+      /* font-size: 1.3rem; */
+      /* -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2); */
+      box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
       cursor: pointer;
     }
   </style>

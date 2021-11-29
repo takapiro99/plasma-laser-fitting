@@ -12,7 +12,6 @@ const inputFileAndDraw = (input) => {
     return
   }
   const filenamechunk = input.files[0].name.split(".")
-  console.log()
   if(filenamechunk[filenamechunk.length - 1] !== "txt"){
     input.value = ""
     return alert("this was not .txt file")
