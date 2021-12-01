@@ -92,7 +92,8 @@
         </div>
         <label class="col s2"><br>Doppler shift(pm)<input type="number" value="25" id="DS"></label>
         <label class="col s1"><br>Z<input type="number" value="3.2" id="Z"></label>
-        <span class="col s2"><br><br><a target="_blank" href="https://www-amdis.iaea.org/FLYCHK/ZBAR/zp064.zvd">ref(Gd)↗</a></span>
+        <span class="col s2"><br><br><a target="_blank"
+            href="https://www-amdis.iaea.org/FLYCHK/ZBAR/zp064.zvd">ref(Gd)↗</a></span>
 
       </div>
       <p>
@@ -115,8 +116,7 @@
         <button id="copy" onclick="_copy()" class="waves-effect waves-light btn-small green lighten-2"
           type="button">copy
           data</button>
-        <button id="copy" onclick="_copyAll()" class="purple lighten-3 grey-text text-lighten-4"
-          type="button">copy
+        <button id="copy" onclick="_copyAll()" class="purple lighten-3 grey-text text-lighten-4" type="button">copy
           all data for log</button>
         <span id="clipboardStatus" class="green-text text-lighten-2">&nbsp;</span>
         <span>&nbsp;&nbsp;copies (ne, Te, Vs, z) in a row.</span>
@@ -325,9 +325,30 @@ ${_Z}`
       if (!_ne) {
         _print(false)
       }
+
+      const precision = 3
+      const ne = document.getElementById("ne").value
+      const ne_after = document.getElementById("ne_after").value
+      const Z = document.getElementById("Z").value
+      const atomicMass = document.getElementById("atomic-mass").value
+      const Te = document.getElementById("Te").value
+      const Ti = document.getElementById("Ti").value
+      const iccd_center = document.getElementById("ICCD_CENTER").value
+      const dopplerShift = document.getElementById("DS").value
+      const gyakusenBunsan = document.getElementById("D").value
+      const ppICCD = document.getElementById("ppICCD").value
+      const RSFWHM = document.getElementById("RSFWHM").value
+      const NT = document.getElementById("NT").value
+      const ANGLE_KI_KS = document.getElementById("ANGLE_KI_KS").value
+      const IR = document.getElementById("IR").value
+      const ELR = document.getElementById("ELR").value
+      const ELT = document.getElementById("ELT").value
+      const airDensity = document.getElementById("n0").value
+      const accumulationShots = document.getElementById("NR").value
+      const w_fit_coeff = document.getElementById("w_fit_coeff").value
       // TODO: stop using magic number for ne
       // ${_ne * 1e24}
-      const target = [ne,ne_after,Z,atomicMass,Te,Ti,iccd_center,dopplerShift,gyakusenBunsan,ppICCD,RSFWHM,NT,ANGLE_KI_KS,IR,ELR,ELT,airDensity,accumulationShots,w_fit_coeff].join(",")
+      const target = [_neReal, _Te, _Vs, _Z, ne, ne_after, Z, atomicMass, Te, Ti, iccd_center, dopplerShift, gyakusenBunsan, ppICCD, RSFWHM, NT, ANGLE_KI_KS, IR, ELR, ELT, airDensity, accumulationShots, w_fit_coeff].join(",")
       if (myChart) {
         if (navigator.clipboard) {
           navigator.clipboard.writeText(target).then(() => {
