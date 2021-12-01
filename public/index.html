@@ -48,11 +48,41 @@
     </p>
     <form onsubmit="go();return false;" novalidate>
       <div class="row 1">
-        <label class="col s2">atomic mass<input id="atomic-mass" type="number" value="158"></label>
-        <label class="col s1">Te(eV)<input type="number" value="7" id='Te' oninput="sync(this.value)"></label>
-        <label class="col s1">Ti(eV)<input type="number" value="7" id='Ti' disabled></label>
+        <label class="col s2">Laser energy<br>(ELR)<input type="number" value="5" id="ELR"></label>
+        <label class="col s2">Laser energy<br>(ELT)<input type="number" id="ELT" value="5"></label>
+        <label class="col s2">air density for Rayleigh(×10^25)<input type="number" value="2.5" id="n0"></label>
+        <label class="col s2">accumulation shots<input type="number" value="100" id="NR"></label>
+        <label class="col s2">angle_ki_ks<input type="number" value="135" id="ANGLE_KI_KS"></label>
+        <label class="col s2">ne (×10^24)<input type="number" value="3" id="ne"></label>
+
+        <!-- display none -->
+        <label class="col s2" style="display: none;">
+          ne after (×10^24)
+          <input type="number" value="3" id="ne_after">
+        </label>
+      </div>
+
+      <div class="row 2">
+        <label class="col s2">ICCD (mm/pixel)<input id="ppICCD" type="number" value="0.013"></label>
+        <label class="col s2">逆線分散 (nm/mm)<input type="number" value="0.18" id="D"></label>
+        <label class="col s2">RS FWHM (pixel)<input type="number" value="6" id="RSFWHM"></label>
+        <label class="col s1">NT<input type="number" value="3" id="NT"></label>
+
+      </div>
+      <hr>
+      <div class="row 4">
+        <label class="col s2">rayleigh center(pixel)<input type="number" value="510" id="ICCD_CENTER"></label>
+        <label class="col s2">w_fit coefficient(×10^5)<input id="w_fit_coeff" type="number" value="10"></label>
+        <label class="col s2"><br>atomic mass<input id="atomic-mass" type="number" value="158"></label>
+        <label class="col s2"><br>baseline<input id="baseline" type="number" value="0"></label>
+
+      </div>
+      <div class="row 3">
+        <label class="col s2">RS integrated intensity<input type="number" value="10000" id="IR"></label>
+        <label class="col s1"><br>Te(eV)<input type="number" value="7" id='Te' oninput="sync(this.value)"></label>
+        <label class="col s1"><br>Ti(eV)<input type="number" value="7" id='Ti' disabled></label>
         <div class="col s2">
-          <span class="grey-text">sync Te-Ti</span>
+          <span class="grey-text"><br>sync Te-Ti</span>
           <div class="switch">
             <label>
               <input id="sync-te-ti" type="checkbox" checked onchange="changeSync(this.checked)">
@@ -60,42 +90,13 @@
             </label>
           </div>
         </div>
-        <label class="col s2">ne (×10^24)<input type="number" value="3" id="ne">
-        </label>
-        <label class="col s2" style="display: none;">ne after (×10^24)<input type="number" value="3"
-            id="ne_after"></label>
-        <label class="col s1">Z<input type="number" value="3.2" id="Z"></label>
-        <label class="col s1">NT<input type="number" value="3" id="NT"></label>
-        <label class="col s2">w_fit coefficient(×10^5)<input id="w_fit_coeff" type="number" value="10"></label>
-      </div>
-      <div class="row 2">
-        <label class="col s2">rayleigh center(pixel)<input type="number" value="510" id="ICCD_CENTER"></label>
-        <label class="col s2">Doppler shift(pm)<input type="number" value="25" id="DS"></label>
-        <label class="col s2">逆線分散 (nm/mm)<input type="number" value="0.18" id="D"></label>
-        <label class="col s2">ICCD (mm/pixel)<input id="ppICCD" type="number" value="0.013"></label>
-        <label class="col s2">RS FWHM (pixel)<input type="number" value="6" id="RSFWHM"></label>
-        <label class="col s2">baseline<input id="baseline" type="number" value="0"></label>
-      </div>
-      <div class="row 3">
-        <label class="col s2">angle_ki_ks<input type="number" value="135" id="ANGLE_KI_KS"></label>
-        <label class="col s2">RS integrated intensity<input type="number" value="10000" id="IR"></label>
-        <label class="col s2">Laser energy(ELR)<input type="number" value="5" id="ELR"></label>
-        <label class="col s2">Laser energy(ELT)<input type="number" id="ELT" value="5"></label>
-        <label class="col s2">air density for Rayleigh(×10^25)<input type="number" value="2.5" id="n0"></label>
-        <label class="col s2">accumulation shots<input type="number" value="100" id="NR"></label>
+        <label class="col s2"><br>Doppler shift(pm)<input type="number" value="25" id="DS"></label>
+        <label class="col s1"><br>Z<input type="number" value="3.2" id="Z"></label>
+        <span class="col s2"><br><br><a target="_blank" href="https://www-amdis.iaea.org/FLYCHK/ZBAR/zp064.zvd">ref(Gd)↗</a></span>
+
       </div>
       <p>
       <h5 style="display: inline-block;margin:0 1em 0">3. draw</h5>
-
-      <!-- <button id="fit" class="waves-effect waves-light btn-small blue">draw</button>
-      <button id="print" onclick="_print(true)" class="waves-effect waves-light btn-small orange lighten-2"
-        type="button">print data</button><span class="grey-text text-darken-1">if hover chart, text will dissapear,
-        sorry...</span>
-      <button id="copy" onclick="_copy()" class="waves-effect waves-light btn-small green lighten-2" type="button">copy
-        data</button>
-      <span id="clipboardStatus" class="green-text text-lighten-2">&nbsp;</span>
-      <span>&nbsp;&nbsp;copies (ne, Te, Vs, z) in a row.</span> -->
-
       </p>
       <div style="height: 60vh;margin-bottom:5em">
         <p id="status-text"></p>
@@ -114,6 +115,9 @@
         <button id="copy" onclick="_copy()" class="waves-effect waves-light btn-small green lighten-2"
           type="button">copy
           data</button>
+        <button id="copy" onclick="_copyAll()" class="purple lighten-3 grey-text text-lighten-4"
+          type="button">copy
+          all data for log</button>
         <span id="clipboardStatus" class="green-text text-lighten-2">&nbsp;</span>
         <span>&nbsp;&nbsp;copies (ne, Te, Vs, z) in a row.</span>
         <!--  -->
@@ -145,7 +149,6 @@
       const ti = document.getElementById("Ti")
       const te = document.getElementById("Te")
       checked = document.getElementById("sync-te-ti").checked
-      console.log("jo")
       if (checked) {
         ti.value = te.value
       }
@@ -306,6 +309,25 @@ ${_neReal}
 ${_Te}
 ${_Vs}
 ${_Z}`
+      if (myChart) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(target).then(() => {
+            showClipboardCopied()
+          })
+        } else {
+          execCopy(target)
+        }
+      }
+      statusDone()
+    }
+
+    const _copyAll = () => {
+      if (!_ne) {
+        _print(false)
+      }
+      // TODO: stop using magic number for ne
+      // ${_ne * 1e24}
+      const target = [ne,ne_after,Z,atomicMass,Te,Ti,iccd_center,dopplerShift,gyakusenBunsan,ppICCD,RSFWHM,NT,ANGLE_KI_KS,IR,ELR,ELT,airDensity,accumulationShots,w_fit_coeff].join(",")
       if (myChart) {
         if (navigator.clipboard) {
           navigator.clipboard.writeText(target).then(() => {
