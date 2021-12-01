@@ -84,8 +84,8 @@
       <div class="row 3">
         <label class="col s2">RS integrated intensity<input type="number" oninput="rs(this.value)" value="10000"
             id="IR"></label>
-        <label class="col s1">Z<input type="number" value="3.2" id="Z"></label>
-        <label class="col s1">Te(eV)<input type="number" value="7" id='Te' oninput="sync(this.value)"></label>
+        <label class="col s2">Z<input type="number" value="3.2" id="Z"></label>
+        <label class="col s1">Te(eV)<input type="number" value="7" id='Te' onchange="syncZ()" oninput="sync(this.value)"></label>
         <label class="col s1">Ti(eV)<input type="number" value="7" id='Ti' disabled></label>
         <div class="col s2">
           <div>
@@ -97,15 +97,15 @@
               </label>
             </div>
           </div>
-          <!-- <div>
-            <span class="grey-text">auto Z(1E19)</span>
+          <div>
+            <span class="grey-text" style="font-size: 80%;">auto Z(w/ ne=1E19)</span>
             <div class="switch">
               <label>
-                <input disabled id="autoZ" type="checkbox" onchange="changeSync(this.checked)">
+                <input id="autoZ" type="checkbox" onchange="changeAutoZ(this.checked)">
                 <span class="lever"></span>
               </label>
             </div>
-          </div> -->
+          </div>
         </div>
         <label class="col s2">Doppler shift(pm)<input type="number" value="25" id="DS"></label>
         <span class="col s2"><br><a target="_blank"
@@ -151,6 +151,12 @@
       <li>enlarge the window for high quality image</li>
       <!-- <li></li> -->
     </ul>
+    <hr>
+    <h6>change log</h6>
+    <ul class="changelog">
+      <li>auto Z linear interpolation with ne=1e19</li>
+      <li>sync te-ti mode</li>
+    </ul>
     </p>
   </div>
   <div style="height:300px"></div>
@@ -158,8 +164,23 @@
     .btn-small {
       margin: 10px !important
     }
+
+    .changelog>li {
+      margin-left: 15px;
+      list-style: disc !important;
+    }
   </style>
   <script>
+
+    const syncZ = () => {
+      const autoZ = document.getElementById("autoZ").checked
+      if (autoZ) {
+        val = document.getElementById("Te").value
+        const interpolated = Math.round((linearInterp(val))*1000)/1000
+        document.getElementById("Z").value = interpolated
+      }
+    }
+
     const sync = (val) => {
       const ti = document.getElementById("Ti")
       const te = document.getElementById("Te")
@@ -175,6 +196,16 @@
       ti.disabled = checked ? true : false
       if (checked) {
         ti.value = te.value
+      }
+    }
+
+    const changeAutoZ = (val) => {
+      const z = document.getElementById("Z")
+      if (val) {
+        z.disabled = true
+        syncZ()
+      } else {
+        z.disabled = false
       }
     }
 
