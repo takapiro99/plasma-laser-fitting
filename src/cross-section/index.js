@@ -7,36 +7,44 @@ import JSZip from "jszip";
 let rawData = null;
 let rawFileName = null;
 
-const inputFileAndDraw = (input) => {
-  if(!input.files[0].name){
-    return
+const sleep = async (msec) => new Promise((resolve) => setTimeout(resolve, msec));
+
+const inputFileAndDraw = async (input) => {
+  if (!input.files[0].name) {
+    return alert("was not a file.");
   }
-  const filenamechunk = input.files[0].name.split(".")
-  if(filenamechunk[filenamechunk.length - 1] !== "txt"){
-    input.value = ""
-    return alert("this was not .txt file")
+  const filenamechunk = input.files[0].name.split(".");
+  if (filenamechunk[filenamechunk.length - 1] !== "txt") {
+    input.value = "";
+    return alert("this was not .txt file");
   }
   document.getElementById("input-file-status").innerHTML = "input running... please wait";
-  setTimeout(() => {
-    readData(input)
-      .then((d) => {
-        const [data, fileName] = d;
-        console.log(data, fileName);
-        rawData = data;
-        rawFileName = fileName.slice(0, -4);
-        window.rawData = data;
-        window.fileName = fileName;
-        document.getElementById("input-file-status").innerHTML = `input complete<br/>total data size: ${data.length} (${Math.round(Math.sqrt(data.length))}^2)`;
-        document.getElementById("console").style.pointerEvents = "auto";
-        document.getElementById("console").style.color = "inherit";
-        document.getElementById("downloadButton").classList.remove("disabled");
-        // draw2D(data);
-      })
-      .catch((e) => {
-        console.error(e);
-        alert("something went wrong, sorry.  " + e);
-      });
-  }, 70);
+  sleep(80);
+  // setTimeout(() => {
+  try {
+    const d = await readData(input);
+    // .then((d) => {
+    const [data, fileName] = d;
+    console.log(data, fileName);
+    rawData = data;
+    rawFileName = fileName.slice(0, -4);
+    window.rawData = data;
+    window.fileName = fileName;
+    document.getElementById("input-file-status").innerHTML = `input complete<br/>total data size: ${data.length} (${Math.round(Math.sqrt(data.length))}^2)<br/><b style="color:tomato">${data.length !== 1048577 ? "1024*1024ではありません。OK?" : ""}</b>`;
+    document.getElementById("console").style.pointerEvents = "auto";
+    document.getElementById("console").style.color = "inherit";
+    document.getElementById("downloadButton").classList.remove("disabled");
+    // draw2D(data);
+    return true;
+    // })
+  } catch (e) {
+    console.error(e);
+    alert("something went wrong, sorry.  " + e);
+    return false
+  }
+  // .catch((e) => {
+  // });
+  // }, 70);
 };
 
 window.inputFileAndDraw = inputFileAndDraw;

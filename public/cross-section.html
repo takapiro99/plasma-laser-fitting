@@ -8,14 +8,6 @@
   <title>cross section</title>
   <link rel="stylesheet" href="./assets/materialize.min.css" />
   <script src="./assets/materialize.min.js"></script>
-  <script>
-    let data;
-    let myChart;
-    let dlmin = -0.2; // %nm
-    let dlmax = 0.2;
-    let step = 0.0003;
-    let experimentData = [], fittingData = [];
-  </script>
 </head>
 
 <body class="grey lighten-3">
@@ -32,56 +24,51 @@
     <div>
       <p>
       <h5 style="display: inline-block;margin-right:1em">1. select .txt file</h5>
-      <input type="file" onchange="inputFileAndDraw(this)" accept=".txt" id="fileInput" />
+      <input type="file" onchange="go(this)" accept=".txt" id="fileInput" />
       </p>
       <div style="cursor: default; user-select: none;">
-        <p id="dropZone" style="text-align: center;height:50px;width:70%;background: lightyellow;line-height: 50px;margin:0 auto;border-radius:7px;transition: all .16s ease;">or drop here</p>
+        <p id="dropZone"
+          style="text-align: center;height:50px;width:70%;background: lightyellow;line-height: 50px;margin:0 auto;border-radius:7px;transition: all .16s ease;">
+          or drop here</p>
       </div>
       <p id="input-file-status"></p>
     </div>
     <div id="console" style="pointer-events:none;color:lightgrey !important;">
       <!-- <div id="console" style="color:lightgrey !important;"> -->
 
-      <p>
-      <h5><s> 2. preview</s></h5>
-      準備中
-      </p>
-      <form onsubmit="event.preventDefault();downloadZip();">
+      <div>
+        <h5>2. preview</h5>
+        準備中
         <div>
-          <h5>3. parameters</h5>
-          <div class="row">
-            <p class="col s4">
-              <label for="min">from<input type="number" name="min" value="1" id='min' min="1" max="1024"></label>
-            </p>
-            <p class="col s4">
-              <label for="max">to<input type="number" name="max" id="max" value="1024" min="1" max="1024"></label>
-            </p>
-            <p class="col s4">
-              <label for="step">step<input type="number" name="step" id="step" value="2" min="1" max="1024"></label>
+          <canvas width="400" height="300" style="border:solid 2px lightgrey"></canvas>
+        </div>
+      </div>
+      <div>
+        <form onsubmit="event.preventDefault();downloadZip();">
+          <div>
+            <h5>3. parameters</h5>
+            <div class="row">
+              <p class="col s4">
+                <label for="min">from<input type="number" name="min" value="1" id='min' min="1" max="1024"></label>
+              </p>
+              <p class="col s4">
+                <label for="max">to<input type="number" name="max" id="max" value="1024" min="1" max="1024"></label>
+              </p>
+              <p class="col s4">
+                <label for="step">step<input type="number" name="step" id="step" value="2" min="1" max="1024"></label>
+              </p>
+            </div>
+            <p class="grey-text">output will be calculated as average</p>
+          </div>
+          <div>
+            <h5>4. Download as zip</h5>
+            <p>
+              <button type="submit" id="downloadButton"
+                class="waves-effect waves-light btn-small indigo disabled">download</button>
             </p>
           </div>
-          <p class="grey-text">output will be calculated as average</p>
-          <!-- <div class="row">
-        <p class="col s6">
-          <label>
-            <input name="mode" type="radio" checked />
-            <span>average</span>
-          </label>
-          <label>
-            <input name="mode" type="radio" />
-            <span>sum</span>
-          </label>
-        </p>
-      </div> -->
-        </div>
-        <div>
-          <h5>4. Download as zip</h5>
-          <p>
-            <button type="submit" id="downloadButton"
-              class="waves-effect waves-light btn-small indigo disabled">download</button>
-          </p>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -93,27 +80,44 @@
     const fileInput = document.getElementById("fileInput")
 
 
-  dropZone.addEventListener('dragover', function(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    this.style.background = '#a1a7f0';
-  }, false);
-
-    dropZone.addEventListener('dragleave', function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.style.background = 'lightyellow';
+    dropZone.addEventListener('dragover', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      e.target.style.background = '#a1a7f0';
     }, false);
 
-  dropZone.addEventListener('drop', function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.style.background = 'lightyellow'; //背景色を白に戻す
-        var files = e.dataTransfer.files; //ドロップしたファイルを取得
-        if (files.length !== 1) {return alert('アップロードできるファイルは1つだけです。');}
-        fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
-        inputFileAndDraw(fileInput)
+    dropZone.addEventListener('dragleave', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      e.target.style.background = 'lightyellow';
     }, false);
+
+    dropZone.addEventListener('drop', async (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      e.target.style.background = 'lightyellow'; //背景色を白に戻す
+      const files = e.dataTransfer.files; //ドロップしたファイルを取得
+      if (files.length !== 1) { return alert('アップロードできるファイルは1つだけです。'); }
+      fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
+      const res = await inputFileAndDraw(fileInput)
+      if (res) draw()
+    }, false);
+
+    const go = async (input) => {
+      const res = await inputFileAndDraw(input)
+      if (res) draw()
+    }
+
+    const draw = () => {
+      console.log(window.rawData)
+      console.log("hi")
+      console.log(window.rawData.length)
+    }
+
+    function mock() {
+      //pass
+    }
+
   </script>
 </body>
 
