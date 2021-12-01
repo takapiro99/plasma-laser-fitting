@@ -199,3 +199,32 @@ export const wasmBrowserInstantiate = async (wasmModuleUrl, importObject) => {
   response = await fetchAndInstantiateTask();
   return response;
 };
+
+const storageAvailable = () => {
+  var storage;
+  try {
+    storage = window["localStorage"];
+    var x = "__storage_test__";
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return true;
+  } catch (e) {
+    return e instanceof DOMException && (e.code === 22 || e.code === 1014 || e.name === "QuotaExceededError" || e.name === "NS_ERROR_DOM_QUOTA_REACHED") && storage && storage.length !== 0;
+  }
+};
+
+export const setLocalStorage = (key, value) => {
+  if (!storageAvailable()) {
+    throw new Error("there is no local storage");
+  }
+  window.localStorage.setItem(key, value);
+  return;
+};
+
+export const getLocalStorage = (key) => {
+  if (!storageAvailable()) {
+    throw new Error("there is no local storage");
+  }
+  const value = window.localStorage.getItem(key);
+  return value;
+};
