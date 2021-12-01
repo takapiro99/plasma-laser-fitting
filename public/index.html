@@ -37,7 +37,9 @@
         select file
         <input id="txtfile" type="file" onchange="inputFileAndDraw(this)" accept=".txt" />
       </label>
-      <p id="dropZone" style="cursor: default; user-select: none;text-align: center;height:50px;width:70%;background: lightyellow;line-height: 50px;margin:20px auto;border-radius:7px;transition: all .16s ease;">or drop here</p>
+      <p id="dropZone"
+        style="cursor: default; user-select: none;text-align: center;height:50px;width:95%;background: lightyellow;line-height: 50px;margin:20px auto;border-radius:7px;transition: all .16s ease;">
+        or drop here</p>
       <p id="fileName" class="grey-text text-darken-1" style="margin-left: 30px;">no file selected</p>
       </p>
     </div>
@@ -95,27 +97,28 @@
       <span>&nbsp;&nbsp;copies (ne, Te, Vs, z) in a row.</span> -->
 
       </p>
+      <div style="height: 60vh;margin-bottom:5em">
+        <p id="status-text"></p>
+        <canvas id="myChart" width=1000 height=1000 style="height: 85%;width:100%;border:1px solid lightgrey;"></canvas>
+      </div>
+      <p>
+        <button id="reset-zoom-button" class="waves-effect waves-light btn small grey darken-1" style="display:none"
+          onclick="myChart ? myChart.resetZoom() : null">reset zoom</button>
+        <button id="save-as-png" class="waves-effect waves-light btn small orange lighten-2" style="display:none"
+          onclick="myChart ? saveAsPNG() : null">save as png</button>
+        <!--  -->
+        <button id="fit" class="waves-effect waves-light btn-small blue">draw</button>
+        <button id="print" onclick="_print(true)" class="waves-effect waves-light btn-small orange lighten-2"
+          type="button">print data</button><span class="grey-text text-darken-1">if hover chart, text will dissapear,
+          sorry...</span>
+        <button id="copy" onclick="_copy()" class="waves-effect waves-light btn-small green lighten-2"
+          type="button">copy
+          data</button>
+        <span id="clipboardStatus" class="green-text text-lighten-2">&nbsp;</span>
+        <span>&nbsp;&nbsp;copies (ne, Te, Vs, z) in a row.</span>
+        <!--  -->
+      </p>
     </form>
-    <div style="height: 60vh;margin-bottom:5em">
-      <p id="status-text"></p>
-      <canvas id="myChart" width=1000 height=1000 style="height: 85%;width:100%;border:1px solid lightgrey;"></canvas>
-    </div>
-    <p>
-      <button id="reset-zoom-button" class="waves-effect waves-light btn small grey darken-1" style="display:none"
-        onclick="myChart ? myChart.resetZoom() : null">reset zoom</button>
-      <button id="save-as-png" class="waves-effect waves-light btn small orange lighten-2" style="display:none"
-        onclick="myChart ? saveAsPNG() : null">save as png</button>
-
-      <button id="fit" class="waves-effect waves-light btn-small blue">draw</button>
-      <button id="print" onclick="_print(true)" class="waves-effect waves-light btn-small orange lighten-2"
-        type="button">print data</button><span class="grey-text text-darken-1">if hover chart, text will dissapear,
-        sorry...</span>
-      <button id="copy" onclick="_copy()" class="waves-effect waves-light btn-small green lighten-2" type="button">copy
-        data</button>
-      <span id="clipboardStatus" class="green-text text-lighten-2">&nbsp;</span>
-      <span>&nbsp;&nbsp;copies (ne, Te, Vs, z) in a row.</span>
-
-    </p>
     <p>
     <h5 style="display: inline-block;margin-right:1em">4. export as .xlsx</h5>
     <button id="fit" class="waves-effect waves-light btn-small blue"
@@ -143,7 +146,7 @@
       const te = document.getElementById("Te")
       checked = document.getElementById("sync-te-ti").checked
       console.log("jo")
-      if(checked){
+      if (checked) {
         ti.value = te.value
       }
     }
@@ -151,8 +154,8 @@
     const changeSync = (checked) => {
       const ti = document.getElementById("Ti")
       const te = document.getElementById("Te")
-      ti.disabled = checked ?  true : false
-      if(checked){
+      ti.disabled = checked ? true : false
+      if (checked) {
         ti.value = te.value
       }
     }
@@ -334,11 +337,11 @@ ${_Z}`
     }
 
     const inputFileAndDraw = (input) => {
-      if(!input.files[0].name){
+      if (!input.files[0].name) {
         return
       }
       const filenamechunk = input.files[0].name.split(".")
-      if(filenamechunk[filenamechunk.length - 1] !== "txt"){
+      if (filenamechunk[filenamechunk.length - 1] !== "txt") {
         input.value = ""
         return alert("this was not .txt file")
       }
@@ -367,32 +370,32 @@ ${_Z}`
     const fileInput = document.getElementById("fileInput")
 
 
-  dropZone.addEventListener('dragover', function(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    this.style.background = '#a1a7f0';
-  }, false);
-
-    dropZone.addEventListener('dragleave', function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.style.background = 'lightyellow';
+    dropZone.addEventListener('dragover', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      this.style.background = '#a1a7f0';
     }, false);
 
-  dropZone.addEventListener('drop', function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.style.background = 'lightyellow'; //背景色を白に戻す
-        var files = e.dataTransfer.files; //ドロップしたファイルを取得
-        if (files.length !== 1) {return alert('アップロードできるファイルは1つだけです。');}
-        fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
-        inputFileAndDraw(fileInput)
+    dropZone.addEventListener('dragleave', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      this.style.background = 'lightyellow';
+    }, false);
+
+    dropZone.addEventListener('drop', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      this.style.background = 'lightyellow'; //背景色を白に戻す
+      var files = e.dataTransfer.files; //ドロップしたファイルを取得
+      if (files.length !== 1) { return alert('アップロードできるファイルは1つだけです。'); }
+      fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
+      inputFileAndDraw(fileInput)
     }, false);
 
 
   </script>
   <style>
-   .uploadFileInput>input {
+    .uploadFileInput>input {
       display: none;
     }
 
