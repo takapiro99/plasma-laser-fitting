@@ -7,30 +7,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>cross section</title>
   <link rel="stylesheet" href="./assets/materialize.min.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="./assets/materialize.min.js"></script>
   <script>
     let drawMode = false;
     let clickFlg = 0;
     let canvasMode = 0;
 
+    let anchorX = 50
+    let anchorY = 50
+    let lastScale = 0.6
 
+    let lastPixelX = lastPixelY = -1
+    const scaleFactor = 1.02;
 
+    let colorMode = false
+    // let anchorX = -470 * lastScale
+    // let anchorY = -400 * lastScale
+    let dragStart, dragged;
+    let _dragStartX, _dragStartY;
 
+    let firstLine = [];
+    let secondLine = [];
+    let currentDrawingLineNum = null;
 
+    let distanceData;
+
+    const _id = (id) => document.getElementById(id);
   </script>
   <style>
     ul.left>li {
-      margin: 0 10px;
+      margin: 0 10px
     }
 
     .lineIndicator>div {
-      border: 1px solid grey;
+      border: 2px solid rgba(100, 100, 100, 0.2);
+      border-radius: 6px;
     }
 
     @media only screen and (min-width: 993px) {
       .container {
         width: 90%;
       }
+    }
+
+    .btn-flat:hover {
+      background-color: rgba(100, 100, 100, .3) !important;
+    }
+
+    .transparent {
+      display: none;
     }
   </style>
 </head>
@@ -58,10 +84,9 @@
       </div>
       <p id="input-file-status"></p>
     </div>
-    <button onclick="redraw()">draw</button>
+    <!-- <button onclick="redraw()">draw</button> -->
     <!-- <div id="console" style="pointer-events:none;color:lightgrey !important;"> -->
     <div id="console">
-
       <div>
         <div>
           <h5>2. preview（解析もできちゃう）</h5>
@@ -82,7 +107,8 @@
                 <div class="nav-wrapper grey lighten-1 black-text">
                   <ul class="left">
                     <li id="move" class="active"><a onclick="changeMode('move')">move</a></li>
-                    <li id="draw"><a onclick="changeMode('draw')">draw</a></li>
+                    <!-- <li id="draw" disabled><a disabled onclick="changeMode('draw')">draw</a></li> -->
+                    <li id="draw" disabled><a disabled onclick="alert('click edit icon below')">draw</a></li>
                   </ul>
                 </div>
               </nav>
@@ -93,8 +119,24 @@
                 </label>
               </p>
               <div class="row lineIndicator" style="text-align: center;">
-                <div class="col s6">dfsdf</div>
-                <div class="col s6">aaa</div>
+                <div class="col s6">
+                  <div><i class="material-icons green-text transparent" id="doneIcon1">done</i>1st line</div>
+                  <button class="btn btn-flat" onclick="startDrawingLine(this, 1)" id="writeButton1">
+                    <i class="material-icons grey-text text-darken-2" id="writeIcon1">create</i>
+                  </button>
+                  <button class="btn btn-flat" disabled id="deleteButton1" onclick="deleteLine(this, 1)">
+                    <i class="material-icons grey-text" id="deleteIcon1">delete</i>
+                  </button>
+                </div>
+                <div class="col s6">
+                  <div><i class="material-icons green-text transparent" id="doneIcon2">done</i>2nd line</div>
+                  <button class="btn btn-flat" onclick="startDrawingLine(this, 2)" id="writeButton2">
+                    <i class="material-icons grey-text text-darken-2" id="writeIcon2">create</i>
+                  </button>
+                  <button class="btn btn-flat" disabled id="deleteButton2" onclick="deleteLine(this, 2)">
+                    <i class="material-icons grey-text" id="deleteIcon2">delete</i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -122,20 +164,26 @@
           </div>
         </div>
       </div>
+      <!-- <label for="">
+        center pixel
+        <input type="text">
+      </label> -->
+      <div id="distance"></div>
       <div style="height:100px"></div>
       <div>
         <form onsubmit="event.preventDefault();downloadZip();">
           <div>
             <h5>3. parameters</h5>
+            <div class="grey-text">それぞれ 1~1024</div>
             <div class="row">
               <p class="col s4">
-                <label for="min">from<input type="number" name="min" value="1" id='min' min="1" max="1024"></label>
+                <label for="min">from<input type="number" name="min" value="490" id='min' min="1" max="1024"></label>
               </p>
               <p class="col s4">
-                <label for="max">to<input type="number" name="max" id="max" value="1024" min="1" max="1024"></label>
+                <label for="max">to<input type="number" name="max" id="max" value="500" min="1" max="1024"></label>
               </p>
               <p class="col s4">
-                <label for="step">step<input type="number" name="step" id="step" value="2" min="1" max="1024"></label>
+                <label for="step">step<input type="number" name="step" id="step" value="1" min="1" max="1024"></label>
               </p>
             </div>
             <p class="grey-text">output will be calculated as average</p>
@@ -151,16 +199,15 @@
       </div>
     </div>
   </div>
-
   <div style="height:300px"></div>
 
   <script src="./cross-section.js"></script>
   <script>
-    const dropZone = document.getElementById("dropZone")
-    const fileInput = document.getElementById("fileInput")
-    const previewCanvas = document.getElementById("previewCanvas")
+    const dropZone = _id("dropZone")
+    const fileInput = _id("fileInput")
+    const previewCanvas = _id("previewCanvas")
 
-    const canvas = document.getElementById('previewCanvas');
+    const canvas = _id('previewCanvas');
     const cc = canvas.getContext('2d');
 
     const dataMax = data.reduce((a, b) => a > b ? a : b);
@@ -168,44 +215,63 @@
     let scaleMax = dataMax
     let scaleMin = 0
 
-    const rangeMin = document.getElementById("rangeMin")
+    const rangeMin = _id("rangeMin")
     const rangeMax = document.getElementById("rangeMax")
     const rangeMinDisplay = document.getElementById("rangeMinDisplay")
     const rangeMaxDisplay = document.getElementById("rangeMaxDisplay")
 
     let lastX = canvas.width / 2
     let lastY = canvas.height / 2
-    let anchorX = -10
-    let anchorY = -100
-    let lastScale = 0.6
 
-    let lastPixelX = lastPixelY = -1
-
-    let colorMode = false
-    // let anchorX = -470 * lastScale
-    // let anchorY = -400 * lastScale
-    let dragStart, dragged;
-
-    const firstLine = []
-    const secondLine = []
-    let drawingLineCount = 0
-
-
-    dropZone.addEventListener('dragover', (e) => {
+    const stop = (e) => {
       e.stopPropagation();
       e.preventDefault();
+    }
+
+    const execCopy = (string) => {
+      const tmp = document.createElement("div");
+      const pre = document.createElement('pre');
+      // 親要素のCSSで user-select: none だとコピーできないので書き換える
+      pre.style.webkitUserSelect = 'auto';
+      pre.style.userSelect = 'auto';
+      tmp.appendChild(pre).textContent = string;
+      tmp.style.position = 'fixed';
+      tmp.style.right = '200%';
+      document.body.appendChild(tmp);
+      document.getSelection().selectAllChildren(tmp);
+      const result = document.execCommand("copy");
+      document.body.removeChild(tmp);
+      return result;
+    }
+
+    const showClipboardCopied = () => {
+      _id("copied").innerText = "copied!";
+      setTimeout(() => { _id("copied").innerText = "" }, 1500)
+    }
+
+    const copy = (target) => {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(target).then(() => {
+          showClipboardCopied()
+        })
+      } else {
+        execCopy(target)
+        showClipboardCopied()
+      }
+    }
+
+    dropZone.addEventListener('dragover', (e) => {
+      stop(e)
       e.target.style.background = '#a1a7f0';
     }, false);
 
     dropZone.addEventListener('dragleave', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
+      stop(e)
       e.target.style.background = 'lightyellow';
     }, false);
 
     dropZone.addEventListener('drop', async (e) => {
-      e.stopPropagation();
-      e.preventDefault();
+      stop(e)
       e.target.style.background = 'lightyellow'; //背景色を白に戻す
       const files = e.dataTransfer.files; //ドロップしたファイルを取得
       if (files.length !== 1) { return alert('アップロードできるファイルは1つだけです。'); }
@@ -221,10 +287,11 @@
 
 
     const draw = (x, y) => {
+      // console.log(x, y)
       cc.lineWidth = 0.2;
       cc.strokeStyle = 'rgba(250, 100, 50)';
-      if (clickFlg == "1") {
-        clickFlg = "2";
+      if (clickFlg == 1) {
+        clickFlg = 2;
         cc.beginPath();
         // cc.lineCap = "round";  // 線を角丸にする
         cc.moveTo(x / lastScale, y / lastScale);
@@ -232,9 +299,18 @@
         cc.lineTo(x / lastScale, y / lastScale);
       }
       cc.stroke();
-      const xx = Math.round((x - anchorX) / lastScale)
-      const yy = Math.round((y - anchorY) / lastScale)
-      firstLine.push([xx, yy])
+      // const xx = Math.round((x - anchorX) / lastScale)
+      const xx = (x - anchorX) / lastScale
+      // const yy = (y - anchorY) / lastScale
+      const yy = Math.round((y - anchorY) / lastScale - 0.5) + 0.5
+      if (currentDrawingLineNum === 1) {
+        firstLine.push([xx, yy])
+      } else if (currentDrawingLineNum === 2) {
+        secondLine.push([xx, yy])
+      } else {
+        // console.warn('?')
+        // alert("no")
+      }
     };
 
     rangeMin.min = rangeMax.min = dataMin
@@ -253,8 +329,37 @@
       redraw()
     })
 
-    const scaleFactor = 1.02;
+    const changeClassName = (ele, before, after) => {
+      ele.classList.remove(before)
+      ele.classList.add(after)
+    }
+
+    const startDrawingLine = (e, number) => {
+      e.disabled = true
+      changeClassName(e.firstElementChild, "grey-text", "light-blue-text")
+      changeMode("draw")
+      currentDrawingLineNum = number
+    }
+
+    const deleteLine = (e, number) => {
+      if (window.confirm(`本当に ${number} 本目の線を消しますか？`)) {
+        e.disabled = true
+        if (number === 1) {
+          firstLine = []
+          changeMode("move")
+        } else if (number === 2) {
+          secondLine = []
+          changeMode("move")
+        } else {
+          alert("no mode")
+        }
+        redraw();
+        checkForResult();
+      }
+    }
+
     const zoom = (clicks) => {
+      _dragStartX = _dragStartY = 0
       let prevScale = lastScale
       const pt = cc.transformedPoint(lastX, lastY);
       lastScale *= Math.pow(scaleFactor, clicks);
@@ -294,20 +399,60 @@
       cc.stroke();
     }
 
-    // window.onload = () => {
+    const checkForResult = () => {
+      if (!firstLine.length || !secondLine.length) {
+        copyData = null
+        _id("distance").innerHTML = ""
+        return
+      }
+      console.log('checkForResult')
+      console.log(firstLine, secondLine)
+      let realFirstLine = firstLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1]) // y, x
+      let realSecondLine = secondLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1])
+      console.log(realFirstLine, realSecondLine)
+      const pixelMin = Math.max(realFirstLine[0][0], realSecondLine[0][0])
+      const pixelMax = Math.min(realFirstLine[realFirstLine.length - 1][0], realSecondLine[realSecondLine.length - 1][0])
+      console.log(pixelMin, pixelMax)
+      realFirstLine = realFirstLine.filter(s => (s[0] >= pixelMin && s[0] <= pixelMax))
+      realSecondLine = realSecondLine.filter(s => (s[0] >= pixelMin && s[0] <= pixelMax))
+      console.log(realSecondLine, realFirstLine)
+      distanceData = realFirstLine.map((s, i) => [s[0], s[1], realSecondLine[i][1]])
+      copyData = distanceData.map(d => ([d[0], Math.abs(d[1] - d[2]), Math.min(d[1], d[2]) + Math.abs(d[1] - d[2])].join("\t"))).join("\n")
+      if (!distanceData.length) {
+        return alert("Y軸で重なりませんでした")
+      }
+      const target =
+        _id("distance").innerHTML = `<p>
+          <button class="btn btn-small green" onclick='copy(copyData)'>copy</button><span id="copied"></span></p>
+        <table><thead><tr><th>pixelY(1 origin)</th><th>distance</th><th>center</th></tr></thead>
+        <tbody style="user-select: all;">${distanceData.map(s => (`<tr>
+            <td>${s[0]}</td>
+            <td>${Math.abs(s[1] - s[2])}</td>
+            <td>${Math.min(s[1], s[2]) + Math.abs(s[1] - s[2])}</td>
+          </tr>`))}
+        </tbody>
+      </table>`
+    }
+
     canvas.addEventListener("mousedown",
       (evt) => {
         document.body.style.userSelect = "none";
+        dragged = false;
         lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
         lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
-        dragStart = cc.transformedPoint(lastX, lastY);
-        dragStart.x = dragStart.x * lastScale
-        dragStart.y = dragStart.y * lastScale
-        const pt = cc.transformedPoint(lastX, lastY);
-        dragged = false;
-        clickFlg = 1
+        if (drawMode) {
+          clickFlg = 1
+        } else {
+          dragStart = cc.transformedPoint(lastX, lastY);
+          dragStart.x = dragStart.x * lastScale
+          dragStart.y = dragStart.y * lastScale
+          _dragStartX = dragStart.x
+          _dragStartY = dragStart.y
+          // const pt = cc.transformedPoint(lastX, lastY);
+        }
       }, false
     );
+
     canvas.addEventListener("mousemove",
       (evt) => {
         lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
@@ -325,35 +470,83 @@
         }
       }, false
     );
+
     canvas.addEventListener("mouseup",
       (evt) => {
         document.body.style.userSelect = "text";
+        // 線を書き終えた
+        if (currentDrawingLineNum != null) {
+          console.log("end drawing line")
+          if (currentDrawingLineNum === 1) {
+            firstLine = shrink(firstLine)
+            if (!firstLine.length) {
+              alert("Y軸に重複がないようにお願いします")
+              firstLine = []
+              changeMode("move")
+              redraw()
+            }
+            if (!isContinuous(firstLine)) {
+              alert("拡大するか、ゆっくり再描画してください")
+              firstLine = []
+              changeMode("move")
+              redraw()
+              // return
+            }
+            console.log(firstLine)
+            changeMode("move")
+          } else if (currentDrawingLineNum === 2) {
+            secondLine = shrink(secondLine)
+            if (!secondLine.length) {
+              alert("Y軸に重複がないようにお願いします")
+              secondLine = []
+              changeMode("move")
+              redraw()
+            }
+            if (!isContinuous(secondLine)) {
+              alert("拡大するか、ゆっくり再描画してください")
+              secondLine = []
+              changeMode("move")
+              redraw()
+              // return
+            }
+            console.log(secondLine)
+            changeMode("move")
+          } else {
+            alert("no line?")
+          }
+          checkForResult()
+          dragStart = null;
+          clickFlg = 0
+          currentDrawingLineNum = null
+          return
+        }
         const pt = cc.transformedPoint(lastX, lastY);
         const amountX = pt.x * lastScale - dragStart.x
         const amountY = pt.y * lastScale - dragStart.y
         anchorX += amountX
         anchorY += amountY
+        // trigger pointer mode
         if (!dragged) {
           lastPixelX = pt.x - anchorX / lastScale
           lastPixelY = pt.y - anchorY / lastScale
           const roundedPixelX = Math.round(lastPixelX + 0.5)
           const roundedPixelY = Math.round(lastPixelY + 0.5) // 謎調整
-          document.getElementById("xAxis").innerText = roundedPixelX
-          document.getElementById("yAxis").innerText = roundedPixelY
-          document.getElementById("intensity").innerText = roundedPixelX > 1024 ? "-" : data[(roundedPixelY - 1) * 1024 + roundedPixelX - 1] || "-"
+          _id("xAxis").innerText = roundedPixelX
+          _id("yAxis").innerText = roundedPixelY
+          _id("intensity").innerText = roundedPixelX > 1024 ? "-" : data[(roundedPixelY - 1) * 1024 + roundedPixelX - 1] || "-"
           redraw()
         }
         dragStart = null;
         dragged = false
         clickFlg = 0
-        if (firstLine.length) {
-          console.log(firstLine)
-        }
+        changeMode("move")
       }, false
     );
 
     canvas.addEventListener("mouseleave", () => {
       document.body.style.userSelect = "text";
+      currentDrawingLineNum = null
+      clickFlg = 0
       if (dragged) {
         const pt = cc.transformedPoint(lastX, lastY);
         const amountX = pt.x * lastScale - dragStart.x
@@ -425,44 +618,37 @@
 
     trackTransforms(cc);
 
-    const _r = (intensity) => {
-      const val = intensity / 0.32 - 0.78125;
-      if (val <= 0) {
-        return 0;
-      } else if (val >= 1) {
-        return 1;
+    const writeDrawedLine = (amountX, amountY) => {
+      // if (true) {
+      if (firstLine.length) {
+        clickFlg = 1
+        for (let i = 0; i < firstLine.length; i++) {
+          let [y, x] = firstLine[i]
+          y = parseFloat(y)
+          const pt = cc.transformedPoint(lastX, lastY);
+          let amountX = (pt.x - _dragStartX / lastScale) * lastScale
+          let amountY = (pt.y - _dragStartY / lastScale) * lastScale
+          if (_dragStartX == 0) amountX = amountY = 0
+          draw(Math.round(anchorX + x * lastScale + amountX), Math.round(anchorY + y * lastScale + amountY))
+        }
       }
-      return val;
-    };
-
-    const _g = (intensity) => {
-      const val = 2 * intensity - 0.84;
-      if (val <= 0) {
-        return 0;
-      } else if (val >= 1) {
-        return 1;
+      if (secondLine.length) {
+        clickFlg = 1
+        for (let i = 0; i < secondLine.length; i++) {
+          let [y, x] = secondLine[i]
+          y = parseFloat(y)
+          const pt = cc.transformedPoint(lastX, lastY);
+          let amountX = (pt.x - _dragStartX / lastScale) * lastScale
+          let amountY = (pt.y - _dragStartY / lastScale) * lastScale
+          if (_dragStartX == 0) amountX = amountY = 0
+          draw(anchorX + x * lastScale + amountX + 0.5, anchorY + y * lastScale + amountY + 0.5)
+        }
       }
-      return val;
-    };
-
-    const _b = (intensity) => {
-      let val;
-      if (intensity < 0.25) {
-        val = 4 * intensity;
-      } else if (intensity < 0.92) {
-        val = -2 * intensity + 1.84;
-      } else {
-        val = intensity / 0.08 - 11.5;
-      }
-      if (val <= 0) {
-        return 0;
-      } else if (val >= 1) {
-        return 1;
-      }
-      return val;
-    };
+      clickFlg = 0
+    }
 
     const redraw = (_x, _y, scale = lastScale, color = colorMode) => {
+      console.log("r")
       // console.log(data)
       if (!_x && !_y) {
         _x = anchorX
@@ -500,6 +686,7 @@
       cc.scale(scale, scale);
       cc.drawImage(canvasInvisible, _x / lastScale, _y / lastScale);
       writeLine(_x - anchorX, _y - anchorY)
+      writeDrawedLine()
     };
     redraw()
   </script>

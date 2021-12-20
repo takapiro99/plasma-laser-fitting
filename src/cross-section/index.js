@@ -1,5 +1,5 @@
 import { readData } from "../utils";
-// import { intensity2Color } from "./utils";
+import { _r, _g, _b } from "./utils";
 // import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
@@ -124,6 +124,8 @@ over 100 sections will be aborted`);
 window.downloadZip = downloadZip;
 window.readData = readData;
 
+const _id = (id) => document.getElementById(id);
+
 const changeMode = (mode) => {
   console.log(mode);
   if (mode === "draw") {
@@ -133,9 +135,43 @@ const changeMode = (mode) => {
     canvas.style.cursor = "crosshair";
   } else if (mode === "move") {
     drawMode = false;
-    document.getElementById("draw").classList.remove("active");
-    document.getElementById("move").classList.add("active");
+    _id("draw").classList.remove("active");
+    _id("move").classList.add("active");
     canvas.style.cursor = "move";
+    _id("writeButton1").disabled = false;
+    _id("writeButton2").disabled = false;
+    changeClassName(_id("writeIcon1"), "light-blue-text", "grey-text");
+    changeClassName(_id("writeIcon2"), "light-blue-text", "grey-text");
+  }
+  const firstLineDone = !!firstLine.length;
+  const secondLineDone = !!secondLine.length;
+  if (firstLineDone) {
+    _id("doneIcon1").classList.remove("transparent");
+    _id("deleteIcon1").classList.add("text-darken-2");
+    _id("deleteButton1").disabled = false;
+    _id("writeButton1").disabled = true;
+    _id("writeIcon1").classList.remove("text-darken-2");
+    _id("writeIcon1").classList.remove("text-darken-2");
+  } else {
+    _id("doneIcon1").classList.add("transparent");
+    _id("deleteIcon1").classList.remove("text-darken-2");
+    _id("deleteButton1").disabled = true;
+    _id("writeButton1").disabled = false;
+    _id("writeIcon1").classList.add("text-darken-2");
+  }
+  if (secondLineDone) {
+    _id("doneIcon2").classList.remove("transparent");
+    _id("deleteIcon2").classList.add("text-darken-2");
+    _id("deleteButton2").disabled = false;
+    _id("writeButton2").disabled = true;
+    _id("writeIcon2").classList.remove("text-darken-2");
+    _id("writeIcon2").classList.remove("text-darken-2");
+  } else {
+    _id("doneIcon2").classList.add("transparent");
+    _id("deleteIcon2").classList.remove("text-darken-2");
+    _id("deleteButton2").disabled = true;
+    _id("writeButton2").disabled = false;
+    _id("writeIcon2").classList.add("text-darken-2");
   }
 };
 
@@ -143,4 +179,52 @@ window.changeMode = changeMode;
 
 import { data } from "./data";
 
-window.data = data
+window.data = data;
+
+window._r = _r;
+window._g = _g;
+window._b = _b;
+
+const sum = (arr) => arr.reduce((a, b) => a + b);
+
+// xとy 反転させるから注意
+const shrink = (dataArray) => {
+  // console.log(dataArray);
+  const ys = dataArray.map((s) => s[1]);
+  let isOk = true;
+  for (let i = 0; i < ys.length - 1; i++) {
+    if (ys[i] > ys[i + 1]) isOk = false;
+  }
+  // console.log(isOk);
+  if (!isOk) return [];
+  const res = {};
+  for (let i = 0; i < dataArray.length; i++) {
+    const [x, y] = dataArray[i];
+    if (!res[y]) {
+      res[y] = [x];
+    } else {
+      res[y].push(x);
+    }
+  }
+  Object.keys(res).forEach((key) => {
+    res[key] = sum(res[key]) / res[key].length;
+  });
+  // console.log(res);
+  return Object.entries(res);
+};
+
+window.shrink = shrink;
+
+const isContinuous = (arr) => {
+  return !arr
+    .map((s) => parseFloat(s[0]))
+    .reduce((acc, cur, i, arr) => {
+      if (cur - arr?.[i - 1] === 1 || !arr?.[i - 1]) {
+        return acc;
+      } else {
+        return [...acc, cur];
+      }
+    }, []).length;
+};
+
+window.isContinuous = isContinuous;
