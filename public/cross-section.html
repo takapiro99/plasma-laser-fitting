@@ -85,8 +85,8 @@
       <p id="input-file-status"></p>
     </div>
     <!-- <button onclick="redraw()">draw</button> -->
-    <!-- <div id="console" style="pointer-events:none;color:lightgrey !important;"> -->
-    <div id="console">
+    <div id="console" style="pointer-events:none;color:lightgrey !important;">
+    <!-- <div id="console"> -->
       <div>
         <div>
           <h5>2. preview（解析もできちゃう）</h5>
@@ -210,9 +210,8 @@
     const canvas = _id('previewCanvas');
     const cc = canvas.getContext('2d');
 
-    const dataMax = data.reduce((a, b) => a > b ? a : b);
-    const dataMin = data.reduce((a, b) => a < b ? a : b);
-    let scaleMax = dataMax
+    // let dataMax, dataMin
+    // let scaleMax = dataMax
     let scaleMin = 0
 
     const rangeMin = _id("rangeMin")
@@ -313,10 +312,10 @@
       }
     };
 
-    rangeMin.min = rangeMax.min = dataMin
-    rangeMin.max = rangeMax.max = dataMax
-    // TODOL: なおす
-    rangeMax.value = 3000
+    // rangeMin.min = rangeMax.min = dataMin
+    // rangeMin.max = rangeMax.max = dataMax
+    // // TODOL: なおす
+    // rangeMax.value = 3000
     // rangeMax.value = dataMax
     rangeMinDisplay.innerText = rangeMin.value
     rangeMaxDisplay.innerText = rangeMax.value
@@ -406,16 +405,16 @@
         return
       }
       console.log('checkForResult')
-      console.log(firstLine, secondLine)
+      // console.log(firstLine, secondLine)
       let realFirstLine = firstLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1]) // y, x
       let realSecondLine = secondLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1])
-      console.log(realFirstLine, realSecondLine)
+      // console.log(realFirstLine, realSecondLine)
       const pixelMin = Math.max(realFirstLine[0][0], realSecondLine[0][0])
       const pixelMax = Math.min(realFirstLine[realFirstLine.length - 1][0], realSecondLine[realSecondLine.length - 1][0])
-      console.log(pixelMin, pixelMax)
+      // console.log(pixelMin, pixelMax)
       realFirstLine = realFirstLine.filter(s => (s[0] >= pixelMin && s[0] <= pixelMax))
       realSecondLine = realSecondLine.filter(s => (s[0] >= pixelMin && s[0] <= pixelMax))
-      console.log(realSecondLine, realFirstLine)
+      // console.log(realSecondLine, realFirstLine)
       distanceData = realFirstLine.map((s, i) => [s[0], s[1], realSecondLine[i][1]])
       copyData = distanceData.map(d => ([d[0], Math.abs(d[1] - d[2]), Math.min(d[1], d[2]) + Math.abs(d[1] - d[2])].join("\t"))).join("\n")
       if (!distanceData.length) {
@@ -648,7 +647,7 @@
     }
 
     const redraw = (_x, _y, scale = lastScale, color = colorMode) => {
-      console.log("r")
+      // console.log("r")
       // console.log(data)
       if (!_x && !_y) {
         _x = anchorX
@@ -688,7 +687,7 @@
       writeLine(_x - anchorX, _y - anchorY)
       writeDrawedLine()
     };
-    redraw()
+    // redraw()
   </script>
 </body>
 

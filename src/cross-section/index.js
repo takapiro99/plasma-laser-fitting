@@ -25,16 +25,38 @@ const inputFileAndDraw = async (input) => {
     const d = await readData(input);
     // .then((d) => {
     const [data, fileName] = d;
-    console.log(data, fileName);
+    // console.log(data, fileName);
     rawData = data;
     rawFileName = fileName.slice(0, -4);
     window.rawData = data;
+    const graphData = data.map((s) => s[2]);
+    if (graphData[graphData.length] - 1 === undefined) {
+      graphData.pop();
+    }
+    window.data = graphData;
+    // console.log(graphData);
+    // console.log(window.data.reduce((a, b) => (a > b ? a : b), 0));
+    window.dataMax = graphData.reduce((a, b) => (a > b ? a : b));
+    window.scaleMax = window.dataMax;
+    window.dataMin = graphData.reduce((a, b) => (a < b ? a : b));
+    // console.log(dataMax);//
+
+    const rangeMin = _id("rangeMin");
+    const rangeMax = _id("rangeMax");
+    rangeMin.min = rangeMax.min = dataMin;
+    rangeMin.max = rangeMax.max = dataMax;
+    // TODOL: なおす
+    rangeMax.value = 3000;
+    _id("rangeMinDisplay").innerText = rangeMin.value;
+    _id("rangeMaxDisplay").innerText = rangeMax.value;
+
     window.fileName = fileName;
     document.getElementById("input-file-status").innerHTML = `input complete<br/>total data size: ${data.length} (${Math.round(Math.sqrt(data.length))}^2)<br/><b style="color:tomato">${data.length !== 1048577 ? "1024*1024ではありません。OK?" : ""}</b>`;
     document.getElementById("console").style.pointerEvents = "auto";
     document.getElementById("console").style.color = "inherit";
     document.getElementById("downloadButton").classList.remove("disabled");
     // draw2D(data);
+    redraw();
     return true;
     // })
   } catch (e) {
@@ -177,9 +199,9 @@ const changeMode = (mode) => {
 
 window.changeMode = changeMode;
 
-import { data } from "./data";
+// import { data } from "./data";
 
-window.data = data;
+// window.data = data;
 
 window._r = _r;
 window._g = _g;
