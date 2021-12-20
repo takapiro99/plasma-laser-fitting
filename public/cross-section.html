@@ -14,9 +14,9 @@
     let clickFlg = 0;
     let canvasMode = 0;
 
-    let anchorX = 50
-    let anchorY = 50
-    let lastScale = 0.6
+    let anchorX = -3000
+    let anchorY = -2800
+    let lastScale = 6
 
     let lastPixelX = lastPixelY = -1
     const scaleFactor = 1.02;
@@ -32,6 +32,7 @@
     let currentDrawingLineNum = null;
 
     let distanceData;
+    // let data;
 
     const _id = (id) => document.getElementById(id);
   </script>
@@ -86,7 +87,7 @@
     </div>
     <!-- <button onclick="redraw()">draw</button> -->
     <div id="console" style="pointer-events:none;color:lightgrey !important;">
-    <!-- <div id="console"> -->
+      <!-- <div id="console"> -->
       <div>
         <div>
           <h5>2. preview（解析もできちゃう）</h5>
@@ -94,7 +95,7 @@
             <div class="col xl9 s12" style="text-align: center;">
               <div>
                 <canvas id="previewCanvas" width="800" height="400"
-                  style="border:2px solid grey;border-radius: 6px; cursor: move;background-color: snow;">
+                  style="border:2px solid grey;border-radius: 6px; cursor: move;background-color: snow;pointer-events:auto;">
                   図形を表示するには、canvasタグをサポートしたブラウザが必要です。
                 </canvas>
               </div>
@@ -138,6 +139,7 @@
                   </button>
                 </div>
               </div>
+              <div><button class="btn" disabled id="saveAsPng" onclick="saveAsPng()">save as png</button></div>
             </div>
           </div>
           <div style="font-size: 150%;">
@@ -243,6 +245,17 @@
       return result;
     }
 
+    const saveAsPng = () => {
+      let downloadLink = document.createElement('a');
+      downloadLink.setAttribute('download', `${window.fileName.substr(0, window.fileName.length - 4)}.png`);
+      // let canvas = document.getElementById('myCanvas');
+      canvas.toBlob(function (blob) {
+        let url = URL.createObjectURL(blob);
+        downloadLink.setAttribute('href', url);
+        downloadLink.click();
+      });
+    }
+
     const showClipboardCopied = () => {
       _id("copied").innerText = "copied!";
       setTimeout(() => { _id("copied").innerText = "" }, 1500)
@@ -260,8 +273,9 @@
     }
 
     dropZone.addEventListener('dragover', (e) => {
-      stop(e)
+      stop(e);
       e.target.style.background = '#a1a7f0';
+      // console.log(e)
     }, false);
 
     dropZone.addEventListener('dragleave', (e) => {
@@ -312,11 +326,6 @@
       }
     };
 
-    // rangeMin.min = rangeMax.min = dataMin
-    // rangeMin.max = rangeMax.max = dataMax
-    // // TODOL: なおす
-    // rangeMax.value = 3000
-    // rangeMax.value = dataMax
     rangeMinDisplay.innerText = rangeMin.value
     rangeMaxDisplay.innerText = rangeMax.value
     rangeMin.addEventListener('input', (e) => {
@@ -402,6 +411,7 @@
       if (!firstLine.length || !secondLine.length) {
         copyData = null
         _id("distance").innerHTML = ""
+        _id("saveAsPng").disabled = true
         return
       }
       console.log('checkForResult')
@@ -420,8 +430,8 @@
       if (!distanceData.length) {
         return alert("Y軸で重なりませんでした")
       }
-      const target =
-        _id("distance").innerHTML = `<p>
+      // const target =
+      _id("distance").innerHTML = `<p>
           <button class="btn btn-small green" onclick='copy(copyData)'>copy</button><span id="copied"></span></p>
         <table><thead><tr><th>pixelY(1 origin)</th><th>distance</th><th>center</th></tr></thead>
         <tbody style="user-select: all;">${distanceData.map(s => (`<tr>
@@ -431,10 +441,12 @@
           </tr>`))}
         </tbody>
       </table>`
+      _id("saveAsPng").disabled = false
     }
 
     canvas.addEventListener("mousedown",
       (evt) => {
+        // if (!data) return
         document.body.style.userSelect = "none";
         dragged = false;
         lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
@@ -454,6 +466,7 @@
 
     canvas.addEventListener("mousemove",
       (evt) => {
+        // if (!data) return
         lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
         lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
         if (drawMode && clickFlg) {
@@ -472,6 +485,7 @@
 
     canvas.addEventListener("mouseup",
       (evt) => {
+        // if (!data) return
         document.body.style.userSelect = "text";
         // 線を書き終えた
         if (currentDrawingLineNum != null) {
@@ -648,6 +662,7 @@
 
     const redraw = (_x, _y, scale = lastScale, color = colorMode) => {
       // console.log("r")
+      // if (!data || !data.length) return?
       // console.log(data)
       if (!_x && !_y) {
         _x = anchorX
