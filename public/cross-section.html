@@ -8,6 +8,31 @@
   <title>cross section</title>
   <link rel="stylesheet" href="./assets/materialize.min.css" />
   <script src="./assets/materialize.min.js"></script>
+  <script>
+    let drawMode = false;
+    let clickFlg = 0;
+    let canvasMode = 0;
+
+
+
+
+
+  </script>
+  <style>
+    ul.left>li {
+      margin: 0 10px;
+    }
+
+    .lineIndicator>div {
+      border: 1px solid grey;
+    }
+
+    @media only screen and (min-width: 993px) {
+      .container {
+        width: 90%;
+      }
+    }
+  </style>
 </head>
 
 <body class="grey lighten-3">
@@ -33,16 +58,71 @@
       </div>
       <p id="input-file-status"></p>
     </div>
-    <div id="console" style="pointer-events:none;color:lightgrey !important;">
-      <!-- <div id="console" style="color:lightgrey !important;"> -->
+    <button onclick="redraw()">draw</button>
+    <!-- <div id="console" style="pointer-events:none;color:lightgrey !important;"> -->
+    <div id="console">
 
       <div>
-        <h5>2. preview</h5>
-        準備中
         <div>
-          <canvas width="400" height="300" style="border:solid 2px lightgrey"></canvas>
+          <h5>2. preview（解析もできちゃう）</h5>
+          <div class="row">
+            <div class="col xl9 s12" style="text-align: center;">
+              <div>
+                <canvas id="previewCanvas" width="800" height="400"
+                  style="border:2px solid grey;border-radius: 6px; cursor: move;background-color: snow;">
+                  図形を表示するには、canvasタグをサポートしたブラウザが必要です。
+                </canvas>
+              </div>
+              <div>
+                <canvas id="xAxisCanvas" width="800" height="70" style="background-color: grey;"></canvas>
+              </div>
+            </div>
+            <div class="col xl3 s12" style="padding-left: 20px;">
+              <nav style="display:inline-block;width:auto">
+                <div class="nav-wrapper grey lighten-1 black-text">
+                  <ul class="left">
+                    <li id="move" class="active"><a onclick="changeMode('move')">move</a></li>
+                    <li id="draw"><a onclick="changeMode('draw')">draw</a></li>
+                  </ul>
+                </div>
+              </nav>
+              <p>
+                <label>
+                  <input type="checkbox" oninput="colorMode = this.checked;redraw()" />
+                  <span>color mode</span>
+                </label>
+              </p>
+              <div class="row lineIndicator" style="text-align: center;">
+                <div class="col s6">dfsdf</div>
+                <div class="col s6">aaa</div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 150%;">
+            <span>x: </span>
+            <div id="xAxis" style="display: inline-block;margin-right:20px;font-weight: bold;">-</div>
+            <span>y: </span>
+            <div id="yAxis" style="display: inline-block;margin-right:20px;font-weight: bold;">-</div>
+            <span>intensity: </span>
+            <div id="intensity" style="display: inline-block;margin-right:20px;font-weight: bold;">-</div>
+          </div>
+          <div>
+            <div>
+              <label for="">min
+                <input type="range" id="rangeMin" style="width:80%">
+                <span id="rangeMinDisplay"></span>
+              </label>
+            </div>
+            <div>
+              <label for="">max
+                <input type="range" id="rangeMax" step="10" style="width:80%">
+                <span id="rangeMaxDisplay"></span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
+      <div style="height:100px"></div>
       <div>
         <form onsubmit="event.preventDefault();downloadZip();">
           <div>
@@ -78,6 +158,37 @@
   <script>
     const dropZone = document.getElementById("dropZone")
     const fileInput = document.getElementById("fileInput")
+    const previewCanvas = document.getElementById("previewCanvas")
+
+    const canvas = document.getElementById('previewCanvas');
+    const cc = canvas.getContext('2d');
+
+    const dataMax = data.reduce((a, b) => a > b ? a : b);
+    const dataMin = data.reduce((a, b) => a < b ? a : b);
+    let scaleMax = dataMax
+    let scaleMin = 0
+
+    const rangeMin = document.getElementById("rangeMin")
+    const rangeMax = document.getElementById("rangeMax")
+    const rangeMinDisplay = document.getElementById("rangeMinDisplay")
+    const rangeMaxDisplay = document.getElementById("rangeMaxDisplay")
+
+    let lastX = canvas.width / 2
+    let lastY = canvas.height / 2
+    let anchorX = -10
+    let anchorY = -100
+    let lastScale = 0.6
+
+    let lastPixelX = lastPixelY = -1
+
+    let colorMode = false
+    // let anchorX = -470 * lastScale
+    // let anchorY = -400 * lastScale
+    let dragStart, dragged;
+
+    const firstLine = []
+    const secondLine = []
+    let drawingLineCount = 0
 
 
     dropZone.addEventListener('dragover', (e) => {
@@ -100,24 +211,297 @@
       if (files.length !== 1) { return alert('アップロードできるファイルは1つだけです。'); }
       fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
       const res = await inputFileAndDraw(fileInput)
-      if (res) draw()
+      if (res) redraw()
     }, false);
 
     const go = async (input) => {
       const res = await inputFileAndDraw(input)
-      if (res) draw()
+      if (res) redraw()
     }
 
-    const draw = () => {
-      console.log(window.rawData)
-      console.log("hi")
-      console.log(window.rawData.length)
+
+    const draw = (x, y) => {
+      cc.lineWidth = 0.2;
+      cc.strokeStyle = 'rgba(250, 100, 50)';
+      if (clickFlg == "1") {
+        clickFlg = "2";
+        cc.beginPath();
+        // cc.lineCap = "round";  // 線を角丸にする
+        cc.moveTo(x / lastScale, y / lastScale);
+      } else {
+        cc.lineTo(x / lastScale, y / lastScale);
+      }
+      cc.stroke();
+      const xx = Math.round((x - anchorX) / lastScale)
+      const yy = Math.round((y - anchorY) / lastScale)
+      firstLine.push([xx, yy])
+    };
+
+    rangeMin.min = rangeMax.min = dataMin
+    rangeMin.max = rangeMax.max = dataMax
+    // TODOL: なおす
+    rangeMax.value = 3000
+    // rangeMax.value = dataMax
+    rangeMinDisplay.innerText = rangeMin.value
+    rangeMaxDisplay.innerText = rangeMax.value
+    rangeMin.addEventListener('input', (e) => {
+      rangeMinDisplay.innerText = e.target.value
+      redraw()
+    })
+    rangeMax.addEventListener('input', (e) => {
+      rangeMaxDisplay.innerText = e.target.value
+      redraw()
+    })
+
+    const scaleFactor = 1.02;
+    const zoom = (clicks) => {
+      let prevScale = lastScale
+      const pt = cc.transformedPoint(lastX, lastY);
+      lastScale *= Math.pow(scaleFactor, clicks);
+      const shouldLockX = (canvas.width / 2 - anchorX) / prevScale
+      const shouldLockY = (canvas.height / 2 - anchorY) / prevScale
+      const deltaX = shouldLockX * (lastScale - prevScale)
+      const deltaY = shouldLockY * (lastScale - prevScale)
+      anchorX -= deltaX
+      anchorY -= deltaY
+      redraw();
+    };
+
+    const handleScroll = (evt) => {
+      lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
+      lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
+      const delta = evt.wheelDelta
+        ? evt.wheelDelta / 40
+        : evt.detail
+          ? -evt.detail
+          : 0;
+      if (delta) zoom(delta);
+      return evt.preventDefault() && false;
+    };
+
+    const writeLine = (_amountX = 0, _amountY = 0) => {
+      cc.lineWidth = 1.2 / lastScale;
+      cc.strokeStyle = '#fff176';
+      const xAxis = anchorX / lastScale + lastPixelX + _amountX / lastScale
+      const yAxis = anchorY / lastScale + lastPixelY + _amountY / lastScale
+      cc.beginPath();
+      cc.moveTo(xAxis, 0);
+      cc.lineTo(xAxis, canvas.height / lastScale);
+      cc.stroke();
+      cc.beginPath();
+      cc.moveTo(0, yAxis);
+      cc.lineTo(canvas.width / lastScale, yAxis);
+      cc.stroke();
     }
 
-    function mock() {
-      //pass
-    }
+    // window.onload = () => {
+    canvas.addEventListener("mousedown",
+      (evt) => {
+        document.body.style.userSelect = "none";
+        lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
+        lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
+        dragStart = cc.transformedPoint(lastX, lastY);
+        dragStart.x = dragStart.x * lastScale
+        dragStart.y = dragStart.y * lastScale
+        const pt = cc.transformedPoint(lastX, lastY);
+        dragged = false;
+        clickFlg = 1
+      }, false
+    );
+    canvas.addEventListener("mousemove",
+      (evt) => {
+        lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
+        lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
+        if (drawMode && clickFlg) {
+          draw(lastX, lastY);
+          return
+        }
+        if (dragStart) {
+          dragged = true;
+          const pt = cc.transformedPoint(lastX, lastY);
+          const amountX = (pt.x - dragStart.x / lastScale) * lastScale
+          const amountY = (pt.y - dragStart.y / lastScale) * lastScale
+          redraw(anchorX + amountX, anchorY + amountY)
+        }
+      }, false
+    );
+    canvas.addEventListener("mouseup",
+      (evt) => {
+        document.body.style.userSelect = "text";
+        const pt = cc.transformedPoint(lastX, lastY);
+        const amountX = pt.x * lastScale - dragStart.x
+        const amountY = pt.y * lastScale - dragStart.y
+        anchorX += amountX
+        anchorY += amountY
+        if (!dragged) {
+          lastPixelX = pt.x - anchorX / lastScale
+          lastPixelY = pt.y - anchorY / lastScale
+          const roundedPixelX = Math.round(lastPixelX + 0.5)
+          const roundedPixelY = Math.round(lastPixelY + 0.5) // 謎調整
+          document.getElementById("xAxis").innerText = roundedPixelX
+          document.getElementById("yAxis").innerText = roundedPixelY
+          document.getElementById("intensity").innerText = roundedPixelX > 1024 ? "-" : data[(roundedPixelY - 1) * 1024 + roundedPixelX - 1] || "-"
+          redraw()
+        }
+        dragStart = null;
+        dragged = false
+        clickFlg = 0
+        if (firstLine.length) {
+          console.log(firstLine)
+        }
+      }, false
+    );
 
+    canvas.addEventListener("mouseleave", () => {
+      document.body.style.userSelect = "text";
+      if (dragged) {
+        const pt = cc.transformedPoint(lastX, lastY);
+        const amountX = pt.x * lastScale - dragStart.x
+        const amountY = pt.y * lastScale - dragStart.y
+        dragged = false;
+        dragStart = null;
+        anchorX += amountX
+        anchorY += amountY
+      }
+    }, false)
+
+    canvas.addEventListener("DOMMouseScroll", handleScroll, false);
+    canvas.addEventListener("mousewheel", handleScroll, false);
+
+    const trackTransforms = (ctx) => {
+      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      var xform = svg.createSVGMatrix();
+      ctx.getTransform = () => xform;
+      const savedTransforms = [];
+      const save = ctx.save;
+      ctx.save = () => {
+        savedTransforms.push(xform.translate(0, 0));
+        return save.call(ctx);
+      };
+      const restore = ctx.restore;
+      ctx.restore = () => {
+        xform = savedTransforms.pop();
+        return restore.call(ctx);
+      };
+      const scale = ctx.scale;
+      ctx.scale = (sx, sy) => {
+        xform = xform.scaleNonUniform(sx, sy);
+        return scale.call(ctx, sx, sy);
+      };
+      const translate = ctx.translate;
+      ctx.translate = (dx, dy) => {
+        xform = xform.translate(dx, dy);
+        return translate.call(ctx, dx, dy);
+      };
+      const transform = ctx.transform;
+      ctx.transform = (a, b, c, d, e, f) => {
+        var m2 = svg.createSVGMatrix();
+        m2.a = a;
+        m2.b = b;
+        m2.c = c;
+        m2.d = d;
+        m2.e = e;
+        m2.f = f;
+        xform = xform.multiply(m2);
+        return transform.call(ctx, a, b, c, d, e, f);
+      };
+      const setTransform = ctx.setTransform;
+      ctx.setTransform = (a, b, c, d, e, f) => {
+        xform.a = a;
+        xform.b = b;
+        xform.c = c;
+        xform.d = d;
+        xform.e = e;
+        xform.f = f;
+        return setTransform.call(ctx, a, b, c, d, e, f);
+      };
+      const pt = svg.createSVGPoint();
+      ctx.transformedPoint = (x, y) => {
+        pt.x = x;
+        pt.y = y;
+        return pt.matrixTransform(xform.inverse());
+      };
+    };
+
+    trackTransforms(cc);
+
+    const _r = (intensity) => {
+      const val = intensity / 0.32 - 0.78125;
+      if (val <= 0) {
+        return 0;
+      } else if (val >= 1) {
+        return 1;
+      }
+      return val;
+    };
+
+    const _g = (intensity) => {
+      const val = 2 * intensity - 0.84;
+      if (val <= 0) {
+        return 0;
+      } else if (val >= 1) {
+        return 1;
+      }
+      return val;
+    };
+
+    const _b = (intensity) => {
+      let val;
+      if (intensity < 0.25) {
+        val = 4 * intensity;
+      } else if (intensity < 0.92) {
+        val = -2 * intensity + 1.84;
+      } else {
+        val = intensity / 0.08 - 11.5;
+      }
+      if (val <= 0) {
+        return 0;
+      } else if (val >= 1) {
+        return 1;
+      }
+      return val;
+    };
+
+    const redraw = (_x, _y, scale = lastScale, color = colorMode) => {
+      // console.log(data)
+      if (!_x && !_y) {
+        _x = anchorX
+        _y = anchorY
+      }
+      cc.setTransform(1, 0, 0, 1, 0, 0);
+      cc.clearRect(0, 0, canvas.width, canvas.height)
+      const min = rangeMin.value - 0
+      const max = rangeMax.value - 0
+      const canvasInvisible = document.createElement('canvas');
+      canvasInvisible.width = canvasInvisible.height = 1024;
+      cc.imageSmoothingEnabled = false;
+      const imageData = cc.createImageData(1024, 1024);
+      const imgd = imageData.data;
+      const height = 1024, width = 1024;
+      let count = 0
+      for (let y = 0; y < height; ++y) {
+        for (let x = 0; x < width; ++x) {
+          const base = (x + y * width) * 4;
+          const rawVal = data[count]
+          const val = rawVal >= max ? 255 : rawVal <= min ? 0 : (rawVal - min) / (max - min) * 255
+          if (color) {
+            imgd[base + 0] = Math.floor(_r(val / 255) * 255)
+            imgd[base + 1] = Math.floor(_g(val / 255) * 255)
+            imgd[base + 2] = Math.floor(_b(val / 255) * 255)
+          } else {
+            imgd[base + 0] = imgd[base + 1] = imgd[base + 2] = val
+          }
+          imgd[base + 3] = 255;
+          count += 1
+        }
+      }
+      ctx2 = canvasInvisible.getContext('2d');
+      ctx2.putImageData(imageData, 0, 0);
+      cc.scale(scale, scale);
+      cc.drawImage(canvasInvisible, _x / lastScale, _y / lastScale);
+      writeLine(_x - anchorX, _y - anchorY)
+    };
+    redraw()
   </script>
 </body>
 

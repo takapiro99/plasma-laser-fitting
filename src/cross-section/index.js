@@ -40,7 +40,7 @@ const inputFileAndDraw = async (input) => {
   } catch (e) {
     console.error(e);
     alert("something went wrong, sorry.  " + e);
-    return false
+    return false;
   }
   // .catch((e) => {
   // });
@@ -122,40 +122,25 @@ over 100 sections will be aborted`);
 };
 
 window.downloadZip = downloadZip;
-
-// const draw2D = (data) => {
-//   // 1. データの準備
-//   const width = window.innerWidth * 0.35;
-//   const height = width;
-
-//   let formattedData = [];
-//   const dataCount = 1024;
-//   for (let i = 0; i < dataCount; i++) {
-//     formattedData.push(data.slice(i * dataCount, (i + 1) * dataCount).map((s) => s[2]));
-//   }
-//   // formattedData.push(0)
-//   formattedData = formattedData.flat();
-//   console.log(formattedData);
-//   const svg = d3.select("#heatmap").append("svg").attr("width", width).attr("height", height);
-
-//   // 3. しきい値の設定
-//   const thresholds = d3.range(0, 21).map((p) => p * 50); //1000まで
-
-//   // 4. データ変換 // 30,30
-//   const _contours = d3.contours().size([1024, 300]).thresholds(thresholds);
-
-//   // 5. カラースケールの設定
-//   const color = d3.scaleSequential((t) => intensity2Color(1 - t, 0, 1)).domain([0, 1000]);
-//   console.log("hello1");
-//   // 6. コンター用SVG要素の設定
-//   // return
-//   svg
-//     .selectAll("path")
-//     .data(_contours(formattedData.slice(300000,607200)))
-//     .enter()
-//     .append("path")
-//     .attr("d", d3.geoPath(d3.geoIdentity().scale(width / dataCount)))
-//     .attr("fill", (d) => color(d.value));
-// };
-
 window.readData = readData;
+
+const changeMode = (mode) => {
+  console.log(mode);
+  if (mode === "draw") {
+    drawMode = true;
+    document.getElementById("draw").classList.add("active");
+    document.getElementById("move").classList.remove("active");
+    canvas.style.cursor = "crosshair";
+  } else if (mode === "move") {
+    drawMode = false;
+    document.getElementById("draw").classList.remove("active");
+    document.getElementById("move").classList.add("active");
+    canvas.style.cursor = "move";
+  }
+};
+
+window.changeMode = changeMode;
+
+import { data } from "./data";
+
+window.data = data
