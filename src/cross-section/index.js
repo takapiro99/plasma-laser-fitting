@@ -30,7 +30,7 @@ const inputFileAndDraw = async (input) => {
     rawFileName = fileName.slice(0, -4);
     window.rawData = data;
     const graphData = data.map((s) => s[2]);
-    if (graphData[graphData.length] - 1 === undefined) {
+    if (graphData[graphData.length - 1] === undefined) {
       graphData.pop();
     }
     window.data = graphData;
