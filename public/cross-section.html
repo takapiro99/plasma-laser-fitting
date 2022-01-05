@@ -427,7 +427,7 @@
 
       // console.log(realSecondLine, realFirstLine)
       distanceData = realFirstLine.map((s, i) => [s[0], s[1], realSecondLine[i][1]])
-      copyData = distanceData.map(d => ([d[0], Math.abs(d[1] - d[2]), Math.min(d[1], d[2]) + Math.abs(d[1] - d[2])].join("\t"))).join("\n")
+      copyData = distanceData.map(d => ([d[0], Math.abs(d[1] - d[2]), Math.min(d[1], d[2]) + Math.abs(d[1] - d[2])/2].join("\t"))).join("\n")
       if (!distanceData.length) {
         return alert("Y軸で重なりませんでした")
       }
