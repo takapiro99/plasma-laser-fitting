@@ -427,11 +427,11 @@
 
       // console.log(realSecondLine, realFirstLine)
       distanceData = realFirstLine.map((s, i) => [s[0], s[1], realSecondLine[i][1]])
-      copyData = distanceData.map(d => ([d[0], Math.abs(d[1] - d[2]), Math.min(d[1], d[2]) + Math.abs(d[1] - d[2])/2].join("\t"))).join("\n")
+      copyData = distanceData.map(d => ([d[0], Math.abs(d[1] - d[2]), Math.min(d[1], d[2]) + Math.abs(d[1] - d[2]) / 2].join("\t"))).join("\n")
       if (!distanceData.length) {
         return alert("Y軸で重なりませんでした")
       }
-      copyRawData = realFirstLine.map((ele, i) => ([ele, realSecondLine[i]].join("\t"))).join("\n")
+      copyRawData = realFirstLine.map((ele, i) => ([ele[0], ele[1], realSecondLine[i][1]].join("\t"))).join("\n")
       // const target =
       _id("distance").innerHTML = `<p>
           <button class="btn green" onclick='copy(copyData)'>copy</button><button class="btn btn-small grey" onclick='copy(copyRawData)'>copy raw</button><span id="copied"></span></p>
