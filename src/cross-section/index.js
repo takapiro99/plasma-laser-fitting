@@ -1,4 +1,4 @@
-import { readData } from "../utils";
+import { readData, readSpeData } from "../utils";
 import { _r, _g, _b } from "./utils";
 // import * as d3 from "d3";
 import { saveAs } from "file-saver";
@@ -14,16 +14,22 @@ const inputFileAndDraw = async (input) => {
     return alert("was not a file.");
   }
   const filenamechunk = input.files[0].name.split(".");
-  if (filenamechunk[filenamechunk.length - 1] !== "txt") {
+  const fileExt = filenamechunk[filenamechunk.length - 1]
+  if (!["txt", "SPE", "spe"].includes(fileExt)) {
     input.value = "";
-    return alert("this was not .txt file");
+    return alert(".txt 又は .SPE ファイルのみ対応しています");
   }
   document.getElementById("input-file-status").innerHTML = "input running... please wait";
+
   sleep(80);
-  // setTimeout(() => {
   try {
-    const d = await readData(input);
-    // .then((d) => {
+    let d;
+    if (fileExt === "txt") {
+      d = await readData(input);
+    } else {
+      d = await readSpeData(input);
+    }
+
     const [data, fileName] = d;
     // console.log(data, fileName);
     rawData = data;
@@ -34,31 +40,26 @@ const inputFileAndDraw = async (input) => {
       graphData.pop();
     }
     window.data = graphData;
-    // console.log(graphData);
-    // console.log(window.data.reduce((a, b) => (a > b ? a : b), 0));
     window.dataMax = graphData.reduce((a, b) => (a > b ? a : b));
     window.scaleMax = window.dataMax;
     window.dataMin = graphData.reduce((a, b) => (a < b ? a : b));
-    // console.log(dataMax);//
 
     const rangeMin = _id("rangeMin");
     const rangeMax = _id("rangeMax");
     rangeMin.min = rangeMax.min = dataMin;
     rangeMin.max = rangeMax.max = dataMax;
-    // TODOL: なおす
+    // TODO: なおす
     rangeMax.value = 3000;
     _id("rangeMinDisplay").innerText = rangeMin.value;
     _id("rangeMaxDisplay").innerText = rangeMax.value;
 
     window.fileName = fileName;
-    document.getElementById("input-file-status").innerHTML = `input complete<br/>total data size: ${data.length} (${Math.round(Math.sqrt(data.length))}^2)<br/><b style="color:tomato">${data.length !== 1048577 ? "1024*1024ではありません。OK?" : ""}</b>`;
-    document.getElementById("console").style.pointerEvents = "auto";
-    document.getElementById("console").style.color = "inherit";
-    document.getElementById("downloadButton").classList.remove("disabled");
-    // draw2D(data);
+    _id("input-file-status").innerHTML = `input complete<br/>total data size: ${data.length} (${Math.round(Math.sqrt(data.length))}^2)<br/><b style="color:tomato">${!(data.length == 1048577 || data.length == 1048576) ? "1024*1024ではありません。OK?" : ""}</b>`;
+    _id("console").style.pointerEvents = "auto";
+    _id("console").style.color = "inherit";
+    _id("downloadButton").classList.remove("disabled");
     redraw();
     return true;
-    // })
   } catch (e) {
     console.error(e);
     alert("something went wrong, sorry.  " + e);

@@ -127,6 +127,83 @@ export const readData = async (input) => {
   return [vals, file.name];
 };
 
+export const readSpeData = async (input) => {
+  const file = input.files[0];
+  let rawArrayBuffer;
+  try {
+    rawArrayBuffer = await new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => {
+        if (fr.readyState !== 2) {
+          alert("something gone wrong");
+          reject("file reader broken");
+        }
+        resolve(fr.result);
+      };
+      fr.onerror = reject;
+      fr.readAsArrayBuffer(file);
+    })
+  } catch (e) {
+    alert("error reading data", e);
+    console.error(e.toString())
+    return;
+  }
+  const view = new DataView(rawArrayBuffer)
+  let _rawData = []
+
+  const dataType = view.getInt16(108, true); // 3 little endian
+  const frame_width = view.getUint16(42, true) // from_bytes(b, "H", 42)
+  const frame_height = view.getUint16(656, true) // from_bytes(b, "H", 656)
+  const num_frames = view.getInt32(1446, true)
+  const count = frame_height * frame_width
+  if (num_frames !== 1) {
+    if (!window.confirm(`フレームが ${num_frames}枚 あります。1枚目のみのプレビューとなりますがよいですか？`)) {
+      return
+    }
+  }
+  let viewFunc;
+  let blockSize;
+  const dataOffset = 4100
+  switch (dataType) {
+    case 0: // float32
+      viewFunc = DataView.prototype.getFloat32
+      blockSize = 4
+      break;
+    case 1: // int32
+      viewFunc = DataView.prototype.getInt32
+      blockSize = 4
+      break
+    case 2: // int16
+      viewFunc = DataView.prototype.getInt16
+      blockSize = 2
+      break
+    case 3: // uint16
+      viewFunc = DataView.prototype.getUint16
+      blockSize = 2
+      break
+    case 5: // float64
+      viewFunc = DataView.prototype.getFloat64
+      blockSize = 8
+      break
+    case 6: // uint8
+      viewFunc = DataView.prototype.getUint8
+      blockSize = 1
+      break
+    case 8: // uint32
+      viewFunc = DataView.prototype.getUint32
+      blockSize = 4
+      break
+    case 4:
+    case 7:
+    default:
+      throw Error(`unknown dataType. dataType:${dataType}`)
+  }
+  for (let i = 0; i < count; i++) {
+    _rawData.push(viewFunc.call(view, dataOffset + i * blockSize, true))
+  }
+  return [_rawData.map(s => [undefined, undefined, s]), file.name];
+}
+
 export const drawData = (ctx, data, shouldUpdate = false) => {
   const D = document.getElementById("D").value; //# 逆線分散 (nm/mm)
   const ICCD_PIXEL = document.getElementById("ppICCD").value; //# pixel per mm on ICCD (mm/pixel)
