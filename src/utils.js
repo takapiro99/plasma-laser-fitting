@@ -201,7 +201,14 @@ export const readSpeData = async (input) => {
   for (let i = 0; i < count; i++) {
     _rawData.push(viewFunc.call(view, dataOffset + i * blockSize, true))
   }
-  return [_rawData.map(s => [undefined, undefined, s]), file.name];
+  let colCount = 0
+  let rowCount = 1
+  _rawData = _rawData.map((s) => {
+    if (colCount == frame_width) { colCount = 0; rowCount++ }
+    colCount++
+    return [colCount, rowCount, s]
+  })
+  return [_rawData, file.name];
 }
 
 export const drawData = (ctx, data, shouldUpdate = false) => {

@@ -35,6 +35,7 @@ const inputFileAndDraw = async (input) => {
     rawData = data;
     rawFileName = fileName.slice(0, -4);
     window.rawData = data;
+    _id("fileName").innerText = fileName
     const graphData = data.map((s) => s[2]);
     if (graphData[graphData.length - 1] === undefined) {
       graphData.pop();
@@ -65,9 +66,6 @@ const inputFileAndDraw = async (input) => {
     alert("something went wrong, sorry.  " + e);
     return false;
   }
-  // .catch((e) => {
-  // });
-  // }, 70);
 };
 
 window.inputFileAndDraw = inputFileAndDraw;
