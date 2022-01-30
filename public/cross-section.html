@@ -143,8 +143,13 @@
                     all
                     lines</button>
                 </div>
+                <div class="col s12">
+                  <button class="btn" disabled id="saveAsPng" onclick="saveAsPng()">
+                    save as png
+                  </button>
+                </div>
+                <div class="col s12" id="copy_buttons"></div>
               </div>
-              <div><button class="btn" disabled id="saveAsPng" onclick="saveAsPng()">save as png</button></div>
             </div>
           </div>
           <div style="font-size: 150%;">
@@ -175,7 +180,6 @@
         center pixel
         <input type="text">
       </label> -->
-      <div id="copy_buttons"></div>
       <canvas id="ex_chart" width="800" height="250"></canvas>
       <div id="distance"></div>
       <div style="height:100px"></div>
