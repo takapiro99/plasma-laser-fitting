@@ -138,7 +138,9 @@
                   </button>
                 </div>
                 <div class="col s12">
-                  <button onclick="deleteLine(_id('deleteButton1'), 1);deleteLine(_id('deleteButton2'), 2)">delete all
+                  <button
+                    onclick="deleteLine(_id('deleteButton1'), 1, true);deleteLine(_id('deleteButton2'), 2, true)">delete
+                    all
                     lines</button>
                 </div>
               </div>
@@ -354,8 +356,12 @@
       currentDrawingLineNum = number
     }
 
-    const deleteLine = (e, number) => {
-      if (window.confirm(`本当に ${number} 本目の線を消しますか？`)) {
+    const deleteLine = (e, number, deleteImmediately = false) => {
+      let res = true
+      if (!deleteImmediately) {
+        res = window.confirm(`本当に ${number} 本目の線を消しますか？`)
+      }
+      if (res) {
         e.disabled = true
         if (number === 1) {
           firstLine = []
