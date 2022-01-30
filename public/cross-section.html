@@ -137,6 +137,10 @@
                     <i class="material-icons grey-text" id="deleteIcon2">delete</i>
                   </button>
                 </div>
+                <div class="col s12">
+                  <button onclick="deleteLine(_id('deleteButton1'), 1);deleteLine(_id('deleteButton2'), 2)">delete all
+                    lines</button>
+                </div>
               </div>
               <div><button class="btn" disabled id="saveAsPng" onclick="saveAsPng()">save as png</button></div>
             </div>
@@ -169,6 +173,7 @@
         center pixel
         <input type="text">
       </label> -->
+      <div id="copy_buttons"></div>
       <canvas id="ex_chart" width="800" height="250"></canvas>
       <div id="distance"></div>
       <div style="height:100px"></div>
@@ -460,8 +465,8 @@
       }
       copyRawData = realFirstLine.map((ele, i) => ([ele[0], ele[1], realSecondLine[i][1]].join("\t"))).join("\n")
       // const target =
+      _id("copy_buttons").innerHTML = `<button class="btn green" onclick='copy(copyData)'>copy</button><button class="btn btn-small grey" onclick='copy(copyRawData)'>copy raw</button><span id="copied"></span></p>`
       _id("distance").innerHTML = `<p>
-          <button class="btn green" onclick='copy(copyData)'>copy</button><button class="btn btn-small grey" onclick='copy(copyRawData)'>copy raw</button><span id="copied"></span></p>
         <table><thead><tr><th>pixelY(1 origin)</th><th>distance</th><th>center</th></tr></thead>
         <tbody style="user-select: all;">${distanceData.map(s => (`<tr>
             <td>${s[0]}</td>
