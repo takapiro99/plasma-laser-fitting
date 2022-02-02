@@ -15,9 +15,8 @@
     let experimentData = [], fittingData = [];
     let fileName;
     let _ne, _neReal, _Te, _Vs, _Z;
-    const rs = (val) => { setLocalStorage("RS_INTENSITY", val) }
-    const iccdCenter = (val) => { setLocalStorage("RAYLEIGH_CENTER", val) }
-    function nothing() { }
+    const rs = (val) => { setLocalStorage("RS_INTENSITY", val) };
+    const iccdCenter = (val) => { setLocalStorage("RAYLEIGH_CENTER", val) };
   </script>
 </head>
 
@@ -85,7 +84,8 @@
         <label class="col s2">RS integrated intensity<input type="number" oninput="rs(this.value)" value="10000"
             id="IR"></label>
         <label class="col s2">Z<input type="number" value="3.2" id="Z"></label>
-        <label class="col s1">Te(eV)<input type="number" value="7" id='Te' onchange="syncZ()" oninput="sync(this.value)"></label>
+        <label class="col s1">Te(eV)<input type="number" value="7" id='Te' onchange="syncZ()"
+            oninput="sync(this.value)"></label>
         <label class="col s1">Ti(eV)<input type="number" value="7" id='Ti' disabled></label>
         <div class="col s2">
           <div>
@@ -176,7 +176,7 @@
       const autoZ = document.getElementById("autoZ").checked
       if (autoZ) {
         val = document.getElementById("Te").value
-        const interpolated = Math.round((linearInterp(val))*1000)/1000
+        const interpolated = Math.round((linearInterp(val)) * 1000) / 1000
         document.getElementById("Z").value = interpolated
       }
     }

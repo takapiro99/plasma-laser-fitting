@@ -13,6 +13,7 @@ loadWasm()
     console.log("loaded");
   })
   .catch((e) => {
+    console.error(e)
     alert("failed to load module. please reload.", { e });
   });
 

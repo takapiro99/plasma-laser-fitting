@@ -3,22 +3,22 @@
  (type $i32_=>_i32 (func (param i32) (result i32)))
  (type $i32_i32_=>_i32 (func (param i32 i32) (result i32)))
  (type $i32_=>_none (func (param i32)))
- (type $none_=>_none (func))
  (type $i32_i32_i32_=>_none (func (param i32 i32 i32)))
- (type $i32_=>_f64 (func (param i32) (result f64)))
+ (type $none_=>_none (func))
  (type $f64_i32_i32_=>_f64 (func (param f64 i32 i32) (result f64)))
- (type $i32_i32_f64_=>_none (func (param i32 i32 f64)))
- (type $i32_i32_i32_=>_i32 (func (param i32 i32 i32) (result i32)))
+ (type $i32_=>_f64 (func (param i32) (result f64)))
  (type $f64_f64_i32_i32_=>_f64 (func (param f64 f64 i32 i32) (result f64)))
+ (type $i32_i32_i32_=>_i32 (func (param i32 i32 i32) (result i32)))
+ (type $i32_i32_f64_=>_none (func (param i32 i32 f64)))
  (type $i32_i32_i32_i32_=>_none (func (param i32 i32 i32 i32)))
- (type $f64_=>_f64 (func (param f64) (result f64)))
  (type $i32_i32_=>_f64 (func (param i32 i32) (result f64)))
- (type $none_=>_i32 (func (result i32)))
- (type $i32_i32_i32_i32_=>_i32 (func (param i32 i32 i32 i32) (result i32)))
- (type $i32_f64_=>_i32 (func (param i32 f64) (result i32)))
- (type $f64_i64_=>_i32 (func (param f64 i64) (result i32)))
+ (type $f64_=>_f64 (func (param f64) (result f64)))
  (type $i32_i32_f64_=>_f64 (func (param i32 i32 f64) (result f64)))
+ (type $none_=>_i32 (func (result i32)))
+ (type $f64_i64_=>_i32 (func (param f64 i64) (result i32)))
  (type $f64_f64_=>_f64 (func (param f64 f64) (result f64)))
+ (type $i32_f64_=>_i32 (func (param i32 f64) (result i32)))
+ (type $i32_i32_i32_i32_=>_i32 (func (param i32 i32 i32 i32) (result i32)))
  (import "env" "abort" (func $~lib/builtins/abort (param i32 i32 i32 i32)))
  (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_entryfile_flag i32 (i32.const 1))
  (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_String_ID i32 (i32.const 1))
@@ -43,6 +43,9 @@
  (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_StringArrayArray_ID i32 (i32.const 19))
  (global $node_modules/as-bind/lib/assembly/as-bind/__asbind_BoolArrayArray_ID i32 (i32.const 20))
  (global $~lib/builtins/f64.MIN_VALUE f64 (f64.const 5e-324))
+ (global $~lib/shared/runtime/Runtime.Stub i32 (i32.const 0))
+ (global $~lib/shared/runtime/Runtime.Minimal i32 (i32.const 1))
+ (global $~lib/shared/runtime/Runtime.Incremental i32 (i32.const 2))
  (global $~argumentsLength (mut i32) (i32.const 0))
  (global $assembly/index/arrayMax i32 (i32.const 64))
  (global $~lib/builtins/f64.MAX_VALUE f64 (f64.const 1797693134862315708145274e284))
@@ -59,6 +62,7 @@
  (global $~lib/rt/tlsf/ROOT (mut i32) (i32.const 0))
  (global $~lib/ASC_LOW_MEMORY_LIMIT i32 (i32.const 0))
  (global $~lib/ASC_SHRINK_LEVEL i32 (i32.const 0))
+ (global $~lib/ASC_RUNTIME i32 (i32.const 2))
  (global $assembly/index/convolve i32 (i32.const 816))
  (global $~lib/math/NativeMath.PI f64 (f64.const 3.141592653589793))
  (global $assembly/index/PI f64 (f64.const 3.141592653589793))
@@ -1693,7 +1697,6 @@
  )
  (func $~lib/rt/itcms/interrupt
   (local $0 i32)
-  (local $1 i32)
   i32.const 0
   drop
   i32.const 0
@@ -1704,7 +1707,7 @@
   i32.const 100
   i32.div_u
   local.set $0
-  loop $do-continue|0
+  loop $do-loop|0
    local.get $0
    call $~lib/rt/itcms/step
    i32.sub
@@ -1717,7 +1720,8 @@
     drop
     global.get $~lib/rt/itcms/total
     i64.extend_i32_u
-    i64.const 200
+    i32.const 200
+    i64.extend_i32_u
     i64.mul
     i64.const 100
     i64.div_u
@@ -1732,9 +1736,7 @@
    local.get $0
    i32.const 0
    i32.gt_s
-   local.set $1
-   local.get $1
-   br_if $do-continue|0
+   br_if $do-loop|0
   end
   i32.const 0
   drop
@@ -3941,7 +3943,7 @@
    if
     i32.const 320
     i32.const 368
-    i32.const 17
+    i32.const 19
     i32.const 48
     call $~lib/builtins/abort
     unreachable
@@ -3985,14 +3987,10 @@
    local.get $6
    call $~lib/rt/itcms/__renew
    local.set $8
-   local.get $8
-   local.get $4
-   i32.add
-   i32.const 0
-   local.get $6
-   local.get $4
-   i32.sub
-   call $~lib/memory/memory.fill
+   i32.const 2
+   global.get $~lib/shared/runtime/Runtime.Incremental
+   i32.ne
+   drop
    local.get $8
    local.get $5
    i32.ne
@@ -4037,7 +4035,7 @@
    if
     i32.const 608
     i32.const 368
-    i32.const 115
+    i32.const 130
     i32.const 22
     call $~lib/builtins/abort
     unreachable
@@ -4069,7 +4067,7 @@
   if
    i32.const 608
    i32.const 368
-   i32.const 99
+   i32.const 114
    i32.const 42
    call $~lib/builtins/abort
    unreachable
@@ -4115,7 +4113,7 @@
   if
    i32.const 608
    i32.const 848
-   i32.const 1374
+   i32.const 1435
    i32.const 64
    call $~lib/builtins/abort
    unreachable
@@ -5540,10 +5538,12 @@
    local.set $11
    local.get $11
    i64.const 52
-   i64.const 7
+   i32.const 7
+   i64.extend_i32_s
    i64.sub
    i64.shr_u
-   i64.const 127
+   i32.const 127
+   i64.extend_i32_s
    i64.and
    i32.wrap_i64
    local.set $12
@@ -5866,7 +5866,8 @@
     f64.add
     local.set $28
     local.get $14
-    i64.const 127
+    i32.const 127
+    i64.extend_i32_s
     i64.and
     i64.const 1
     i64.shl
@@ -5877,7 +5878,8 @@
     i64.extend_i32_u
     i64.add
     i64.const 52
-    i64.const 7
+    i32.const 7
+    i64.extend_i32_s
     i64.sub
     i64.shl
     local.set $13
@@ -6175,7 +6177,8 @@
    f64.add
    local.set $7
    local.get $6
-   i64.const 127
+   i32.const 127
+   i64.extend_i32_s
    i64.and
    i64.const 1
    i64.shl
@@ -6183,7 +6186,8 @@
    local.set $8
    local.get $6
    i64.const 52
-   i64.const 7
+   i32.const 7
+   i64.extend_i32_s
    i64.sub
    i64.shl
    local.set $9
@@ -6418,7 +6422,7 @@
   if
    i32.const 608
    i32.const 848
-   i32.const 1385
+   i32.const 1446
    i32.const 64
    call $~lib/builtins/abort
    unreachable
@@ -6544,7 +6548,8 @@
   end
   global.get $~lib/rt/itcms/total
   i64.extend_i32_u
-  i64.const 200
+  i32.const 200
+  i64.extend_i32_u
   i64.mul
   i64.const 100
   i64.div_u
@@ -6555,11 +6560,6 @@
   i32.const 0
   drop
   i32.const 0
-  if (result i32)
-   i32.const 1
-  else
-   i32.const 0
-  end
   drop
  )
  (func $~lib/rt/__visit_globals (param $0 i32)
@@ -8613,7 +8613,7 @@
   if
    i32.const 320
    i32.const 368
-   i32.const 64
+   i32.const 70
    i32.const 60
    call $~lib/builtins/abort
    unreachable
@@ -8635,10 +8635,10 @@
   call $~lib/rt/itcms/__new
   local.tee $5
   i32.store offset=4
-  local.get $5
-  i32.const 0
-  local.get $4
-  call $~lib/memory/memory.fill
+  i32.const 2
+  global.get $~lib/shared/runtime/Runtime.Incremental
+  i32.ne
+  drop
   local.get $0
   local.get $5
   call $~lib/array/Array<f64>#set:buffer
@@ -8982,7 +8982,7 @@
   if
    i32.const 320
    i32.const 7328
-   i32.const 18
+   i32.const 19
    i32.const 57
    call $~lib/builtins/abort
    unreachable
@@ -8996,10 +8996,10 @@
   call $~lib/rt/itcms/__new
   local.tee $3
   i32.store offset=4
-  local.get $3
-  i32.const 0
-  local.get $1
-  call $~lib/memory/memory.fill
+  i32.const 2
+  global.get $~lib/shared/runtime/Runtime.Incremental
+  i32.ne
+  drop
   local.get $0
   local.get $3
   call $~lib/arraybuffer/ArrayBufferView#set:buffer
