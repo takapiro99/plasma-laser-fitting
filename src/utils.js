@@ -142,74 +142,77 @@ export const readSpeData = async (input) => {
       };
       fr.onerror = reject;
       fr.readAsArrayBuffer(file);
-    })
+    });
   } catch (e) {
     alert("error reading data", e);
-    console.error(e.toString())
+    console.error(e.toString());
     return;
   }
-  const view = new DataView(rawArrayBuffer)
-  let _rawData = []
+  const view = new DataView(rawArrayBuffer);
+  let _rawData = [];
 
   const dataType = view.getInt16(108, true); // 3 little endian
-  const frame_width = view.getUint16(42, true) // from_bytes(b, "H", 42)
-  const frame_height = view.getUint16(656, true) // from_bytes(b, "H", 656)
-  const num_frames = view.getInt32(1446, true)
-  const count = frame_height * frame_width
+  const frame_width = view.getUint16(42, true); // from_bytes(b, "H", 42)
+  const frame_height = view.getUint16(656, true); // from_bytes(b, "H", 656)
+  const num_frames = view.getInt32(1446, true);
+  const count = frame_height * frame_width;
   if (num_frames !== 1) {
     if (!window.confirm(`フレームが ${num_frames}枚 あります。1枚目のみのプレビューとなりますがよいですか？`)) {
-      return
+      return;
     }
   }
   let viewFunc;
   let blockSize;
-  const dataOffset = 4100
+  const dataOffset = 4100;
   switch (dataType) {
     case 0: // float32
-      viewFunc = DataView.prototype.getFloat32
-      blockSize = 4
+      viewFunc = DataView.prototype.getFloat32;
+      blockSize = 4;
       break;
     case 1: // int32
-      viewFunc = DataView.prototype.getInt32
-      blockSize = 4
-      break
+      viewFunc = DataView.prototype.getInt32;
+      blockSize = 4;
+      break;
     case 2: // int16
-      viewFunc = DataView.prototype.getInt16
-      blockSize = 2
-      break
+      viewFunc = DataView.prototype.getInt16;
+      blockSize = 2;
+      break;
     case 3: // uint16
-      viewFunc = DataView.prototype.getUint16
-      blockSize = 2
-      break
+      viewFunc = DataView.prototype.getUint16;
+      blockSize = 2;
+      break;
     case 5: // float64
-      viewFunc = DataView.prototype.getFloat64
-      blockSize = 8
-      break
+      viewFunc = DataView.prototype.getFloat64;
+      blockSize = 8;
+      break;
     case 6: // uint8
-      viewFunc = DataView.prototype.getUint8
-      blockSize = 1
-      break
+      viewFunc = DataView.prototype.getUint8;
+      blockSize = 1;
+      break;
     case 8: // uint32
-      viewFunc = DataView.prototype.getUint32
-      blockSize = 4
-      break
+      viewFunc = DataView.prototype.getUint32;
+      blockSize = 4;
+      break;
     case 4:
     case 7:
     default:
-      throw Error(`unknown dataType. dataType:${dataType}`)
+      throw Error(`unknown dataType. dataType:${dataType}`);
   }
   for (let i = 0; i < count; i++) {
-    _rawData.push(viewFunc.call(view, dataOffset + i * blockSize, true))
+    _rawData.push(viewFunc.call(view, dataOffset + i * blockSize, true));
   }
-  let colCount = 0
-  let rowCount = 1
+  let colCount = 0;
+  let rowCount = 1;
   _rawData = _rawData.map((s) => {
-    if (colCount == frame_width) { colCount = 0; rowCount++ }
-    colCount++
-    return [colCount, rowCount, s]
-  })
+    if (colCount == frame_width) {
+      colCount = 0;
+      rowCount++;
+    }
+    colCount++;
+    return [colCount, rowCount, s];
+  });
   return [_rawData, file.name];
-}
+};
 
 export const drawData = (ctx, data, shouldUpdate = false) => {
   const D = document.getElementById("D").value; //# 逆線分散 (nm/mm)
@@ -337,5 +340,3 @@ export const linearInterp = (val, arr = datan19) => {
   // console.log(startX, val, endX, startY, answer, endY)
   return answer;
 };
-
-

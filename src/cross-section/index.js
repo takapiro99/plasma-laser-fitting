@@ -1,6 +1,5 @@
 import { readData, readSpeData } from "../utils";
 import { _r, _g, _b } from "./utils";
-// import * as d3 from "d3";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 
