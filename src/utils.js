@@ -316,6 +316,32 @@ export const getLocalStorage = (key) => {
   return value;
 };
 
+const execCopy = (string) => {
+  const tmp = document.createElement("div");
+  const pre = document.createElement('pre');
+  // 親要素のCSSで user-select: none だとコピーできないので書き換える
+  pre.style.userSelect = 'auto';
+  tmp.appendChild(pre).textContent = string;
+  tmp.style.position = 'fixed';
+  tmp.style.right = '200%';
+  document.body.appendChild(tmp);
+  document.getSelection().selectAllChildren(tmp);
+  const result = document.execCommand("copy");
+  document.body.removeChild(tmp);
+  return result;
+}
+
+export const copy = (target) => {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(target).then(() => {
+      showClipboardCopied()
+    })
+  } else {
+    execCopy(target)
+    showClipboardCopied()
+  }
+}
+
 const datan19 = [
   [0.5, 1.0, 1.5, 2.0, 5.0, 7.0, 10.0, 15.0, 23.0, 32.0, 52.0, 74.0, 100.0, 165.0, 235.0, 310.0, 390.0, 475.0, 655.0, 845.0, 1000.0, 1441.0, 1925.0, 2454.0, 3030.0, 3655.0, 4331.0, 5060.0, 5844.0, 6685.0, 7585.0, 8546.0, 10000.0, 20000.0, 50000.0, 100000.0],
   [0.00054005, 0.10523, 0.3871, 0.80533, 2.7098, 4.5245, 6.8702, 9.0401, 12.375, 14.065, 16.321, 17.305, 17.723, 18.661, 20.217, 21.977, 23.949, 26.482, 33.176, 34.816, 35.167, 35.67, 36.137, 36.83, 38.061, 40.154, 42.998, 46.144, 48.907, 50.689, 51.727, 52.385, 53.026, 56.187, 59.965, 61.208],

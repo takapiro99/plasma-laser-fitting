@@ -79,7 +79,7 @@
       <p id="fileName"></p>
       <div style="cursor: default; user-select: none;">
         <p id="dropZone"
-          style="text-align: center;height:150px;width:70%;background: lightyellow;line-height: 50px;margin:0 auto;border-radius:7px;transition: all .16s ease;line-height: 150px;font-size: 150%;">
+          style="text-align: center;height:150px;background: lightyellow;line-height: 50px;border-radius:7px;transition:all .16s ease;line-height:150px;font-size:150%;">
           or drop here</p>
       </div>
       <p id="input-file-status"></p>
@@ -91,13 +91,13 @@
           <div class="row">
             <div class="col xl9 s12" style="text-align: center;">
               <div>
-                <canvas id="previewCanvas" width="800" height="400"
+                <canvas id="previewCanvas" width="810" height="400"
                   style="border:2px solid grey;border-radius: 6px; cursor: move;background-color: snow;pointer-events:auto;">
                   図形を表示するには、canvasタグをサポートしたブラウザが必要です。
                 </canvas>
               </div>
               <div>
-                <canvas id="xAxisCanvas" width="800" height="70" style="background-color: grey;"></canvas>
+                <!-- <canvas id="xAxisCanvas" width="800" height="70" style="background-color: grey;"></canvas> -->
               </div>
             </div>
             <div class="col xl3 s12" style="padding-left: 20px;">
@@ -141,7 +141,8 @@
                     lines</button>
                 </div>
                 <div class="col s12">
-                  <button class="btn" disabled id="saveAsPng" onclick="saveAsPng()">
+                  <button class="btn" disabled id="saveAsPng"
+                    onclick="saveAsPng(`${window.fileName.substr(0, window.fileName.length - 4)}.png`)">
                     save as png
                   </button>
                 </div>
@@ -181,7 +182,7 @@
       <div id="distance"></div>
       <div style="height:100px"></div>
       <div>
-        <form onsubmit="event.preventDefault();downloadZip();">
+        <form onsubmit="event.preventDefalt();downloadZip();">
           <div>
             <h5>3. parameters</h5>
             <div class="grey-text">それぞれ 1~1024</div>
@@ -211,23 +212,20 @@
   </div>
   <div style="height:300px"></div>
 
+
   <script src="./cross-section.js"></script>
   <script>
     const dropZone = _id("dropZone")
-    const fileInput = _id("fileInput")
-    const previewCanvas = _id("previewCanvas")
 
     const canvas = _id('previewCanvas');
     const cc = canvas.getContext('2d');
 
-    // let dataMax, dataMin
-    // let scaleMax = dataMax
     let scaleMin = 0
 
     const rangeMin = _id("rangeMin")
-    const rangeMax = document.getElementById("rangeMax")
-    const rangeMinDisplay = document.getElementById("rangeMinDisplay")
-    const rangeMaxDisplay = document.getElementById("rangeMaxDisplay")
+    const rangeMax = _id("rangeMax")
+    const rangeMinDisplay = _id("rangeMinDisplay")
+    const rangeMaxDisplay = _id("rangeMaxDisplay")
 
     let lastX = canvas.width / 2
     let lastY = canvas.height / 2
@@ -237,53 +235,14 @@
       e.preventDefault();
     }
 
-    const execCopy = (string) => {
-      const tmp = document.createElement("div");
-      const pre = document.createElement('pre');
-      // 親要素のCSSで user-select: none だとコピーできないので書き換える
-      pre.style.webkitUserSelect = 'auto';
-      pre.style.userSelect = 'auto';
-      tmp.appendChild(pre).textContent = string;
-      tmp.style.position = 'fixed';
-      tmp.style.right = '200%';
-      document.body.appendChild(tmp);
-      document.getSelection().selectAllChildren(tmp);
-      const result = document.execCommand("copy");
-      document.body.removeChild(tmp);
-      return result;
-    }
-
-    const saveAsPng = () => {
-      let downloadLink = document.createElement('a');
-      downloadLink.setAttribute('download', `${window.fileName.substr(0, window.fileName.length - 4)}.png`);
-      // let canvas = document.getElementById('myCanvas');
-      canvas.toBlob(function (blob) {
-        let url = URL.createObjectURL(blob);
-        downloadLink.setAttribute('href', url);
-        downloadLink.click();
-      });
-    }
-
     const showClipboardCopied = () => {
       _id("copied").innerText = "copied!";
       setTimeout(() => { _id("copied").innerText = "" }, 1500)
     }
 
-    const copy = (target) => {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(target).then(() => {
-          showClipboardCopied()
-        })
-      } else {
-        execCopy(target)
-        showClipboardCopied()
-      }
-    }
-
     dropZone.addEventListener('dragover', (e) => {
       stop(e);
       e.target.style.background = '#a1a7f0';
-      // console.log(e)
     }, false);
 
     dropZone.addEventListener('dragleave', (e) => {
@@ -293,9 +252,10 @@
 
     dropZone.addEventListener('drop', async (e) => {
       stop(e)
-      e.target.style.background = 'lightyellow'; //背景色を白に戻す
+      e.target.style.background = 'lightyellow';
       const files = e.dataTransfer.files; //ドロップしたファイルを取得
       if (files.length !== 1) { return alert('アップロードできるファイルは1つだけです。'); }
+      const fileInput = _id("fileInput")
       fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
       const res = await inputFileAndDraw(fileInput)
       if (res) redraw()
@@ -308,7 +268,6 @@
 
 
     const draw = (x, y) => {
-      // console.log(x, y)
       cc.lineWidth = 0.2;
       cc.strokeStyle = 'rgba(250, 100, 50)';
       if (clickFlg == 1) {
@@ -381,7 +340,6 @@
     const zoom = (clicks) => {
       _dragStartX = _dragStartY = 0
       let prevScale = lastScale
-      const pt = cc.transformedPoint(lastX, lastY);
       lastScale *= Math.pow(scaleFactor, clicks);
       const shouldLockX = (canvas.width / 2 - anchorX) / prevScale
       const shouldLockY = (canvas.height / 2 - anchorY) / prevScale
@@ -419,6 +377,11 @@
       cc.stroke();
     }
     let ex_chart
+
+    const pixelToPm = (pixel) => {
+      return pixel * 2.34
+    }
+
     const checkForResult = () => {
       if (!firstLine.length || !secondLine.length) {
         copyData = null
@@ -427,25 +390,21 @@
         return
       }
       console.log('checkForResult')
-      // console.log(firstLine, secondLine)
       let realFirstLine = firstLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1]) // y, x
       let realSecondLine = secondLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1])
-      // console.log(realFirstLine, realSecondLine)
       const pixelMin = Math.max(realFirstLine[0][0], realSecondLine[0][0])
       const pixelMax = Math.min(realFirstLine[realFirstLine.length - 1][0], realSecondLine[realSecondLine.length - 1][0])
-      // console.log(pixelMin, pixelMax)
       realFirstLine = realFirstLine.filter(s => (s[0] >= pixelMin && s[0] <= pixelMax))
       realSecondLine = realSecondLine.filter(s => (s[0] >= pixelMin && s[0] <= pixelMax))
 
-      // console.log(realSecondLine, realFirstLine)
       distanceData = realFirstLine.map((s, i) => [s[0], s[1], realSecondLine[i][1]])
 
-      var ctx = document.getElementById('ex_chart');
+      let ctx = _id('ex_chart');
       var data = {
         labels: distanceData.map((s) => s[0]),
         datasets: [{
           label: 'preview',
-          data: distanceData.map((s) => s[2] - s[1]),
+          data: distanceData.map((s) => pixelToPm(s[2] - s[1])),
           borderColor: 'rgba(255, 100, 100, 1)'
         }]
       };
@@ -471,7 +430,6 @@
         return alert("Y軸で重なりませんでした")
       }
       copyRawData = realFirstLine.map((ele, i) => ([ele[0], ele[1], realSecondLine[i][1]].join("\t"))).join("\n")
-      // const target =
       _id("copy_buttons").innerHTML = `<button class="btn green" onclick='copy(copyData)'>copy</button><button class="btn btn-small grey" onclick='copy(copyRawData)'>copy raw</button><span id="copied"></span></p>`
       _id("distance").innerHTML = `<p>
         <table><thead><tr><th>pixelY(1 origin)</th><th>distance</th><th>center</th></tr></thead>
@@ -487,7 +445,6 @@
 
     canvas.addEventListener("mousedown",
       (evt) => {
-        // if (!data) return
         document.body.style.userSelect = "none";
         dragged = false;
         lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
@@ -500,14 +457,12 @@
           dragStart.y = dragStart.y * lastScale
           _dragStartX = dragStart.x
           _dragStartY = dragStart.y
-          // const pt = cc.transformedPoint(lastX, lastY);
         }
       }, false
     );
 
     canvas.addEventListener("mousemove",
       (evt) => {
-        // if (!data) return
         lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
         lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
         if (drawMode && clickFlg) {
@@ -517,8 +472,8 @@
         if (dragStart) {
           dragged = true;
           const pt = cc.transformedPoint(lastX, lastY);
-          const amountX = (pt.x - dragStart.x / lastScale) * lastScale
-          const amountY = (pt.y - dragStart.y / lastScale) * lastScale
+          const amountX = (pt.x * lastScale - dragStart.x)
+          const amountY = (pt.y * lastScale - dragStart.y)
           redraw(anchorX + amountX, anchorY + amountY)
         }
       }, false
@@ -526,7 +481,6 @@
 
     canvas.addEventListener("mouseup",
       (evt) => {
-        // if (!data) return
         document.body.style.userSelect = "text";
         // 線を書き終えた
         if (currentDrawingLineNum != null) {
@@ -546,7 +500,6 @@
               redraw()
               // return
             }
-            console.log(firstLine)
             changeMode("move")
           } else if (currentDrawingLineNum === 2) {
             secondLine = shrink(secondLine)
@@ -563,7 +516,6 @@
               redraw()
               // return
             }
-            console.log(secondLine)
             changeMode("move")
           } else {
             alert("no line?")
@@ -615,65 +567,9 @@
     canvas.addEventListener("DOMMouseScroll", handleScroll, false);
     canvas.addEventListener("mousewheel", handleScroll, false);
 
-    const trackTransforms = (ctx) => {
-      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      var xform = svg.createSVGMatrix();
-      ctx.getTransform = () => xform;
-      const savedTransforms = [];
-      const save = ctx.save;
-      ctx.save = () => {
-        savedTransforms.push(xform.translate(0, 0));
-        return save.call(ctx);
-      };
-      const restore = ctx.restore;
-      ctx.restore = () => {
-        xform = savedTransforms.pop();
-        return restore.call(ctx);
-      };
-      const scale = ctx.scale;
-      ctx.scale = (sx, sy) => {
-        xform = xform.scaleNonUniform(sx, sy);
-        return scale.call(ctx, sx, sy);
-      };
-      const translate = ctx.translate;
-      ctx.translate = (dx, dy) => {
-        xform = xform.translate(dx, dy);
-        return translate.call(ctx, dx, dy);
-      };
-      const transform = ctx.transform;
-      ctx.transform = (a, b, c, d, e, f) => {
-        var m2 = svg.createSVGMatrix();
-        m2.a = a;
-        m2.b = b;
-        m2.c = c;
-        m2.d = d;
-        m2.e = e;
-        m2.f = f;
-        xform = xform.multiply(m2);
-        return transform.call(ctx, a, b, c, d, e, f);
-      };
-      const setTransform = ctx.setTransform;
-      ctx.setTransform = (a, b, c, d, e, f) => {
-        xform.a = a;
-        xform.b = b;
-        xform.c = c;
-        xform.d = d;
-        xform.e = e;
-        xform.f = f;
-        return setTransform.call(ctx, a, b, c, d, e, f);
-      };
-      const pt = svg.createSVGPoint();
-      ctx.transformedPoint = (x, y) => {
-        pt.x = x;
-        pt.y = y;
-        return pt.matrixTransform(xform.inverse());
-      };
-    };
-
     trackTransforms(cc);
 
     const writeDrawedLine = (amountX, amountY) => {
-      // if (true) {
       if (firstLine.length) {
         clickFlg = 1
         for (let i = 0; i < firstLine.length; i++) {
@@ -702,9 +598,7 @@
     }
 
     const redraw = (_x, _y, scale = lastScale, color = colorMode) => {
-      // console.log("r")
-      // if (!data || !data.length) return?
-      // console.log(data)
+      if (typeof data === "undefined") return
       if (!_x && !_y) {
         _x = anchorX
         _y = anchorY

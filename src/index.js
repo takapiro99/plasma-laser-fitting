@@ -1,4 +1,4 @@
-import { readData, drawData, addData, wasmBrowserInstantiate, getLocalStorage, setLocalStorage, linearInterp } from "./utils";
+import { readData, drawData, addData, wasmBrowserInstantiate, getLocalStorage, setLocalStorage, linearInterp, copy } from "./utils";
 import { resetZoom } from "chartjs-plugin-zoom";
 import { exportAsExcel } from "./excel";
 
@@ -30,3 +30,4 @@ window.exportAsExcel = exportAsExcel;
 window.setLocalStorage = setLocalStorage;
 window.getLocalStorage = getLocalStorage;
 window.linearInterp = linearInterp;
+window.copy = copy;

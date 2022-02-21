@@ -1,24 +1,74 @@
-import { readData, readSpeData } from "../utils";
+import { readData, readSpeData, copy } from "../utils";
 import { _r, _g, _b } from "./utils";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 
+window._r = _r;
+window._g = _g;
+window._b = _b;
+
+window.copy = copy;
+
 let rawData = null;
 let rawFileName = null;
 
+const _id = (id) => document.getElementById(id);
+
 const sleep = async (msec) => new Promise((resolve) => setTimeout(resolve, msec));
+
+// https://gist.github.com/dzhang123/2a3a611b3d75a45a3f41
+// https://stackoverflow.com/questions/59352578/how-to-zoom-an-image-in-canvas-from-center-of-canvas
+const trackTransforms = (ctx) => {
+  var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  var xform = svg.createSVGMatrix();
+  const scale = ctx.scale;
+  ctx.scale = (sx, sy) => {
+    xform = xform.scaleNonUniform(sx, sy);
+    return scale.call(ctx, sx, sy);
+  };
+  const setTransform = ctx.setTransform;
+  ctx.setTransform = (a, b, c, d, e, f) => {
+    xform.a = a;
+    xform.b = b;
+    xform.c = c;
+    xform.d = d;
+    xform.e = e;
+    xform.f = f;
+    return setTransform.call(ctx, a, b, c, d, e, f);
+  };
+  const pt = svg.createSVGPoint();
+  ctx.transformedPoint = (x, y) => {
+    pt.x = x;
+    pt.y = y;
+    return pt.matrixTransform(xform.inverse());
+  };
+};
+
+window.trackTransforms = trackTransforms;
+
+const saveAsPng = (fileName) => {
+  let downloadLink = document.createElement("a");
+  downloadLink.setAttribute("download", fileName);
+  canvas.toBlob(function (blob) {
+    let url = URL.createObjectURL(blob);
+    downloadLink.setAttribute("href", url);
+    downloadLink.click();
+  });
+};
+
+window.saveAsPng = saveAsPng;
 
 const inputFileAndDraw = async (input) => {
   if (!input.files[0].name) {
     return alert("was not a file.");
   }
   const filenamechunk = input.files[0].name.split(".");
-  const fileExt = filenamechunk[filenamechunk.length - 1]
+  const fileExt = filenamechunk[filenamechunk.length - 1];
   if (!["txt", "SPE", "spe"].includes(fileExt)) {
     input.value = "";
     return alert(".txt 又は .SPE ファイルのみ対応しています");
   }
-  document.getElementById("input-file-status").innerHTML = "input running... please wait";
+  _id("input-file-status").innerHTML = "input running... please wait";
 
   sleep(80);
   try {
@@ -34,7 +84,7 @@ const inputFileAndDraw = async (input) => {
     rawData = data;
     rawFileName = fileName.slice(0, -4);
     window.rawData = data;
-    _id("fileName").innerText = fileName
+    _id("fileName").innerText = fileName;
     const graphData = data.map((s) => s[2]);
     if (graphData[graphData.length - 1] === undefined) {
       graphData.pop();
@@ -75,9 +125,9 @@ const downloadZip = () => {
     alert("input file first.");
     return;
   }
-  const min = document.getElementById("min").value - 0;
-  let max = document.getElementById("max").value - 0;
-  const step = document.getElementById("step").value - 0;
+  const min = _id("min").value - 0;
+  let max = _id("max").value - 0;
+  const step = _id("step").value - 0;
   if ((max - min + 1) % step !== 0) {
     if (
       !window.confirm(`${max - min + 1} elements is not indivisible by step: ${step}
@@ -144,14 +194,12 @@ over 100 sections will be aborted`);
 window.downloadZip = downloadZip;
 window.readData = readData;
 
-const _id = (id) => document.getElementById(id);
-
 const changeMode = (mode) => {
   console.log(mode);
   if (mode === "draw") {
     drawMode = true;
-    document.getElementById("draw").classList.add("active");
-    document.getElementById("move").classList.remove("active");
+    _id("draw").classList.add("active");
+    _id("move").classList.remove("active");
     canvas.style.cursor = "crosshair";
   } else if (mode === "move") {
     drawMode = false;
@@ -196,14 +244,6 @@ const changeMode = (mode) => {
 };
 
 window.changeMode = changeMode;
-
-// import { data } from "./data";
-
-// window.data = data;
-
-window._r = _r;
-window._g = _g;
-window._b = _b;
 
 const sum = (arr) => arr.reduce((a, b) => a + b);
 

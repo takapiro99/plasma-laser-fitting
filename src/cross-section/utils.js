@@ -1,3 +1,6 @@
+// color mode の配色は、gnuplot2 というもの
+// https://github.com/matplotlib/matplotlib/blob/f6e0ee49c598f59c6e6cf4eefe473e4dc634a58a/lib/matplotlib/_cm.py#L166
+
 export const _r = (intensity) => {
   const val = intensity / 0.32 - 0.78125;
   if (val <= 0) {
