@@ -7,8 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>cross section</title>
   <link rel="stylesheet" href="./assets/materialize.min.css" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="./assets/materialize.min.js"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let drawMode = false;
@@ -73,16 +73,16 @@
   <div class="container">
     <div>
       <p>
-      <h5 style="display: inline-block;margin-right:1em">1. select .txt or .SPE file</h5>
-      <input type="file" onchange="go(this)" accept=".txt,.SPE" id="fileInput" />
+      <h5>1. select .txt or .SPE file</h5>
+      <input type="file" onchange="onFileInput(this)" accept=".txt,.SPE" id="fileInput" />
       </p>
-      <p id="fileName"></p>
-      <div style="cursor: default; user-select: none;">
+      <p id="fileName" />
+      <div style="user-select:none;">
         <p id="dropZone"
           style="text-align: center;height:150px;background: lightyellow;line-height: 50px;border-radius:7px;transition:all .16s ease;line-height:150px;font-size:150%;">
           or drop here</p>
       </div>
-      <p id="input-file-status"></p>
+      <p id="input-file-status" />
     </div>
     <div id="console" style="pointer-events:none;color:lightgrey !important;">
       <div>
@@ -111,11 +111,11 @@
               </nav>
               <p>
                 <label>
-                  <input type="checkbox" oninput="colorMode = this.checked;redraw()" />
+                  <input type="checkbox" oninput="colorMode=this.checked;redraw()" />
                   <span>color mode</span>
                 </label>
               </p>
-              <div class="row lineIndicator" style="text-align: center;">
+              <div class="row lineIndicator" style="text-align:center;">
                 <div class="col s6">
                   <div><i class="material-icons green-text transparent" id="doneIcon1">done</i>1st line</div>
                   <button class="btn btn-flat" onclick="startDrawingLine(this, 1)" id="writeButton1">
@@ -135,10 +135,9 @@
                   </button>
                 </div>
                 <div class="col s12">
-                  <button
-                    onclick="deleteLine(_id('deleteButton1'), 1, true);deleteLine(_id('deleteButton2'), 2, true)">delete
-                    all
-                    lines</button>
+                  <button onclick="deleteLine(_id('deleteButton1'), 1, true);deleteLine(_id('deleteButton2'), 2, true)">
+                    delete all lines
+                  </button>
                 </div>
                 <div class="col s12">
                   <button class="btn" disabled id="saveAsPng"
@@ -146,29 +145,31 @@
                     save as png
                   </button>
                 </div>
-                <div class="col s12" id="copy_buttons"></div>
+                <div class="col s12" id="copy_buttons" />
               </div>
             </div>
           </div>
           <div style="font-size: 150%;">
             <span>x: </span>
-            <div id="xAxis" style="display: inline-block;margin-right:20px;font-weight: bold;">-</div>
+            <div id="xAxis" style="display:inline-block;margin-right:20px;font-weight:bold;">-</div>
             <span>y: </span>
-            <div id="yAxis" style="display: inline-block;margin-right:20px;font-weight: bold;">-</div>
+            <div id="yAxis" style="display:inline-block;margin-right:20px;font-weight:bold;">-</div>
             <span>intensity: </span>
-            <div id="intensity" style="display: inline-block;margin-right:20px;font-weight: bold;">-</div>
+            <div id="intensity" style="display:inline-block;margin-right:20px;font-weight:bold;">-</div>
+            <span>scale: </span>
+            <div id="scaleDisplay" style="display:inline-block;">-</div>
           </div>
           <div>
             <div>
               <label for="">min
                 <input type="range" id="rangeMin" style="width:80%">
-                <span id="rangeMinDisplay"></span>
+                <span id="rangeMinDisplay" />
               </label>
             </div>
             <div>
               <label for="">max
                 <input type="range" id="rangeMax" step="10" style="width:80%">
-                <span id="rangeMaxDisplay"></span>
+                <span id="rangeMaxDisplay" />
               </label>
             </div>
           </div>
@@ -212,7 +213,6 @@
   </div>
   <div style="height:300px"></div>
 
-
   <script src="./cross-section.js"></script>
   <script>
     const dropZone = _id("dropZone")
@@ -240,6 +240,7 @@
       setTimeout(() => { _id("copied").innerText = "" }, 1500)
     }
 
+    // drag and drop でファイル入力する処理
     dropZone.addEventListener('dragover', (e) => {
       stop(e);
       e.target.style.background = '#a1a7f0';
@@ -253,46 +254,42 @@
     dropZone.addEventListener('drop', async (e) => {
       stop(e)
       e.target.style.background = 'lightyellow';
-      const files = e.dataTransfer.files; //ドロップしたファイルを取得
+      const files = e.dataTransfer.files; // ドロップしたファイルを取得
       if (files.length !== 1) { return alert('アップロードできるファイルは1つだけです。'); }
       const fileInput = _id("fileInput")
-      fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
+      fileInput.files = files; // input の value をドラッグしたファイルに置き換える
       const res = await inputFileAndDraw(fileInput)
       if (res) redraw()
     }, false);
 
-    const go = async (input) => {
+    const onFileInput = async (input) => {
       const res = await inputFileAndDraw(input)
       if (res) redraw()
     }
 
 
+    // 手書きのオレンジの線の 1px ごとの描画
     const draw = (x, y) => {
       cc.lineWidth = 0.2;
       cc.strokeStyle = 'rgba(250, 100, 50)';
       if (clickFlg == 1) {
         clickFlg = 2;
         cc.beginPath();
-        // cc.lineCap = "round";  // 線を角丸にする
         cc.moveTo(x / lastScale, y / lastScale);
       } else {
         cc.lineTo(x / lastScale, y / lastScale);
       }
       cc.stroke();
-      // const xx = Math.round((x - anchorX) / lastScale)
       const xx = (x - anchorX) / lastScale
-      // const yy = (y - anchorY) / lastScale
       const yy = Math.round((y - anchorY) / lastScale - 0.5) + 0.5
       if (currentDrawingLineNum === 1) {
         firstLine.push([xx, yy])
       } else if (currentDrawingLineNum === 2) {
         secondLine.push([xx, yy])
-      } else {
-        // console.warn('?')
-        // alert("no")
       }
     };
 
+    // min, max の制御、表示
     rangeMinDisplay.innerText = rangeMin.value
     rangeMaxDisplay.innerText = rangeMax.value
     rangeMin.addEventListener('input', (e) => {
@@ -325,15 +322,10 @@
         e.disabled = true
         if (number === 1) {
           firstLine = []
-          changeMode("move")
         } else if (number === 2) {
           secondLine = []
-          changeMode("move")
-        } else {
-          alert("no mode")
         }
         redraw();
-        checkForResult();
       }
     }
 
@@ -376,6 +368,7 @@
       cc.lineTo(canvas.width / lastScale, yAxis);
       cc.stroke();
     }
+
     let ex_chart
 
     const pixelToPm = (pixel) => {
@@ -426,9 +419,7 @@
       });
 
       copyData = distanceData.map(d => ([d[0], Math.abs(d[1] - d[2]), Math.min(d[1], d[2]) + Math.abs(d[1] - d[2]) / 2].join("\t"))).join("\n")
-      if (!distanceData.length) {
-        return alert("Y軸で重なりませんでした")
-      }
+      if (!distanceData.length) return alert("Y軸で重なりませんでした")
       copyRawData = realFirstLine.map((ele, i) => ([ele[0], ele[1], realSecondLine[i][1]].join("\t"))).join("\n")
       _id("copy_buttons").innerHTML = `<button class="btn green" onclick='copy(copyData)'>copy</button><button class="btn btn-small grey" onclick='copy(copyRawData)'>copy raw</button><span id="copied"></span></p>`
       _id("distance").innerHTML = `<p>
@@ -443,7 +434,7 @@
       _id("saveAsPng").disabled = false
     }
 
-    canvas.addEventListener("mousedown",
+    canvas.addEventListener("pointerdown",
       (evt) => {
         document.body.style.userSelect = "none";
         dragged = false;
@@ -461,7 +452,7 @@
       }, false
     );
 
-    canvas.addEventListener("mousemove",
+    canvas.addEventListener("pointermove",
       (evt) => {
         lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
         lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
@@ -474,78 +465,69 @@
           const pt = cc.transformedPoint(lastX, lastY);
           const amountX = (pt.x * lastScale - dragStart.x)
           const amountY = (pt.y * lastScale - dragStart.y)
-          redraw(anchorX + amountX, anchorY + amountY)
+          redraw(anchorX + amountX, anchorY + amountY, dragging = true)
         }
       }, false
     );
 
-    canvas.addEventListener("mouseup",
+    canvas.addEventListener("pointerup",
       (evt) => {
         document.body.style.userSelect = "text";
-        // 線を書き終えた
-        if (currentDrawingLineNum != null) {
+        // 1. 線を書き終えた場合
+        if (drawMode && currentDrawingLineNum != null) {
           console.log("end drawing line")
           if (currentDrawingLineNum === 1) {
             firstLine = shrink(firstLine)
             if (!firstLine.length) {
+              firstLine = []
               alert("Y軸に重複がないようにお願いします")
+            } else if (!isContinuous(firstLine)) {
               firstLine = []
-              changeMode("move")
-              redraw()
-            }
-            if (!isContinuous(firstLine)) {
               alert("拡大するか、ゆっくり再描画してください")
-              firstLine = []
-              changeMode("move")
-              redraw()
-              // return
             }
-            changeMode("move")
+            console.log("textq2zz")
           } else if (currentDrawingLineNum === 2) {
             secondLine = shrink(secondLine)
             if (!secondLine.length) {
+              secondLine = []
               alert("Y軸に重複がないようにお願いします")
+            } else if (!isContinuous(secondLine)) {
               secondLine = []
-              changeMode("move")
-              redraw()
-            }
-            if (!isContinuous(secondLine)) {
               alert("拡大するか、ゆっくり再描画してください")
-              secondLine = []
-              changeMode("move")
-              redraw()
-              // return
             }
-            changeMode("move")
           } else {
             alert("no line?")
           }
-          checkForResult()
-          dragStart = null;
-          clickFlg = 0
-          currentDrawingLineNum = null
-          return
-        }
-        const pt = cc.transformedPoint(lastX, lastY);
-        const amountX = pt.x * lastScale - dragStart.x
-        const amountY = pt.y * lastScale - dragStart.y
-        anchorX += amountX
-        anchorY += amountY
-        // trigger pointer mode
-        if (!dragged) {
-          lastPixelX = pt.x - anchorX / lastScale
-          lastPixelY = pt.y - anchorY / lastScale
-          const roundedPixelX = Math.round(lastPixelX + 0.5)
-          const roundedPixelY = Math.round(lastPixelY + 0.5) // 謎調整
-          _id("xAxis").innerText = roundedPixelX
-          _id("yAxis").innerText = roundedPixelY
-          _id("intensity").innerText = roundedPixelX > 1024 ? "-" : data[(roundedPixelY - 1) * 1024 + roundedPixelX - 1] || "-"
-          redraw()
+          // return
+        } else {
+          // 2. move mode でドラッグした場合
+          lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
+          lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
+          const pt = cc.transformedPoint(lastX, lastY);
+          const amountX = pt.x * lastScale - dragStart.x
+          const amountY = pt.y * lastScale - dragStart.y
+          anchorX += amountX
+          anchorY += amountY
+          // 3. move mode で drag しなかった場合（十字を表示）
+          if (!dragged) {
+            console.log("show intensity and cross")
+            lastPixelX = pt.x - anchorX / lastScale
+            lastPixelY = pt.y - anchorY / lastScale
+            const roundedPixelX = Math.round(lastPixelX + 0.5)
+            const roundedPixelY = Math.round(lastPixelY + 0.5) // 謎調整
+            _id("xAxis").innerText = roundedPixelX
+            _id("yAxis").innerText = roundedPixelY
+            _id("intensity").innerText = roundedPixelX > 1024 ? "-" : data[(roundedPixelY - 1) * 1024 + roundedPixelX - 1] || "-"
+            // redraw()
+          }
         }
         dragStart = null;
-        dragged = false
-        clickFlg = 0
+        dragged = false;
+        clickFlg = 0;
+        currentDrawingLineNum = null
         changeMode("move")
+        redraw()
+        checkForResult()
       }, false
     );
 
@@ -559,6 +541,7 @@
         const amountY = pt.y * lastScale - dragStart.y
         dragged = false;
         dragStart = null;
+        currentDrawingLineNum = null;
         anchorX += amountX
         anchorY += amountY
       }
@@ -569,17 +552,22 @@
 
     trackTransforms(cc);
 
-    const writeDrawedLine = (amountX, amountY) => {
+    // 手書きで描いた線の描画
+    const writeDrawedLine = (dragging) => {
       if (firstLine.length) {
         clickFlg = 1
         for (let i = 0; i < firstLine.length; i++) {
           let [y, x] = firstLine[i]
           y = parseFloat(y)
           const pt = cc.transformedPoint(lastX, lastY);
-          let amountX = (pt.x - _dragStartX / lastScale) * lastScale
-          let amountY = (pt.y - _dragStartY / lastScale) * lastScale
-          if (_dragStartX == 0) amountX = amountY = 0
-          draw(Math.round(anchorX + x * lastScale + amountX), Math.round(anchorY + y * lastScale + amountY))
+          // draw(Math.round(anchorX + x * lastScale + amountX), Math.round(anchorY + y * lastScale + amountY))
+          if (dragging) {
+            let amountX = (pt.x - _dragStartX / lastScale) * lastScale
+            let amountY = (pt.y - _dragStartY / lastScale) * lastScale
+            draw(anchorX + x * lastScale + amountX + 0.5, anchorY + y * lastScale + amountY + 0.5)
+          } else {
+            draw(anchorX + x * lastScale + 0.5, anchorY + y * lastScale + 0.5)
+          }
         }
       }
       if (secondLine.length) {
@@ -588,16 +576,20 @@
           let [y, x] = secondLine[i]
           y = parseFloat(y)
           const pt = cc.transformedPoint(lastX, lastY);
-          let amountX = (pt.x - _dragStartX / lastScale) * lastScale
-          let amountY = (pt.y - _dragStartY / lastScale) * lastScale
-          if (_dragStartX == 0) amountX = amountY = 0
-          draw(anchorX + x * lastScale + amountX + 0.5, anchorY + y * lastScale + amountY + 0.5)
+          if (dragging) {
+            let amountX = (pt.x - _dragStartX / lastScale) * lastScale
+            let amountY = (pt.y - _dragStartY / lastScale) * lastScale
+            draw(anchorX + x * lastScale + amountX + 0.5, anchorY + y * lastScale + amountY + 0.5)
+          } else {
+            draw(anchorX + x * lastScale + 0.5, anchorY + y * lastScale + 0.5)
+          }
         }
       }
       clickFlg = 0
     }
 
-    const redraw = (_x, _y, scale = lastScale, color = colorMode) => {
+    // 描画
+    const redraw = (_x, _y, dragging = false, scale = lastScale, color = colorMode) => {
       if (typeof data === "undefined") return
       if (!_x && !_y) {
         _x = anchorX
@@ -635,7 +627,8 @@
       cc.scale(scale, scale);
       cc.drawImage(canvasInvisible, _x / lastScale, _y / lastScale);
       writeLine(_x - anchorX, _y - anchorY)
-      writeDrawedLine()
+      writeDrawedLine(dragging)
+      _id("scaleDisplay").innerText = parseInt(lastScale * 100) / 100
     };
   </script>
 </body>
