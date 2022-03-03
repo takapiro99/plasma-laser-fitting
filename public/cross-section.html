@@ -1,744 +1,829 @@
 <!DOCTYPE html>
 <html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cross section</title>
+    <link rel="stylesheet" href="./assets/materialize.min.css" />
+    <script src="./assets/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    <script>
+      let drawMode = false;
+      let clickFlg = 0;
+      let canvasMode = 0;
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>cross section</title>
-  <link rel="stylesheet" href="./assets/materialize.min.css" />
-  <script src="./assets/materialize.min.js"></script>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
-  <script>
-    let drawMode = false;
-    let clickFlg = 0;
-    let canvasMode = 0;
+      let anchorX = -3000;
+      let anchorY = -2800;
+      let lastScale = 6;
 
-    let anchorX = -3000
-    let anchorY = -2800
-    let lastScale = 6
+      let lastPixelX = (lastPixelY = -1);
+      const scaleFactor = 1.02;
 
-    let lastPixelX = lastPixelY = -1
-    const scaleFactor = 1.02;
+      let colorMode = false;
+      let dragStart, dragged;
+      let _dragStartX, _dragStartY;
 
-    let colorMode = false
-    let dragStart, dragged;
-    let _dragStartX, _dragStartY;
+      let firstLine = [];
+      let secondLine = [];
+      let currentDrawingLineNum = null;
 
-    let firstLine = [];
-    let secondLine = [];
-    let currentDrawingLineNum = null;
+      let selectBackgroundMode = false;
+      let selectingBackground = false;
+      let bgStartX, bgStartY, bgEndX, bgEndY;
 
-    let selectBackgroundMode = false
-    let selectingBackground = false
-    let bgStartX, bgStartY, bgEndX, bgEndY;
+      let distanceData;
 
-    let distanceData;
-
-    const _id = (id) => document.getElementById(id);
-  </script>
-  <style>
-    ul.left>li {
-      margin: 0 10px
-    }
-
-    .lineIndicator>div {
-      border: 2px solid rgba(100, 100, 100, 0.2);
-      border-radius: 6px;
-    }
-
-    @media only screen and (min-width: 993px) {
-      .container {
-        width: 90%;
+      const _id = (id) => document.getElementById(id);
+    </script>
+    <style>
+      ul.left > li {
+        margin: 0 10px;
       }
-    }
 
-    .btn-flat:hover {
-      background-color: rgba(100, 100, 100, .3) !important;
-    }
+      .lineIndicator > div {
+        border: 2px solid rgba(100, 100, 100, 0.2);
+        border-radius: 6px;
+      }
 
-    .transparent {
-      display: none;
-    }
-  </style>
-</head>
+      @media only screen and (min-width: 993px) {
+        .container {
+          width: 90%;
+        }
+      }
 
-<body class="grey lighten-3">
-  <nav class="deep-purple darken-2">
-    <div class="nav-wrapper">
-      <span class="brand-logo center">cross section / 解析</span>
-      <ul id="nav-mobile" class="right hide-on-small-and-down">
-        <li><a href="index.html"><b>fitting</b></a></li>
-        <li><a href="https://github.com/takapiro99/plasma-laser-fitting/">about</a></li>
-      </ul>
-    </div>
-  </nav>
-  <div class="container">
-    <div>
-      <p>
-        <!-- <h5>1. select .txt or .SPE file</h5> -->
-        <label for="fileInput">
-          <big>select file or drop</big>
-          <input type="file" onchange="onFileInput(this)" accept=".txt,.SPE" id="fileInput" />
-        </label>
-      </p>
-      <p id="fileName"></p>
-      <div style="user-select:none;">
-        <!-- <p id="dropZone"
+      .btn-flat:hover {
+        background-color: rgba(100, 100, 100, 0.3) !important;
+      }
+
+      .transparent {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body class="grey lighten-3">
+    <nav class="deep-purple darken-2">
+      <div class="nav-wrapper">
+        <span class="brand-logo center">cross section / 解析</span>
+        <ul id="nav-mobile" class="right hide-on-small-and-down">
+          <li>
+            <a href="index.html"><b>fitting</b></a>
+          </li>
+          <li>
+            <a href="https://github.com/takapiro99/plasma-laser-fitting/">about</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container">
+      <div>
+        <p>
+          <!-- <h5>1. select .txt or .SPE file</h5> -->
+          <label for="fileInput">
+            <big>select file or drop</big>
+            <input type="file" onchange="onFileInput(this)" accept=".txt,.SPE" id="fileInput" />
+          </label>
+        </p>
+        <p id="fileName"></p>
+        <div style="user-select: none">
+          <!-- <p id="dropZone"
           style="text-align: center;height:150px;background: lightyellow;border-radius:7px;line-height:150px;font-size:150%;">
           or drop here</p> -->
+        </div>
+        <p id="input-file-status"></p>
       </div>
-      <p id="input-file-status"></p>
-    </div>
-    <div id="console" style="pointer-events:none;color:lightgrey !important;">
-      <div>
-        <h5>preview</h5>
-        <div class="row">
-          <div class="col xl9 s12" style="text-align: center;">
-            <div>
-              <canvas id="previewCanvas" width="810" height="400"
-                style="border:2px solid grey;border-radius: 6px; cursor: move;background-color: snow;pointer-events:auto;transition:all .16s ease;">
-                図形を表示するには、canvasタグをサポートしたブラウザが必要です。
-              </canvas>
+      <div id="console" style="pointer-events: none; color: lightgrey !important">
+        <div>
+          <h5>preview</h5>
+          <div class="row">
+            <div class="col xl9 s12" style="text-align: center">
+              <div>
+                <canvas id="previewCanvas" width="810" height="400" style="border: 2px solid grey; border-radius: 6px; cursor: move; background-color: snow; pointer-events: auto; transition: all 0.16s ease">図形を表示するには、canvasタグをサポートしたブラウザが必要です。</canvas>
+              </div>
+              <div>
+                <!-- <canvas id="xAxisCanvas" width="800" height="70" style="background-color: grey;"></canvas> -->
+              </div>
+              <div class="row">
+                <div class="col s12" style="font-size: 150%">
+                  <span>x:</span>
+                  <div id="xAxis" style="display: inline-block; margin-right: 20px; font-weight: bold">-</div>
+                  <span>y:</span>
+                  <div id="yAxis" style="display: inline-block; margin-right: 20px; font-weight: bold">-</div>
+                  <span>intensity:</span>
+                  <div id="intensity" style="display: inline-block; margin-right: 20px; font-weight: bold">-</div>
+                  <span>scale:</span>
+                  <div id="scaleDisplay" style="display: inline-block">-</div>
+                </div>
+                <div>
+                  <div>
+                    <label for="rangeMin">
+                      min
+                      <input type="range" id="rangeMin" style="width: 80%" />
+                      <span id="rangeMinDisplay"></span>
+                    </label>
+                  </div>
+                  <div>
+                    <label for="rangeMax">
+                      max
+                      <input type="range" id="rangeMax" step="10" style="width: 80%" />
+                      <span id="rangeMaxDisplay"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <!-- <canvas id="xAxisCanvas" width="800" height="70" style="background-color: grey;"></canvas> -->
+            <div class="col xl3 s12" style="padding: 0 0 0 15px">
+              <nav style="display: none; width: auto">
+                <div class="nav-wrapper grey lighten-1 black-text">
+                  <ul class="left">
+                    <li id="move" class="active">
+                      <a onclick="changeMode('move')">move</a>
+                    </li>
+                    <li id="draw" disabled>
+                      <a disabled onclick="alert('click edit icon below')">draw</a>
+                    </li>
+                  </ul>
+                </div>
+              </nav>
+              <p>
+                <label>
+                  <input type="checkbox" oninput="colorMode=this.checked;redraw()" />
+                  <span>color mode</span>
+                </label>
+              </p>
+              <div class="row lineIndicator" style="text-align: center">
+                <div class="col s6">
+                  <div>
+                    <i class="material-icons green-text transparent" id="doneIcon1">done</i>
+                    1st line
+                  </div>
+                  <button class="btn btn-flat" onclick="startDrawingLine(this, 1)" id="writeButton1">
+                    <i class="material-icons grey-text text-darken-2" id="writeIcon1">create</i>
+                  </button>
+                  <button class="btn btn-flat" disabled id="deleteButton1" onclick="deleteLine(this, 1)">
+                    <i class="material-icons grey-text" id="deleteIcon1">delete</i>
+                  </button>
+                </div>
+                <div class="col s6">
+                  <div>
+                    <i class="material-icons green-text transparent" id="doneIcon2">done</i>
+                    2nd line
+                  </div>
+                  <button class="btn btn-flat" onclick="startDrawingLine(this, 2)" id="writeButton2">
+                    <i class="material-icons grey-text text-darken-2" id="writeIcon2">create</i>
+                  </button>
+                  <button class="btn btn-flat" disabled id="deleteButton2" onclick="deleteLine(this, 2)">
+                    <i class="material-icons grey-text" id="deleteIcon2">delete</i>
+                  </button>
+                </div>
+                <div class="col s12">
+                  <button onclick="deleteLine(_id('deleteButton1'), 1, true);deleteLine(_id('deleteButton2'), 2, true)">delete all lines</button>
+                </div>
+                <div class="col s12">
+                  <button class="btn" disabled id="saveAsPng" onclick="saveAsPng(`${window.fileName.substr(0, window.fileName.length - 4)}.png`)">save as png</button>
+                </div>
+                <div class="col s12" id="copy_buttons"></div>
+              </div>
+              <details open style="width: 100%">
+                <summary>密度の算出</summary>
+
+                <h6>
+                  1. BG の範囲の矩形選択
+                  <i class="material-icons green-text transparent" id="doneIcon3">done</i>
+                </h6>
+                <div>
+                  <button class="btn btn-flat" onclick="startSelectBG(this)" id="writeButton3">
+                    <i class="material-icons grey-text text-darken-2" id="writeIcon3">create</i>
+                  </button>
+                  <button class="btn btn-flat" disabled id="deleteButton3" onclick="deleteBG(this)">
+                    <i class="material-icons grey-text" id="deleteIcon3">delete</i>
+                  </button>
+                </div>
+                <h6>2. 積算範囲の選択</h6>
+                <div>
+                  囲って選択してください（始点と終点が結ばれます）
+                  <div>
+                    <button class="btn btn-flat" onclick="startSelectBG(this)" id="writeButton4">
+                      <i class="material-icons grey-text text-darken-2" id="writeIcon4">create</i>
+                    </button>
+                    <button class="btn btn-flat" disabled id="deleteButton4" onclick="">
+                      <i class="material-icons grey-text" id="deleteIcon4">delete</i>
+                    </button>
+                  </div>
+                </div>
+                <div class="dropZone2" style="width: 110%; height: 100px; line-height: 50px; text-align: center; background: lightgoldenrodyellow; border-radius: 6px; padding: 5px">
+                  <span style="line-height: 1.3rem">
+                    <label for="RlInput" style="color: #222 !important">
+                      <h6>
+                        3. レイリー散乱のファイル
+                        <br />
+                        をドロップ
+                      </h6>
+                      <big>or</big>
+                      <input type="file" id="RlInput" />
+                    </label>
+                  </span>
+                </div>
+                <h6>4. 設定</h6>
+                <div>
+                  <label for="RlAcc">
+                    レイリーの積算数
+                    <input type="number" value="100" id="RlAcc" />
+                  </label>
+                  <label for="TSAcc">
+                    トムソン散乱の積算数
+                    <input type="number" value="3" id="TSAcc" />
+                  </label>
+                </div>
+              </details>
             </div>
-          </div>
-          <div class="col xl3 s12" style="padding-left: 15px;">
-            <nav style="display:inline-block;width:auto">
-              <div class="nav-wrapper grey lighten-1 black-text">
-                <ul class="left">
-                  <li id="move" class="active"><a onclick="changeMode('move')">move</a></li>
-                  <li id="draw" disabled><a disabled onclick="alert('click edit icon below')">draw</a></li>
-                </ul>
-              </div>
-            </nav>
-            <p>
-              <label>
-                <input type="checkbox" oninput="colorMode=this.checked;redraw()" />
-                <span>color mode</span>
-              </label>
-            </p>
-            <div class="row lineIndicator" style="text-align:center;">
-              <div class="col s6">
-                <div><i class="material-icons green-text transparent" id="doneIcon1">done</i>1st line</div>
-                <button class="btn btn-flat" onclick="startDrawingLine(this, 1)" id="writeButton1">
-                  <i class="material-icons grey-text text-darken-2" id="writeIcon1">create</i>
-                </button>
-                <button class="btn btn-flat" disabled id="deleteButton1" onclick="deleteLine(this, 1)">
-                  <i class="material-icons grey-text" id="deleteIcon1">delete</i>
-                </button>
-              </div>
-              <div class="col s6">
-                <div><i class="material-icons green-text transparent" id="doneIcon2">done</i>2nd line</div>
-                <button class="btn btn-flat" onclick="startDrawingLine(this, 2)" id="writeButton2">
-                  <i class="material-icons grey-text text-darken-2" id="writeIcon2">create</i>
-                </button>
-                <button class="btn btn-flat" disabled id="deleteButton2" onclick="deleteLine(this, 2)">
-                  <i class="material-icons grey-text" id="deleteIcon2">delete</i>
-                </button>
-              </div>
-              <div class="col s12">
-                <button onclick="deleteLine(_id('deleteButton1'), 1, true);deleteLine(_id('deleteButton2'), 2, true)">
-                  delete all lines
-                </button>
-              </div>
-              <div class="col s12">
-                <button class="btn" disabled id="saveAsPng"
-                  onclick="saveAsPng(`${window.fileName.substr(0, window.fileName.length - 4)}.png`)">
-                  save as png
-                </button>
-              </div>
-              <div class="col s12" id="copy_buttons"></div>
-            </div>
-            <details open style="width:100%">
-              <summary>密度の算出</summary>
-              <h6>1. レイリー散乱のファイル</h6>
-              <p>あああ</p>
-              <h6>2. BG の範囲の矩形選択</h6>
-              <div class="col s6">
-                <div><i class="material-icons green-text transparent" id="doneIcon3">done</i></div>
-                <button class="btn btn-flat" onclick="startSelectBG(this)" id="writeButton3">
-                  <i class="material-icons grey-text text-darken-2" id="writeIcon3">create</i>
-                </button>
-                <button class="btn btn-flat" disabled id="deleteButton3" onclick="deleteBG(this)">
-                  <i class="material-icons grey-text" id="deleteIcon3">delete</i>
-                </button>
-              </div>
-            </details>
           </div>
         </div>
 
-        <div class="row">
-          <div class="col s12" style="font-size: 150%;">
-            <span>x: </span>
-            <div id="xAxis" style="display:inline-block;margin-right:20px;font-weight:bold;">-</div>
-            <span>y: </span>
-            <div id="yAxis" style="display:inline-block;margin-right:20px;font-weight:bold;">-</div>
-            <span>intensity: </span>
-            <div id="intensity" style="display:inline-block;margin-right:20px;font-weight:bold;">-</div>
-            <span>scale: </span>
-            <div id="scaleDisplay" style="display:inline-block;">-</div>
-          </div>
-          <div>
-            <div>
-              <label for="rangeMin">min
-                <input type="range" id="rangeMin" style="width:80%">
-                <span id="rangeMinDisplay"></span>
-              </label>
-            </div>
-            <div>
-              <label for="rangeMax">max
-                <input type="range" id="rangeMax" step="10" style="width:80%">
-                <span id="rangeMaxDisplay"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- <label for="">
+        <!-- <label for="">
         center pixel
         <input type="text">
       </label> -->
-      <div class="ev-result row">
-        <div class="col s6">
-          <canvas id="ex_chart" width="800" height="250"></canvas>
-          <div id="distance"></div>
-        </div>
-        <div class="n-result col s6"></div>
-      </div>
-      <div style="height:100px"></div>
-
-      <!-- 上で input したファイルを分割できるコーナー -->
-      <div class="split-to-zip">
-        <h5>上で input したファイルを分割できるコーナー</h5>
-        <br>
-        <form onsubmit="event.preventDefalt();downloadZip();">
-          <div>
-            <div class="grey-text">それぞれ 1~1024</div>
-            <div class="row">
-              <p class="col s4">
-                <label for="min">from<input type="number" name="min" value="490" id='min' min="1" max="1024"></label>
-              </p>
-              <p class="col s4">
-                <label for="max">to<input type="number" name="max" id="max" value="500" min="1" max="1024"></label>
-              </p>
-              <p class="col s4">
-                <label for="step">step<input type="number" name="step" id="step" value="1" min="1" max="1024"></label>
-              </p>
-            </div>
-            <p class="grey-text">output will be calculated as average</p>
-            <button type="submit" id="downloadButton"
-              class="waves-effect waves-light btn-small indigo disabled">download as zip</button>
+        <div class="ev-result row">
+          <div class="col s6">
+            <canvas id="ex_chart" width="800" height="250"></canvas>
+            <div id="distance"></div>
           </div>
-        </form>
+          <div class="n-result col s6"></div>
+        </div>
+        <div style="height: 100px"></div>
+
+        <!-- 上で input したファイルを分割できるコーナー -->
+        <div class="split-to-zip">
+          <h5>上で input したファイルを分割できるコーナー</h5>
+          <br />
+          <form onsubmit="event.preventDefalt();downloadZip();">
+            <div>
+              <div class="grey-text">それぞれ 1~1024</div>
+              <div class="row">
+                <p class="col s4">
+                  <label for="min">
+                    from
+                    <input type="number" name="min" value="490" id="min" min="1" max="1024" />
+                  </label>
+                </p>
+                <p class="col s4">
+                  <label for="max">
+                    to
+                    <input type="number" name="max" id="max" value="500" min="1" max="1024" />
+                  </label>
+                </p>
+                <p class="col s4">
+                  <label for="step">
+                    step
+                    <input type="number" name="step" id="step" value="1" min="1" max="1024" />
+                  </label>
+                </p>
+              </div>
+              <p class="grey-text">output will be calculated as average</p>
+              <button type="submit" id="downloadButton" class="waves-effect waves-light btn-small indigo disabled">download as zip</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
-  <div style="height:300px"></div>
+    <div style="height: 300px"></div>
 
-  <script src="./cross-section.js"></script>
-  <script>
-    // const dropZone = _id("dropZone")
-    const dropZone = _id("previewCanvas")
+    <script src="./cross-section.js"></script>
+    <script>
+      // const dropZone = _id("dropZone")
+      const dropZone = _id('previewCanvas');
+      const dropZone2 = _id('dropZone2');
 
-    const canvas = _id('previewCanvas');
-    const cc = canvas.getContext('2d');
-    // drop here の描画
-    cc.font = "25px Sans";
-    cc.fillStyle = "#aaa";
-    cc.textAlign = "center"
-    cc.fillText("drop file here", 810 / 2, 400 / 2);
+      const canvas = _id('previewCanvas');
+      const cc = canvas.getContext('2d');
+      // drop here の描画
+      cc.font = '25px Sans';
+      cc.fillStyle = '#aaa';
+      cc.textAlign = 'center';
+      cc.fillText('drop file here', 810 / 2, 400 / 2);
 
-    const rangeMin = _id("rangeMin")
-    const rangeMax = _id("rangeMax")
-    const rangeMinDisplay = _id("rangeMinDisplay")
-    const rangeMaxDisplay = _id("rangeMaxDisplay")
+      const rangeMin = _id('rangeMin');
+      const rangeMax = _id('rangeMax');
+      const rangeMinDisplay = _id('rangeMinDisplay');
+      const rangeMaxDisplay = _id('rangeMaxDisplay');
 
-    let lastX = canvas.width / 2
-    let lastY = canvas.height / 2
+      let lastX = canvas.width / 2;
+      let lastY = canvas.height / 2;
 
-    const stop = (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-    }
-
-    const showClipboardCopied = () => {
-      _id("copied").innerText = "copied!";
-      setTimeout(() => { _id("copied").innerText = "" }, 1500)
-    }
-
-    // drag and drop でファイル入力する処理
-    dropZone.addEventListener('dragover', (e) => {
-      stop(e);
-      e.target.style.background = '#a1a7f0';
-    }, false);
-
-    dropZone.addEventListener('dragleave', (e) => {
-      stop(e)
-      e.target.style.background = 'snow';
-    }, false);
-
-    dropZone.addEventListener('drop', async (e) => {
-      stop(e)
-      const files = e.dataTransfer.files; // ドロップしたファイルを取得
-      if (files.length !== 1) { return alert('アップロードできるファイルは1つだけです。'); }
-      const fileInput = _id("fileInput")
-      fileInput.files = files; // input の value をドラッグしたファイルに置き換える
-      const res = await inputFileAndDraw(fileInput)
-      e.target.style.background = 'snow';
-      if (res) redraw()
-    }, false);
-
-    const onFileInput = async (input) => {
-      const res = await inputFileAndDraw(input)
-      if (res) redraw()
-    }
-
-
-    // 手書きのオレンジの線の 1px ごとの描画
-    const draw = (x, y) => {
-      cc.lineWidth = 0.2;
-      cc.strokeStyle = 'rgba(250, 100, 50)';
-      if (clickFlg == 1) {
-        clickFlg = 2;
-        cc.beginPath();
-        cc.moveTo(x / lastScale, y / lastScale);
-      } else {
-        cc.lineTo(x / lastScale, y / lastScale);
-      }
-      cc.stroke();
-      const xx = (x - anchorX) / lastScale
-      const yy = Math.round((y - anchorY) / lastScale - 0.5) + 0.5
-      if (currentDrawingLineNum === 1) {
-        firstLine.push([xx, yy])
-      } else if (currentDrawingLineNum === 2) {
-        secondLine.push([xx, yy])
-      }
-    };
-
-    // min, max の制御、表示
-    rangeMinDisplay.innerText = rangeMin.value
-    rangeMaxDisplay.innerText = rangeMax.value
-    rangeMin.addEventListener('input', (e) => {
-      rangeMinDisplay.innerText = e.target.value
-      redraw()
-    })
-    rangeMax.addEventListener('input', (e) => {
-      rangeMaxDisplay.innerText = e.target.value
-      redraw()
-    })
-
-    const changeClassName = (ele, before, after) => {
-      ele.classList.remove(before)
-      ele.classList.add(after)
-    }
-
-    const startDrawingLine = (e, number) => {
-      e.disabled = true
-      changeClassName(e.firstElementChild, "grey-text", "light-blue-text")
-      changeMode("draw")
-      currentDrawingLineNum = number
-    }
-
-    const deleteLine = (e, number, deleteImmediately = false) => {
-      let res = true
-      if (!deleteImmediately) {
-        res = window.confirm(`本当に ${number} 本目の線を消しますか？`)
-      }
-      if (res) {
-        e.disabled = true
-        if (number === 1) {
-          firstLine = []
-        } else if (number === 2) {
-          secondLine = []
-        }
-        redraw();
-      }
-    }
-
-    const deleteBG = (e) => {
-      e.disabled = true;
-      bgStartX = bgStartY = bgEndX = bgEndY = undefined;
-      _id("writeButton3").disabled = false
-      redraw()
-    }
-
-    const startSelectBG = (e) => {
-      e.disabled = true
-      changeClassName(e.firstElementChild, "grey-text", "light-blue-text")
-      changeMode("selectBackground")
-    }
-
-    const zoom = (clicks) => {
-      _dragStartX = _dragStartY = 0
-      let prevScale = lastScale
-      lastScale *= Math.pow(scaleFactor, clicks);
-      const shouldLockX = (canvas.width / 2 - anchorX) / prevScale
-      const shouldLockY = (canvas.height / 2 - anchorY) / prevScale
-      const deltaX = shouldLockX * (lastScale - prevScale)
-      const deltaY = shouldLockY * (lastScale - prevScale)
-      anchorX -= deltaX
-      anchorY -= deltaY
-      redraw();
-    };
-
-    const handleScroll = (evt) => {
-      lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
-      lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
-      const delta = evt.wheelDelta
-        ? evt.wheelDelta / 40
-        : evt.detail
-          ? -evt.detail
-          : 0;
-      if (delta) zoom(delta);
-      return evt.preventDefault() && false;
-    };
-
-    const writeLine = (_amountX = 0, _amountY = 0) => {
-      // console.log(lastPixelX)
-      cc.lineWidth = 1.2 / lastScale;
-      cc.strokeStyle = '#fff176';
-      const xAxis = anchorX / lastScale + lastPixelX + _amountX / lastScale
-      const yAxis = anchorY / lastScale + lastPixelY + _amountY / lastScale
-      cc.beginPath();
-      cc.moveTo(xAxis, 0);
-      cc.lineTo(xAxis, canvas.height / lastScale);
-      cc.stroke();
-      cc.beginPath();
-      cc.moveTo(0, yAxis);
-      cc.lineTo(canvas.width / lastScale, yAxis);
-      cc.stroke();
-    }
-
-    let ex_chart
-
-    const pixelToPm = (pixel) => {
-      return pixel * 2.34
-    }
-
-    const checkForResult = () => {
-      if (!firstLine.length || !secondLine.length) {
-        copyData = null
-        _id("distance").innerHTML = ""
-        _id("saveAsPng").disabled = true
-        return
-      }
-      console.log('checkForResult')
-      let realFirstLine = firstLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1]) // y, x
-      let realSecondLine = secondLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1])
-      const pixelMin = Math.max(realFirstLine[0][0], realSecondLine[0][0])
-      const pixelMax = Math.min(realFirstLine[realFirstLine.length - 1][0], realSecondLine[realSecondLine.length - 1][0])
-      realFirstLine = realFirstLine.filter(s => (s[0] >= pixelMin && s[0] <= pixelMax))
-      realSecondLine = realSecondLine.filter(s => (s[0] >= pixelMin && s[0] <= pixelMax))
-
-      distanceData = realFirstLine.map((s, i) => [s[0], s[1], realSecondLine[i][1]])
-
-      let ctx = _id('ex_chart');
-      var data = {
-        labels: distanceData.map((s) => s[0]),
-        datasets: [{
-          label: 'preview',
-          data: distanceData.map((s) => pixelToPm(s[2] - s[1])),
-          borderColor: 'rgba(255, 100, 100, 1)'
-        }]
+      const stop = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
       };
-      var options = {
-        animation: {
-          numbers: { duration: 0 },
-          colors: {
-            type: "color",
-            duration: 500,
-            from: "transparent",
-          },
+
+      const showClipboardCopied = () => {
+        _id('copied').innerText = 'copied!';
+        setTimeout(() => {
+          _id('copied').innerText = '';
+        }, 1500);
+      };
+
+      // drag and drop でファイル入力する処理
+      dropZone.addEventListener(
+        'dragover',
+        (e) => {
+          stop(e);
+          e.target.style.background = '#a1a7f0';
         },
+        false
+      );
+
+      dropZone.addEventListener(
+        'dragleave',
+        (e) => {
+          stop(e);
+          e.target.style.background = 'snow';
+        },
+        false
+      );
+
+      dropZone.addEventListener(
+        'drop',
+        async (e) => {
+          stop(e);
+          const files = e.dataTransfer.files; // ドロップしたファイルを取得
+          if (files.length !== 1) {
+            return alert('アップロードできるファイルは1つだけです。');
+          }
+          const fileInput = _id('fileInput');
+          fileInput.files = files; // input の value をドラッグしたファイルに置き換える
+          const res = await inputFileAndDraw(fileInput);
+          e.target.style.background = 'snow';
+          if (res) redraw();
+        },
+        false
+      );
+
+      const onFileInput = async (input) => {
+        const res = await inputFileAndDraw(input);
+        if (res) redraw();
       };
-      if (ex_chart) ex_chart.destroy()
-      ex_chart = new Chart(ctx, {
-        type: 'line',
-        data: data,
-        options: options
+
+      // 手書きのオレンジの線の 1px ごとの描画
+      const draw = (x, y) => {
+        cc.lineWidth = 0.2;
+        cc.strokeStyle = 'rgba(250, 100, 50)';
+        if (clickFlg == 1) {
+          clickFlg = 2;
+          cc.beginPath();
+          cc.moveTo(x / lastScale, y / lastScale);
+        } else {
+          cc.lineTo(x / lastScale, y / lastScale);
+        }
+        cc.stroke();
+        const xx = (x - anchorX) / lastScale;
+        const yy = Math.round((y - anchorY) / lastScale - 0.5) + 0.5;
+        if (currentDrawingLineNum === 1) {
+          firstLine.push([xx, yy]);
+        } else if (currentDrawingLineNum === 2) {
+          secondLine.push([xx, yy]);
+        }
+      };
+
+      // min, max の制御、表示
+      rangeMinDisplay.innerText = rangeMin.value;
+      rangeMaxDisplay.innerText = rangeMax.value;
+      rangeMin.addEventListener('input', (e) => {
+        rangeMinDisplay.innerText = e.target.value;
+        redraw();
+      });
+      rangeMax.addEventListener('input', (e) => {
+        rangeMaxDisplay.innerText = e.target.value;
+        redraw();
       });
 
-      copyData = distanceData.map(d => ([d[0], Math.abs(d[1] - d[2]), Math.min(d[1], d[2]) + Math.abs(d[1] - d[2]) / 2].join("\t"))).join("\n")
-      if (!distanceData.length) return alert("Y軸で重なりませんでした")
-      copyRawData = realFirstLine.map((ele, i) => ([ele[0], ele[1], realSecondLine[i][1]].join("\t"))).join("\n")
-      _id("copy_buttons").innerHTML = `<button class="btn green" onclick='copy(copyData)'>copy</button><button class="btn btn-small grey" onclick='copy(copyRawData)'>copy raw</button><span id="copied"></span></p>`
-      _id("distance").innerHTML = `<p>
+      const changeClassName = (ele, before, after) => {
+        ele.classList.remove(before);
+        ele.classList.add(after);
+      };
+
+      const startDrawingLine = (e, number) => {
+        e.disabled = true;
+        changeClassName(e.firstElementChild, 'grey-text', 'light-blue-text');
+        changeMode('draw');
+        currentDrawingLineNum = number;
+      };
+
+      const deleteLine = (e, number, deleteImmediately = false) => {
+        let res = true;
+        if (!deleteImmediately) {
+          res = window.confirm(`本当に ${number} 本目の線を消しますか？`);
+        }
+        if (res) {
+          e.disabled = true;
+          if (number === 1) {
+            firstLine = [];
+          } else if (number === 2) {
+            secondLine = [];
+          }
+          redraw();
+        }
+      };
+
+      const deleteBG = (e) => {
+        e.disabled = true;
+        bgStartX = bgStartY = bgEndX = bgEndY = undefined;
+        _id('writeButton3').disabled = false;
+        redraw();
+      };
+
+      const startSelectBG = (e) => {
+        e.disabled = true;
+        changeClassName(e.firstElementChild, 'grey-text', 'light-blue-text');
+        changeMode('selectBackground');
+      };
+
+      const zoom = (clicks) => {
+        _dragStartX = _dragStartY = 0;
+        let prevScale = lastScale;
+        lastScale *= Math.pow(scaleFactor, clicks);
+        const shouldLockX = (canvas.width / 2 - anchorX) / prevScale;
+        const shouldLockY = (canvas.height / 2 - anchorY) / prevScale;
+        const deltaX = shouldLockX * (lastScale - prevScale);
+        const deltaY = shouldLockY * (lastScale - prevScale);
+        anchorX -= deltaX;
+        anchorY -= deltaY;
+        redraw();
+      };
+
+      const handleScroll = (evt) => {
+        lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
+        lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
+        const delta = evt.wheelDelta ? evt.wheelDelta / 40 : evt.detail ? -evt.detail : 0;
+        if (delta) zoom(delta);
+        return evt.preventDefault() && false;
+      };
+
+      const writeLine = (_amountX = 0, _amountY = 0) => {
+        // console.log(lastPixelX)
+        cc.lineWidth = 1.2 / lastScale;
+        cc.strokeStyle = '#fff176';
+        const xAxis = anchorX / lastScale + lastPixelX + _amountX / lastScale;
+        const yAxis = anchorY / lastScale + lastPixelY + _amountY / lastScale;
+        cc.beginPath();
+        cc.moveTo(xAxis, 0);
+        cc.lineTo(xAxis, canvas.height / lastScale);
+        cc.stroke();
+        cc.beginPath();
+        cc.moveTo(0, yAxis);
+        cc.lineTo(canvas.width / lastScale, yAxis);
+        cc.stroke();
+      };
+
+      let ex_chart;
+
+      const pixelToPm = (pixel) => {
+        return pixel * 2.34;
+      };
+
+      const checkForResult = () => {
+        if (!firstLine.length || !secondLine.length) {
+          copyData = null;
+          _id('distance').innerHTML = '';
+          _id('saveAsPng').disabled = true;
+          return;
+        }
+        console.log('checkForResult');
+        let realFirstLine = firstLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1]); // y, x
+        let realSecondLine = secondLine.map((s) => [parseFloat(s[0]) + 0.5, s[1] + 1]);
+        const pixelMin = Math.max(realFirstLine[0][0], realSecondLine[0][0]);
+        const pixelMax = Math.min(realFirstLine[realFirstLine.length - 1][0], realSecondLine[realSecondLine.length - 1][0]);
+        realFirstLine = realFirstLine.filter((s) => s[0] >= pixelMin && s[0] <= pixelMax);
+        realSecondLine = realSecondLine.filter((s) => s[0] >= pixelMin && s[0] <= pixelMax);
+
+        distanceData = realFirstLine.map((s, i) => [s[0], s[1], realSecondLine[i][1]]);
+
+        let ctx = _id('ex_chart');
+        var data = {
+          labels: distanceData.map((s) => s[0]),
+          datasets: [
+            {
+              label: 'preview',
+              data: distanceData.map((s) => pixelToPm(s[2] - s[1])),
+              borderColor: 'rgba(255, 100, 100, 1)'
+            }
+          ]
+        };
+        var options = {
+          animation: {
+            numbers: { duration: 0 },
+            colors: {
+              type: 'color',
+              duration: 500,
+              from: 'transparent'
+            }
+          }
+        };
+        if (ex_chart) ex_chart.destroy();
+        ex_chart = new Chart(ctx, {
+          type: 'line',
+          data: data,
+          options: options
+        });
+
+        copyData = distanceData.map((d) => [d[0], Math.abs(d[1] - d[2]), Math.min(d[1], d[2]) + Math.abs(d[1] - d[2]) / 2].join('\t')).join('\n');
+        if (!distanceData.length) return alert('Y軸で重なりませんでした');
+        copyRawData = realFirstLine.map((ele, i) => [ele[0], ele[1], realSecondLine[i][1]].join('\t')).join('\n');
+        _id('copy_buttons').innerHTML = `<button class="btn green" onclick='copy(copyData)'>copy</button><button class="btn btn-small grey" onclick='copy(copyRawData)'>copy raw</button><span id="copied"></span></p>`;
+        _id('distance').innerHTML = `<p>
         <table><thead><tr><th>pixelY(1 origin)</th><th>distance</th><th>center</th></tr></thead>
-        <tbody style="user-select: all;">${distanceData.map(s => (`<tr>
+        <tbody style="user-select: all;">${distanceData.map(
+          (s) => `<tr>
             <td>${s[0]}</td>
             <td>${Math.abs(s[1] - s[2])}</td>
             <td>${Math.min(s[1], s[2]) + Math.abs(s[1] - s[2])}</td>
-          </tr>`))}
+          </tr>`
+        )}
         </tbody>
-      </table>`
-      _id("saveAsPng").disabled = false
-    }
+      </table>`;
+        _id('saveAsPng').disabled = false;
+      };
 
-    canvas.addEventListener("pointerdown",
-      (e) => {
-        document.body.style.userSelect = "none";
-        dragged = false;
-        lastX = e.offsetX || e.pageX - canvas.offsetLeft;
-        lastY = e.offsetY || e.pageY - canvas.offsetTop;
-        if (drawMode) { // 線を描いているとき
-          clickFlg = 1
-        }
-        else if (selectBackgroundMode) {
-          // BG選択
-          selectingBackground = true
-          bgStartX = (lastX - anchorX) / lastScale
-          bgStartY = (lastY - anchorY) / lastScale
-          // const yy = Math.round((y - anchorY) / lastScale - 0.5) + 0.5
-          // const xx = (x - anchorX) / lastScale
-          console.log(bgStartX, bgStartY)
-          // bgStartY = lastY
-        } else { // 移動する場合
-          dragStart = cc.transformedPoint(lastX, lastY);
-          dragStart.x = dragStart.x * lastScale
-          dragStart.y = dragStart.y * lastScale
-          _dragStartX = dragStart.x
-          _dragStartY = dragStart.y
-        }
-      }, false
-    );
-
-    canvas.addEventListener("pointermove",
-      (e) => {
-        lastX = e.offsetX || e.pageX - canvas.offsetLeft;
-        lastY = e.offsetY || e.pageY - canvas.offsetTop;
-        // draw mode でクリック中の時は、線を書いていく
-        if (drawMode && clickFlg) {
-          draw(lastX, lastY);
-          return
-        }
-        // BG 選択時
-        else if (selectBackgroundMode) {
-          if (selectingBackground) {
-            bgEndX = (lastX - anchorX) / lastScale
-            bgEndY = (lastY - anchorY) / lastScale
-            redraw()
-            return
+      canvas.addEventListener(
+        'pointerdown',
+        (e) => {
+          document.body.style.userSelect = 'none';
+          dragged = false;
+          lastX = e.offsetX || e.pageX - canvas.offsetLeft;
+          lastY = e.offsetY || e.pageY - canvas.offsetTop;
+          if (drawMode) {
+            // 線を描いているとき
+            clickFlg = 1;
+          } else if (selectBackgroundMode) {
+            // BG選択
+            selectingBackground = true;
+            bgStartX = (lastX - anchorX) / lastScale;
+            bgStartY = (lastY - anchorY) / lastScale;
+            // const yy = Math.round((y - anchorY) / lastScale - 0.5) + 0.5
+            // const xx = (x - anchorX) / lastScale
+            console.log(bgStartX, bgStartY);
+            // bgStartY = lastY
+          } else {
+            // 移動する場合
+            dragStart = cc.transformedPoint(lastX, lastY);
+            dragStart.x = dragStart.x * lastScale;
+            dragStart.y = dragStart.y * lastScale;
+            _dragStartX = dragStart.x;
+            _dragStartY = dragStart.y;
           }
-        }
-        // そうではなくて、ドラッグ中（移動中の場合）は、動かす
-        else if (dragStart) {
-          dragged = true;
-          const pt = cc.transformedPoint(lastX, lastY);
-          const amountX = (pt.x * lastScale - dragStart.x)
-          const amountY = (pt.y * lastScale - dragStart.y)
-          redraw(anchorX + amountX, anchorY + amountY, dragging = true)
-        }
-      }, false
-    );
+        },
+        false
+      );
 
-    canvas.addEventListener("pointerup",
-      (evt) => {
-        let mode = -1;
-        if (drawMode && currentDrawingLineNum != null) {
-          mode = 1; // 線を書き終えた場合
-        } else if (selectBackgroundMode && selectingBackground) {
-          mode = 4; // BG選択終了
-        } else {
-          mode = 2; // move mode でドラッグした場合
-          // else mode = 3; // move mode で drag しなかった場合（十字を表示）
-        }
-        switch (mode) {
-          case 1:
-            if (currentDrawingLineNum === 1) {
-              firstLine = shrink(firstLine)
-              if (!firstLine.length) {
-                firstLine = []
-                alert("Y軸に重複がないようにお願いします")
-              } else if (!isContinuous(firstLine)) {
-                firstLine = []
-                alert("拡大するか、ゆっくり再描画してください")
-              }
-            } else if (currentDrawingLineNum === 2) {
-              secondLine = shrink(secondLine)
-              if (!secondLine.length) {
-                secondLine = []
-                alert("Y軸に重複がないようにお願いします")
-              } else if (!isContinuous(secondLine)) {
-                secondLine = []
-                alert("拡大するか、ゆっくり再描画してください")
-              }
-            } else {
-              alert("no line?")
+      canvas.addEventListener(
+        'pointermove',
+        (e) => {
+          lastX = e.offsetX || e.pageX - canvas.offsetLeft;
+          lastY = e.offsetY || e.pageY - canvas.offsetTop;
+          // draw mode でクリック中の時は、線を書いていく
+          if (drawMode && clickFlg) {
+            draw(lastX, lastY);
+            return;
+          }
+          // BG 選択時
+          else if (selectBackgroundMode) {
+            if (selectingBackground) {
+              bgEndX = (lastX - anchorX) / lastScale;
+              bgEndY = (lastY - anchorY) / lastScale;
+              redraw();
+              return;
             }
-            break;
-          case 2:
-            // move mode でドラッグした場合
-            lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
-            lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
+          }
+          // そうではなくて、ドラッグ中（移動中の場合）は、動かす
+          else if (dragStart) {
+            dragged = true;
             const pt = cc.transformedPoint(lastX, lastY);
-            const amountX = pt.x * lastScale - dragStart.x
-            const amountY = pt.y * lastScale - dragStart.y
-            anchorX += amountX
-            anchorY += amountY
-            // case 3: // 3. move mode で drag しなかった場合（十字を表示）
-            if (!dragged) {
-              lastPixelX = pt.x - anchorX / lastScale
-              lastPixelY = pt.y - anchorY / lastScale
-              const roundedPixelX = Math.round(lastPixelX + 0.5)
-              const roundedPixelY = Math.round(lastPixelY + 0.5) // 謎調整
-              _id("xAxis").innerText = roundedPixelX
-              _id("yAxis").innerText = roundedPixelY
-              _id("intensity").innerText = roundedPixelX > 1024 ? "-" : data[(roundedPixelY - 1) * 1024 + roundedPixelX - 1] || "-"
+            const amountX = pt.x * lastScale - dragStart.x;
+            const amountY = pt.y * lastScale - dragStart.y;
+            redraw(anchorX + amountX, anchorY + amountY, (dragging = true));
+          }
+        },
+        false
+      );
+
+      canvas.addEventListener(
+        'pointerup',
+        (evt) => {
+          let mode = -1;
+          if (drawMode && currentDrawingLineNum != null) {
+            mode = 1; // 線を書き終えた場合
+          } else if (selectBackgroundMode && selectingBackground) {
+            mode = 4; // BG選択終了
+          } else {
+            mode = 2; // move mode でドラッグした場合
+            // else mode = 3; // move mode で drag しなかった場合（十字を表示）
+          }
+          switch (mode) {
+            case 1:
+              if (currentDrawingLineNum === 1) {
+                firstLine = shrink(firstLine);
+                if (!firstLine.length) {
+                  firstLine = [];
+                  alert('Y軸に重複がないようにお願いします');
+                } else if (!isContinuous(firstLine)) {
+                  firstLine = [];
+                  alert('拡大するか、ゆっくり再描画してください');
+                }
+              } else if (currentDrawingLineNum === 2) {
+                secondLine = shrink(secondLine);
+                if (!secondLine.length) {
+                  secondLine = [];
+                  alert('Y軸に重複がないようにお願いします');
+                } else if (!isContinuous(secondLine)) {
+                  secondLine = [];
+                  alert('拡大するか、ゆっくり再描画してください');
+                }
+              } else {
+                alert('no line?');
+              }
+              break;
+            case 2:
+              // move mode でドラッグした場合
+              lastX = evt.offsetX || evt.pageX - canvas.offsetLeft;
+              lastY = evt.offsetY || evt.pageY - canvas.offsetTop;
+              const pt = cc.transformedPoint(lastX, lastY);
+              const amountX = pt.x * lastScale - dragStart.x;
+              const amountY = pt.y * lastScale - dragStart.y;
+              anchorX += amountX;
+              anchorY += amountY;
+              // case 3: // 3. move mode で drag しなかった場合（十字を表示）
+              if (!dragged) {
+                lastPixelX = pt.x - anchorX / lastScale;
+                lastPixelY = pt.y - anchorY / lastScale;
+                const roundedPixelX = Math.round(lastPixelX + 0.5);
+                const roundedPixelY = Math.round(lastPixelY + 0.5); // 謎調整
+                _id('xAxis').innerText = roundedPixelX;
+                _id('yAxis').innerText = roundedPixelY;
+                _id('intensity').innerText = roundedPixelX > 1024 ? '-' : data[(roundedPixelY - 1) * 1024 + roundedPixelX - 1] || '-';
+              }
+              break;
+            case 4:
+              console.log('BG選択終了');
+              if (bgEndX - bgStartX < 3 || bgEndY - bgStartY < 10) {
+                alert('選択範囲が小さすぎます');
+                deleteBG(_id('deleteButton3'));
+                break;
+              }
+              if (bgStartX) {
+                bgStartX = Math.round(bgStartX);
+                bgStartY = Math.round(bgStartY);
+                _id('deleteButton3').disabled = false;
+                _id('doneIcon3').classList.remove('transparent');
+              } else {
+                _id('doneIcon3').classList.add('transparent');
+              }
+              break;
+            default:
+              break;
+          }
+          document.body.style.userSelect = 'text';
+          dragStart = null;
+          dragged = false;
+          clickFlg = 0;
+          currentDrawingLineNum = null;
+          selectBackgroundMode = false;
+          selectingBackground = false;
+          changeMode('move');
+          redraw();
+          checkForResult();
+        },
+        false
+      );
+
+      canvas.addEventListener(
+        'mouseleave',
+        () => {
+          document.body.style.userSelect = 'text';
+          currentDrawingLineNum = null;
+          clickFlg = 0;
+          if (dragged) {
+            const pt = cc.transformedPoint(lastX, lastY);
+            const amountX = pt.x * lastScale - dragStart.x;
+            const amountY = pt.y * lastScale - dragStart.y;
+            dragged = false;
+            dragStart = null;
+            currentDrawingLineNum = null;
+            anchorX += amountX;
+            anchorY += amountY;
+          }
+        },
+        false
+      );
+
+      canvas.addEventListener('DOMMouseScroll', handleScroll, false);
+      canvas.addEventListener('mousewheel', handleScroll, false);
+
+      trackTransforms(cc);
+
+      // 手書きで描いた線の描画
+      const writeDrawedLine = (dragging) => {
+        if (firstLine.length) {
+          clickFlg = 1;
+          for (let i = 0; i < firstLine.length; i++) {
+            let [y, x] = firstLine[i];
+            y = parseFloat(y);
+            const pt = cc.transformedPoint(lastX, lastY);
+            // draw(Math.round(anchorX + x * lastScale + amountX), Math.round(anchorY + y * lastScale + amountY))
+            if (dragging) {
+              let amountX = (pt.x - _dragStartX / lastScale) * lastScale;
+              let amountY = (pt.y - _dragStartY / lastScale) * lastScale;
+              draw(anchorX + x * lastScale + amountX + 0.5, anchorY + y * lastScale + amountY + 0.5);
+            } else {
+              draw(anchorX + x * lastScale + 0.5, anchorY + y * lastScale + 0.5);
             }
-            break
-          case 4:
-            console.log("BG選択終了")
-            if (bgStartX) {
-              bgStartX = Math.round(bgStartX)
-              bgStartY = Math.round(bgStartY)
-              _id("deleteButton3").disabled = false
-            }
-            break
-          default:
-            break;
+          }
         }
-        document.body.style.userSelect = "text";
-        dragStart = null;
-        dragged = false;
+        if (secondLine.length) {
+          clickFlg = 1;
+          for (let i = 0; i < secondLine.length; i++) {
+            let [y, x] = secondLine[i];
+            y = parseFloat(y);
+            const pt = cc.transformedPoint(lastX, lastY);
+            if (dragging) {
+              let amountX = (pt.x - _dragStartX / lastScale) * lastScale;
+              let amountY = (pt.y - _dragStartY / lastScale) * lastScale;
+              draw(anchorX + x * lastScale + amountX + 0.5, anchorY + y * lastScale + amountY + 0.5);
+            } else {
+              draw(anchorX + x * lastScale + 0.5, anchorY + y * lastScale + 0.5);
+            }
+          }
+        }
         clickFlg = 0;
-        currentDrawingLineNum = null;
-        selectBackgroundMode = false;
-        selectingBackground = false;
-        changeMode("move")
-        redraw()
-        checkForResult()
-      }, false
-    );
+      };
 
-    canvas.addEventListener("mouseleave", () => {
-      document.body.style.userSelect = "text";
-      currentDrawingLineNum = null
-      clickFlg = 0
-      if (dragged) {
-        const pt = cc.transformedPoint(lastX, lastY);
-        const amountX = pt.x * lastScale - dragStart.x
-        const amountY = pt.y * lastScale - dragStart.y
-        dragged = false;
-        dragStart = null;
-        currentDrawingLineNum = null;
-        anchorX += amountX
-        anchorY += amountY
-      }
-    }, false)
+      const drawBGSelection = (_amountX = 0, _amountY = 0) => {
+        if (bgStartX && bgEndX) {
+          // anchorX / lastScale + lastPixelX
+          const sX = anchorX / lastScale + bgStartX + 0.5 + _amountX / lastScale;
+          const sY = anchorY / lastScale + bgStartY + 0.5 + _amountY / lastScale;
+          const eX = anchorX / lastScale + bgEndX + 0.5 + _amountX / lastScale;
+          const eY = anchorY / lastScale + bgEndY + 0.5 + _amountY / lastScale;
 
-    canvas.addEventListener("DOMMouseScroll", handleScroll, false);
-    canvas.addEventListener("mousewheel", handleScroll, false);
-
-    trackTransforms(cc);
-
-    // 手書きで描いた線の描画
-    const writeDrawedLine = (dragging) => {
-      if (firstLine.length) {
-        clickFlg = 1
-        for (let i = 0; i < firstLine.length; i++) {
-          let [y, x] = firstLine[i]
-          y = parseFloat(y)
-          const pt = cc.transformedPoint(lastX, lastY);
-          // draw(Math.round(anchorX + x * lastScale + amountX), Math.round(anchorY + y * lastScale + amountY))
-          if (dragging) {
-            let amountX = (pt.x - _dragStartX / lastScale) * lastScale
-            let amountY = (pt.y - _dragStartY / lastScale) * lastScale
-            draw(anchorX + x * lastScale + amountX + 0.5, anchorY + y * lastScale + amountY + 0.5)
-          } else {
-            draw(anchorX + x * lastScale + 0.5, anchorY + y * lastScale + 0.5)
+          cc.strokeStyle = 'skyblue';
+          cc.lineWidth = 2.5 / lastScale;
+          // 矩形の枠線を点線にする
+          cc.setLineDash([1.3, 1.8]);
+          cc.beginPath();
+          cc.moveTo(sX, sY);
+          cc.lineTo(eX, sY);
+          cc.lineTo(eX, eY);
+          cc.lineTo(sX, eY);
+          cc.lineTo(sX, sY);
+          cc.stroke();
+          cc.setLineDash([]);
+        }
+      };
+      // 描画
+      const redraw = (_x, _y, dragging = false, scale = lastScale, color = colorMode) => {
+        if (typeof data === 'undefined') return;
+        if (!_x && !_y) {
+          _x = anchorX;
+          _y = anchorY;
+        }
+        cc.setTransform(1, 0, 0, 1, 0, 0);
+        cc.clearRect(0, 0, canvas.width, canvas.height);
+        const min = rangeMin.value - 0;
+        const max = rangeMax.value - 0;
+        const canvasInvisible = document.createElement('canvas');
+        canvasInvisible.width = canvasInvisible.height = 1024;
+        cc.imageSmoothingEnabled = false;
+        const imageData = cc.createImageData(1024, 1024);
+        const imgd = imageData.data;
+        const height = 1024,
+          width = 1024;
+        let count = 0;
+        for (let y = 0; y < height; ++y) {
+          for (let x = 0; x < width; ++x) {
+            const base = (x + y * width) * 4;
+            const rawVal = data[count];
+            const val = rawVal >= max ? 255 : rawVal <= min ? 0 : ((rawVal - min) / (max - min)) * 255;
+            if (color) {
+              imgd[base + 0] = Math.floor(_r(val / 255) * 255);
+              imgd[base + 1] = Math.floor(_g(val / 255) * 255);
+              imgd[base + 2] = Math.floor(_b(val / 255) * 255);
+            } else {
+              imgd[base + 0] = imgd[base + 1] = imgd[base + 2] = val;
+            }
+            imgd[base + 3] = 255;
+            count += 1;
           }
         }
-      }
-      if (secondLine.length) {
-        clickFlg = 1
-        for (let i = 0; i < secondLine.length; i++) {
-          let [y, x] = secondLine[i]
-          y = parseFloat(y)
-          const pt = cc.transformedPoint(lastX, lastY);
-          if (dragging) {
-            let amountX = (pt.x - _dragStartX / lastScale) * lastScale
-            let amountY = (pt.y - _dragStartY / lastScale) * lastScale
-            draw(anchorX + x * lastScale + amountX + 0.5, anchorY + y * lastScale + amountY + 0.5)
-          } else {
-            draw(anchorX + x * lastScale + 0.5, anchorY + y * lastScale + 0.5)
-          }
-        }
-      }
-      clickFlg = 0
-    }
-
-    const drawBGSelection = () => {
-      if (bgStartX && bgEndX) {
-        // anchorX / lastScale + lastPixelX
-        const sX = anchorX / lastScale + bgStartX + 0.5
-        const sY = anchorY / lastScale + bgStartY + 0.5
-        const eX = anchorX / lastScale + bgEndX + 0.5
-        const eY = anchorY / lastScale + bgEndY + 0.5
-
-        cc.strokeStyle = 'skyblue';
-        cc.lineWidth = 2.5 / lastScale;
-        // 矩形の枠線を点線にする
-        cc.setLineDash([1.3, 1.8]);
-        cc.beginPath();
-        cc.moveTo(sX, sY);
-        cc.lineTo(eX, sY);
-        cc.lineTo(eX, eY);
-        cc.lineTo(sX, eY);
-        cc.lineTo(sX, sY);
-        cc.stroke();
-        cc.setLineDash([]);
-      }
-    }
-    // 描画
-    const redraw = (_x, _y, dragging = false, scale = lastScale, color = colorMode) => {
-      if (typeof data === "undefined") return
-      if (!_x && !_y) {
-        _x = anchorX
-        _y = anchorY
-      }
-      cc.setTransform(1, 0, 0, 1, 0, 0);
-      cc.clearRect(0, 0, canvas.width, canvas.height)
-      const min = rangeMin.value - 0
-      const max = rangeMax.value - 0
-      const canvasInvisible = document.createElement('canvas');
-      canvasInvisible.width = canvasInvisible.height = 1024;
-      cc.imageSmoothingEnabled = false;
-      const imageData = cc.createImageData(1024, 1024);
-      const imgd = imageData.data;
-      const height = 1024, width = 1024;
-      let count = 0
-      for (let y = 0; y < height; ++y) {
-        for (let x = 0; x < width; ++x) {
-          const base = (x + y * width) * 4;
-          const rawVal = data[count]
-          const val = rawVal >= max ? 255 : rawVal <= min ? 0 : (rawVal - min) / (max - min) * 255
-          if (color) {
-            imgd[base + 0] = Math.floor(_r(val / 255) * 255)
-            imgd[base + 1] = Math.floor(_g(val / 255) * 255)
-            imgd[base + 2] = Math.floor(_b(val / 255) * 255)
-          } else {
-            imgd[base + 0] = imgd[base + 1] = imgd[base + 2] = val
-          }
-          imgd[base + 3] = 255;
-          count += 1
-        }
-      }
-      ctx2 = canvasInvisible.getContext('2d');
-      ctx2.putImageData(imageData, 0, 0);
-      cc.scale(scale, scale);
-      cc.drawImage(canvasInvisible, _x / lastScale, _y / lastScale);
-      writeLine(_x - anchorX, _y - anchorY)
-      writeDrawedLine(dragging)
-      drawBGSelection()
-      _id("scaleDisplay").innerText = parseInt(lastScale * 100) / 100
-    };
-  </script>
-</body>
-
+        ctx2 = canvasInvisible.getContext('2d');
+        ctx2.putImageData(imageData, 0, 0);
+        cc.scale(scale, scale);
+        cc.drawImage(canvasInvisible, _x / lastScale, _y / lastScale);
+        writeLine(_x - anchorX, _y - anchorY);
+        writeDrawedLine(dragging);
+        drawBGSelection(_x - anchorX, _y - anchorY);
+        _id('scaleDisplay').innerText = parseInt(lastScale * 100) / 100;
+      };
+    </script>
+  </body>
 </html>
