@@ -3,6 +3,12 @@ import { _r, _g, _b } from "./utils";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 
+import { Chart, registerables } from "chart.js";
+
+Chart.register(...registerables);
+
+window.Chart = Chart
+
 window._r = _r;
 window._g = _g;
 window._b = _b;
@@ -104,7 +110,7 @@ const inputFileAndDraw = async (input) => {
     _id("rangeMaxDisplay").innerText = rangeMax.value;
 
     window.fileName = fileName;
-    _id("input-file-status").innerHTML = `input complete<br/>total data size: ${data.length} (${Math.round(Math.sqrt(data.length))}^2)<br/><b style="color:tomato">${!(data.length == 1048577 || data.length == 1048576) ? "1024*1024ではありません。OK?" : ""}</b>`;
+    _id("input-file-status").innerHTML = `data size: ${data.length} (${Math.round(Math.sqrt(data.length))}^2)<br/><b style="color:tomato">${!(data.length == 1048577 || data.length == 1048576) ? "1024*1024ではありません。OK?" : ""}</b>`;
     _id("console").style.pointerEvents = "auto";
     _id("console").style.color = "inherit";
     _id("downloadButton").classList.remove("disabled");
@@ -202,6 +208,7 @@ const changeMode = (mode) => {
     _id("move").classList.remove("active");
     canvas.style.cursor = "crosshair";
   } else if (mode === "move") {
+    selectBackgroundMode = false
     drawMode = false;
     _id("draw").classList.remove("active");
     _id("move").classList.add("active");
@@ -210,6 +217,10 @@ const changeMode = (mode) => {
     _id("writeButton2").disabled = false;
     changeClassName(_id("writeIcon1"), "light-blue-text", "grey-text");
     changeClassName(_id("writeIcon2"), "light-blue-text", "grey-text");
+    changeClassName(_id("writeIcon3"), "light-blue-text", "grey-text");
+  } else if (mode === "selectBackground") {
+    selectBackgroundMode = true
+    canvas.style.cursor = "default";
   }
   const firstLineDone = !!firstLine.length;
   const secondLineDone = !!secondLine.length;
