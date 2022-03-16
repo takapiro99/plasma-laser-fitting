@@ -1,13 +1,13 @@
-import { readData, readSpeData, copy } from "../utils";
-import { _r, _g, _b } from "./utils";
-import { saveAs } from "file-saver";
-import JSZip from "jszip";
+import { readData, readSpeData, copy } from '../utils';
+import { _r, _g, _b } from './utils';
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 
-import { Chart, registerables } from "chart.js";
+import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 
-window.Chart = Chart
+window.Chart = Chart;
 
 window._r = _r;
 window._g = _g;
@@ -25,7 +25,7 @@ const sleep = async (msec) => new Promise((resolve) => setTimeout(resolve, msec)
 // https://gist.github.com/dzhang123/2a3a611b3d75a45a3f41
 // https://stackoverflow.com/questions/59352578/how-to-zoom-an-image-in-canvas-from-center-of-canvas
 const trackTransforms = (ctx) => {
-  var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   var xform = svg.createSVGMatrix();
   const scale = ctx.scale;
   ctx.scale = (sx, sy) => {
@@ -53,11 +53,11 @@ const trackTransforms = (ctx) => {
 window.trackTransforms = trackTransforms;
 
 const saveAsPng = (fileName) => {
-  let downloadLink = document.createElement("a");
-  downloadLink.setAttribute("download", fileName);
+  let downloadLink = document.createElement('a');
+  downloadLink.setAttribute('download', fileName);
   canvas.toBlob(function (blob) {
     let url = URL.createObjectURL(blob);
-    downloadLink.setAttribute("href", url);
+    downloadLink.setAttribute('href', url);
     downloadLink.click();
   });
 };
@@ -66,20 +66,20 @@ window.saveAsPng = saveAsPng;
 
 const inputFileAndDraw = async (input) => {
   if (!input.files[0].name) {
-    return alert("was not a file.");
+    return alert('was not a file.');
   }
-  const filenamechunk = input.files[0].name.split(".");
+  const filenamechunk = input.files[0].name.split('.');
   const fileExt = filenamechunk[filenamechunk.length - 1];
-  if (!["txt", "SPE", "spe"].includes(fileExt)) {
-    input.value = "";
-    return alert(".txt 又は .SPE ファイルのみ対応しています");
+  if (!['txt', 'SPE', 'spe'].includes(fileExt)) {
+    input.value = '';
+    return alert('.txt 又は .SPE ファイルのみ対応しています');
   }
-  _id("input-file-status").innerHTML = "input running... please wait";
+  _id('input-file-status').innerHTML = 'input running... please wait';
 
   sleep(80);
   try {
     let d;
-    if (fileExt === "txt") {
+    if (fileExt === 'txt') {
       d = await readData(input);
     } else {
       d = await readSpeData(input);
@@ -90,7 +90,7 @@ const inputFileAndDraw = async (input) => {
     rawData = data;
     rawFileName = fileName.slice(0, -4);
     window.rawData = data;
-    _id("fileName").innerText = fileName;
+    _id('fileName').innerText = fileName;
     const graphData = data.map((s) => s[2]);
     if (graphData[graphData.length - 1] === undefined) {
       graphData.pop();
@@ -100,47 +100,48 @@ const inputFileAndDraw = async (input) => {
     window.scaleMax = window.dataMax;
     window.dataMin = graphData.reduce((a, b) => (a < b ? a : b));
 
-    const rangeMin = _id("rangeMin");
-    const rangeMax = _id("rangeMax");
+    const rangeMin = _id('rangeMin');
+    const rangeMax = _id('rangeMax');
     rangeMin.min = rangeMax.min = dataMin;
     rangeMin.max = rangeMax.max = dataMax;
     // TODO: なおす
     rangeMax.value = 3000;
-    _id("rangeMinDisplay").innerText = rangeMin.value;
-    _id("rangeMaxDisplay").innerText = rangeMax.value;
+    _id('rangeMinDisplay').innerText = rangeMin.value;
+    _id('rangeMaxDisplay').innerText = rangeMax.value;
 
     window.fileName = fileName;
-    _id("input-file-status").innerHTML = `data size: ${data.length} (${Math.round(Math.sqrt(data.length))}^2)<br/><b style="color:tomato">${!(data.length == 1048577 || data.length == 1048576) ? "1024*1024ではありません。OK?" : ""}</b>`;
-    _id("console").style.pointerEvents = "auto";
-    _id("console").style.color = "inherit";
-    _id("downloadButton").classList.remove("disabled");
+    _id('input-file-status').innerHTML = `data size: ${data.length} (${Math.round(Math.sqrt(data.length))}^2)<br/><b style="color:tomato">${!(data.length == 1048577 || data.length == 1048576) ? '1024*1024ではありません。OK?' : ''}</b>`;
+    _id('console').style.pointerEvents = 'auto';
+    _id('console').style.color = 'inherit';
+    _id('downloadButton').classList.remove('disabled');
     redraw();
     return true;
   } catch (e) {
     console.error(e);
-    alert("something went wrong, sorry.  " + e);
+    alert('something went wrong, sorry.  ' + e);
     return false;
   }
 };
 
 window.inputFileAndDraw = inputFileAndDraw;
 
-const downloadZip = () => {
+const downloadZip = (e) => {
   // e.preventDefault()
+  console.log("hi")
   if (!rawData) {
-    alert("input file first.");
+    alert('input file first.');
     return;
   }
-  const min = _id("min").value - 0;
-  let max = _id("max").value - 0;
-  const step = _id("step").value - 0;
+  const min = _id('min').value - 0;
+  let max = _id('max').value - 0;
+  const step = _id('step').value - 0;
   if ((max - min + 1) % step !== 0) {
     if (
       !window.confirm(`${max - min + 1} elements is not indivisible by step: ${step}
 
 automatically adjust and continue anyway?`)
     ) {
-      alert("adjust and try again.");
+      alert('adjust and try again.');
       return;
     } else {
       // adjust max
@@ -188,10 +189,10 @@ over 100 sections will be aborted`);
   // M.toast({ html: "preparing files...", classes: "light-blue lighten-3 black-text" });
   const zip = new JSZip();
   fixedData.forEach((item, i) => {
-    zip.file(`${rawFileName}__${min + step * i}_${min + step * (i + 1) - 1}.txt`, `${item.map((s) => s.join(",")).join("\r\n")}\r\n`);
+    zip.file(`${rawFileName}__${min + step * i}_${min + step * (i + 1) - 1}.txt`, `${item.map((s) => s.join(',')).join('\r\n')}\r\n`);
   });
   // M.toast({ html: "zipping...", classes: "light-blue lighten-3 black-text" });
-  zip.generateAsync({ type: "blob" }).then((content) => {
+  zip.generateAsync({ type: 'blob' }).then((content) => {
     // see FileSaver.js
     saveAs(content, `${rawFileName}__processed__.zip`);
   });
@@ -202,55 +203,55 @@ window.readData = readData;
 
 const changeMode = (mode) => {
   console.log(mode);
-  if (mode === "draw") {
+  if (mode === 'draw') {
     drawMode = true;
-    _id("draw").classList.add("active");
-    _id("move").classList.remove("active");
-    canvas.style.cursor = "crosshair";
-  } else if (mode === "move") {
-    selectBackgroundMode = false
+    _id('draw').classList.add('active');
+    _id('move').classList.remove('active');
+    canvas.style.cursor = 'crosshair';
+  } else if (mode === 'move') {
+    selectBackgroundMode = false;
     drawMode = false;
-    _id("draw").classList.remove("active");
-    _id("move").classList.add("active");
-    canvas.style.cursor = "move";
-    _id("writeButton1").disabled = false;
-    _id("writeButton2").disabled = false;
-    changeClassName(_id("writeIcon1"), "light-blue-text", "grey-text");
-    changeClassName(_id("writeIcon2"), "light-blue-text", "grey-text");
-    changeClassName(_id("writeIcon3"), "light-blue-text", "grey-text");
-  } else if (mode === "selectBackground") {
-    selectBackgroundMode = true
-    canvas.style.cursor = "default";
+    _id('draw').classList.remove('active');
+    _id('move').classList.add('active');
+    canvas.style.cursor = 'move';
+    _id('writeButton1').disabled = false;
+    _id('writeButton2').disabled = false;
+    ['writeIcon1', 'writeIcon1', 'writeIcon1', 'writeIcon1'].map((s) => {
+      changeClassName(_id(s), 'light-blue-text', 'grey-text');
+    });
+  } else if (mode === 'selectBackground') {
+    selectBackgroundMode = true;
+    canvas.style.cursor = 'default';
   }
   const firstLineDone = !!firstLine.length;
   const secondLineDone = !!secondLine.length;
   if (firstLineDone) {
-    _id("doneIcon1").classList.remove("transparent");
-    _id("deleteIcon1").classList.add("text-darken-2");
-    _id("deleteButton1").disabled = false;
-    _id("writeButton1").disabled = true;
-    _id("writeIcon1").classList.remove("text-darken-2");
-    _id("writeIcon1").classList.remove("text-darken-2");
+    _id('doneIcon1').classList.remove('transparent');
+    _id('deleteIcon1').classList.add('text-darken-2');
+    _id('deleteButton1').disabled = false;
+    _id('writeButton1').disabled = true;
+    _id('writeIcon1').classList.remove('text-darken-2');
+    _id('writeIcon1').classList.remove('text-darken-2');
   } else {
-    _id("doneIcon1").classList.add("transparent");
-    _id("deleteIcon1").classList.remove("text-darken-2");
-    _id("deleteButton1").disabled = true;
-    _id("writeButton1").disabled = false;
-    _id("writeIcon1").classList.add("text-darken-2");
+    _id('doneIcon1').classList.add('transparent');
+    _id('deleteIcon1').classList.remove('text-darken-2');
+    _id('deleteButton1').disabled = true;
+    _id('writeButton1').disabled = false;
+    _id('writeIcon1').classList.add('text-darken-2');
   }
   if (secondLineDone) {
-    _id("doneIcon2").classList.remove("transparent");
-    _id("deleteIcon2").classList.add("text-darken-2");
-    _id("deleteButton2").disabled = false;
-    _id("writeButton2").disabled = true;
-    _id("writeIcon2").classList.remove("text-darken-2");
-    _id("writeIcon2").classList.remove("text-darken-2");
+    _id('doneIcon2').classList.remove('transparent');
+    _id('deleteIcon2').classList.add('text-darken-2');
+    _id('deleteButton2').disabled = false;
+    _id('writeButton2').disabled = true;
+    _id('writeIcon2').classList.remove('text-darken-2');
+    _id('writeIcon2').classList.remove('text-darken-2');
   } else {
-    _id("doneIcon2").classList.add("transparent");
-    _id("deleteIcon2").classList.remove("text-darken-2");
-    _id("deleteButton2").disabled = true;
-    _id("writeButton2").disabled = false;
-    _id("writeIcon2").classList.add("text-darken-2");
+    _id('doneIcon2').classList.add('transparent');
+    _id('deleteIcon2').classList.remove('text-darken-2');
+    _id('deleteButton2').disabled = true;
+    _id('writeButton2').disabled = false;
+    _id('writeIcon2').classList.add('text-darken-2');
   }
 };
 
