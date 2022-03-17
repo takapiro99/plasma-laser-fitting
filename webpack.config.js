@@ -1,7 +1,7 @@
 module.exports = {
   entry: {
-    main: "./src/index.js",
-    "cross-section": "./src/cross-section/index.js",
+    "fitting": "./src/index.js",
+    "index": "./src/cross-section/index.js",
   },
   output: {
     path: `${__dirname}/public`,
