@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="./assets/materialize.min.css" />
     <script src="./assets/materialize.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="./style/index.css" />
+    <script src="./js/canvas.js"></script>
+    <script src="./js/colorMode.js"></script>
+    <script src="./js/dragAndDrop.js"></script>
+    <script src="./js/utils.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
     <script>
       let drawMode = false;
@@ -39,39 +44,15 @@
 
       const _id = (id) => document.getElementById(id);
     </script>
-    <style>
-      ul.left > li {
-        margin: 0 10px;
-      }
-
-      .lineIndicator > div {
-        border: 2px solid rgba(100, 100, 100, 0.2);
-        border-radius: 6px;
-      }
-
-      @media only screen and (min-width: 993px) {
-        .container {
-          width: 90%;
-        }
-      }
-
-      .btn-flat:hover {
-        background-color: rgba(100, 100, 100, 0.3) !important;
-      }
-
-      .transparent {
-        display: none;
-      }
-    </style>
   </head>
 
   <body class="grey lighten-3">
     <nav class="deep-purple darken-2">
       <div class="nav-wrapper">
-        <span class="brand-logo center">cross section / 解析</span>
+        <span class="brand-logo center">解析</span>
         <ul id="nav-mobile" class="right hide-on-small-and-down">
           <li>
-            <a href="index.html"><b>fitting</b></a>
+            <a href="fitting.html"><b>fitting</b></a>
           </li>
           <li>
             <a href="https://github.com/takapiro99/plasma-laser-fitting/">about</a>
@@ -82,18 +63,13 @@
     <div class="container">
       <div>
         <p>
-          <!-- <h5>1. select .txt or .SPE file</h5> -->
           <label for="fileInput">
             <big>select file or drop</big>
             <input type="file" onchange="onFileInput(this)" accept=".txt,.SPE" id="fileInput" />
           </label>
         </p>
         <p id="fileName"></p>
-        <div style="user-select: none">
-          <!-- <p id="dropZone"
-          style="text-align: center;height:150px;background: lightyellow;border-radius:7px;line-height:150px;font-size:150%;">
-          or drop here</p> -->
-        </div>
+        <div style="user-select: none"></div>
         <p id="input-file-status"></p>
       </div>
       <div id="console" style="pointer-events: none; color: lightgrey !important">
@@ -102,7 +78,7 @@
           <div class="row">
             <div class="col xl9 s12" style="text-align: center">
               <div>
-                <canvas id="previewCanvas" width="810" height="400" style="border: 2px solid grey; border-radius: 6px; cursor: move; background-color: snow; pointer-events: auto; transition: all 0.16s ease">図形を表示するには、canvasタグをサポートしたブラウザが必要です。</canvas>
+                <canvas id="previewCanvas" class="previewCanvas" width="810" height="400"></canvas>
               </div>
               <div>
                 <!-- <canvas id="xAxisCanvas" width="800" height="70" style="background-color: grey;"></canvas> -->
@@ -190,7 +166,6 @@
               </div>
               <details open style="width: 100%">
                 <summary>密度の算出</summary>
-
                 <h6>
                   1. BG の範囲の矩形選択
                   <i class="material-icons green-text transparent" id="doneIcon3">done</i>
@@ -245,11 +220,6 @@
             </div>
           </div>
         </div>
-
-        <!-- <label for="">
-        center pixel
-        <input type="text">
-      </label> -->
         <div class="ev-result row">
           <div class="col s6">
             <canvas id="ex_chart" width="800" height="250"></canvas>
@@ -490,7 +460,6 @@
       };
 
       const writeLine = (_amountX = 0, _amountY = 0) => {
-        // console.log(lastPixelX)
         cc.lineWidth = 1.2 / lastScale;
         cc.strokeStyle = '#fff176';
         const xAxis = anchorX / lastScale + lastPixelX + _amountX / lastScale;

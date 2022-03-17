@@ -1,0 +1,31 @@
+ul.left > li {
+  margin: 0 10px;
+}
+
+.lineIndicator > div {
+  border: 2px solid rgba(100, 100, 100, 0.2);
+  border-radius: 6px;
+}
+
+@media only screen and (min-width: 993px) {
+  .container {
+    width: 90%;
+  }
+}
+
+.btn-flat:hover {
+  background-color: rgba(100, 100, 100, 0.3) !important;
+}
+
+.transparent {
+  display: none;
+}
+
+.previewCanvas {
+  border: 2px solid grey;
+  border-radius: 6px;
+  cursor: move;
+  background-color: snow;
+  pointer-events: auto;
+  transition: all 0.16s ease;
+}

@@ -1,5 +1,4 @@
 import { readData, readSpeData, copy } from '../utils';
-import { _r, _g, _b } from './utils';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 
@@ -8,11 +7,6 @@ import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
 window.Chart = Chart;
-
-window._r = _r;
-window._g = _g;
-window._b = _b;
-
 window.copy = copy;
 
 let rawData = null;
@@ -21,36 +15,6 @@ let rawFileName = null;
 const _id = (id) => document.getElementById(id);
 
 const sleep = async (msec) => new Promise((resolve) => setTimeout(resolve, msec));
-
-// https://gist.github.com/dzhang123/2a3a611b3d75a45a3f41
-// https://stackoverflow.com/questions/59352578/how-to-zoom-an-image-in-canvas-from-center-of-canvas
-const trackTransforms = (ctx) => {
-  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  var xform = svg.createSVGMatrix();
-  const scale = ctx.scale;
-  ctx.scale = (sx, sy) => {
-    xform = xform.scaleNonUniform(sx, sy);
-    return scale.call(ctx, sx, sy);
-  };
-  const setTransform = ctx.setTransform;
-  ctx.setTransform = (a, b, c, d, e, f) => {
-    xform.a = a;
-    xform.b = b;
-    xform.c = c;
-    xform.d = d;
-    xform.e = e;
-    xform.f = f;
-    return setTransform.call(ctx, a, b, c, d, e, f);
-  };
-  const pt = svg.createSVGPoint();
-  ctx.transformedPoint = (x, y) => {
-    pt.x = x;
-    pt.y = y;
-    return pt.matrixTransform(xform.inverse());
-  };
-};
-
-window.trackTransforms = trackTransforms;
 
 const saveAsPng = (fileName) => {
   let downloadLink = document.createElement('a');
@@ -127,7 +91,7 @@ window.inputFileAndDraw = inputFileAndDraw;
 
 const downloadZip = (e) => {
   // e.preventDefault()
-  console.log("hi")
+  console.log('hi');
   if (!rawData) {
     alert('input file first.');
     return;
@@ -186,12 +150,10 @@ over 100 sections will be aborted`);
         .map((s) => Math.round(s / step));
     })
     .map((s) => s.map((t, i) => [i + 1, 1, t]));
-  // M.toast({ html: "preparing files...", classes: "light-blue lighten-3 black-text" });
   const zip = new JSZip();
   fixedData.forEach((item, i) => {
     zip.file(`${rawFileName}__${min + step * i}_${min + step * (i + 1) - 1}.txt`, `${item.map((s) => s.join(',')).join('\r\n')}\r\n`);
   });
-  // M.toast({ html: "zipping...", classes: "light-blue lighten-3 black-text" });
   zip.generateAsync({ type: 'blob' }).then((content) => {
     // see FileSaver.js
     saveAs(content, `${rawFileName}__processed__.zip`);
@@ -286,17 +248,3 @@ const shrink = (dataArray) => {
 };
 
 window.shrink = shrink;
-
-const isContinuous = (arr) => {
-  return !arr
-    .map((s) => parseFloat(s[0]))
-    .reduce((acc, cur, i, arr) => {
-      if (cur - arr?.[i - 1] === 1 || !arr?.[i - 1]) {
-        return acc;
-      } else {
-        return [...acc, cur];
-      }
-    }, []).length;
-};
-
-window.isContinuous = isContinuous;
