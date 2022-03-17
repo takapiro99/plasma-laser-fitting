@@ -200,6 +200,7 @@
                   <button class="btn btn-flat" disabled id="deleteButton3" onclick="deleteBG(this)">
                     <i class="material-icons grey-text" id="deleteIcon3">delete</i>
                   </button>
+                  <span id="bgValue"></span>
                 </div>
                 <h6>2. 積算範囲の選択</h6>
                 <div>
@@ -213,7 +214,7 @@
                     </button>
                   </div>
                 </div>
-                <div id="dropZone2" style="width: 110%; height: 100px; line-height: 50px; text-align: center; background: snow; border-radius: 6px; padding: 5px; transition: all 0.16s ease">
+                <!-- <div id="dropZone2" style="width: 110%; height: 100px; line-height: 50px; text-align: center; background: snow; border-radius: 6px; padding: 5px; transition: all 0.16s ease">
                   <span style="line-height: 1.3rem">
                     <label for="RlInput" style="color: #222 !important">
                       <h6>
@@ -225,8 +226,8 @@
                       <input type="file" id="RlInput" />
                     </label>
                   </span>
-                </div>
-                <h6>4. 設定</h6>
+                </div> -->
+                <!-- <h6>4. 設定</h6>
                 <div>
                   <label for="RlAcc">
                     レイリーの積算数
@@ -236,7 +237,7 @@
                     トムソン散乱の積算数
                     <input type="number" value="3" id="TSAcc" />
                   </label>
-                </div>
+                </div> -->
               </details>
             </div>
           </div>
@@ -295,7 +296,8 @@
     <script>
       // const dropZone = _id("dropZone")
       const dropZone = _id('previewCanvas');
-      const dropZone2 = _id('dropZone2');
+      const dropZone2 = {};
+      // const dropZone2 = _id('dropZone2');
 
       const canvas = _id('previewCanvas');
       const cc = canvas.getContext('2d');
@@ -329,21 +331,22 @@
       const handleDragOver = (e, isRl) => {
         stop(e);
         if (isRl) {
-          _id('dropZone2').style.background = '#a1a7f0';
+          // _id('dropZone2').style.background = '#a1a7f0';
         } else {
           e.target.style.background = '#a1a7f0';
         }
       };
       dropZone.addEventListener('dragover', handleDragOver, false);
-      dropZone2.addEventListener('dragover', (e) => handleDragOver(e, true), false);
+      // dropZone2.addEventListener('dragover', (e) => handleDragOver(e, true), false);
 
       const handleDragLeave = (e, isRl) => {
         stop(e);
-        if (isRl) _id('dropZone2').style.background = 'snow';
-        else e.target.style.background = 'snow';
+        // if (isRl) _id('dropZone2').style.background = 'snow';
+        // else e.target.style.background = 'snow';
+        e.target.style.background = 'snow';
       };
       dropZone.addEventListener('dragleave', handleDragLeave, false);
-      dropZone2.addEventListener('dragleave', (e) => handleDragLeave(e, true), false);
+      // dropZone2.addEventListener('dragleave', (e) => handleDragLeave(e, true), false);
 
       dropZone.addEventListener(
         'drop',
@@ -361,23 +364,23 @@
         },
         false
       );
-      dropZone2.addEventListener(
-        'drop',
-        async (e) => {
-          stop(e);
-          const files = e.dataTransfer.files; // ドロップしたファイルを取得
-          if (files.length !== 1) {
-            return alert('アップロードできるファイルは1つだけです。');
-          }
-          const fileInput = _id('RlInput');
-          fileInput.files = files; // input の value をドラッグしたファイルに置き換える
-          alert('レイリーファイル受領！');
-          // const res = await inputFileAndDraw(fileInput);
-          _id('dropZone2').style.background = 'snow';
-          // if (res) redraw();
-        },
-        false
-      );
+      // dropZone2.addEventListener(
+      //   'drop',
+      //   async (e) => {
+      //     stop(e);
+      //     const files = e.dataTransfer.files; // ドロップしたファイルを取得
+      //     if (files.length !== 1) {
+      //       return alert('アップロードできるファイルは1つだけです。');
+      //     }
+      //     const fileInput = _id('RlInput');
+      //     fileInput.files = files; // input の value をドラッグしたファイルに置き換える
+      //     alert('レイリーファイル受領！');
+      //     // const res = await inputFileAndDraw(fileInput);
+      //     // _id('dropZone2').style.background = 'snow';
+      //     // if (res) redraw();
+      //   },
+      //   false
+      // );
 
       const onFileInput = async (input) => {
         const res = await inputFileAndDraw(input);
@@ -683,6 +686,7 @@
               }
               break;
             case 4:
+              changeClassName(_id('writeIcon3'), 'light-blue-text', 'grey-text');
               console.log('BG選択終了');
               if (bgEndX - bgStartX < 3 || bgEndY - bgStartY < 10) {
                 alert('選択範囲が小さすぎます');
@@ -690,10 +694,25 @@
                 break;
               }
               if (bgStartX) {
-                bgStartX = Math.round(bgStartX);
-                bgStartY = Math.round(bgStartY);
+                // あったとき
+                bgStartX = Math.round(bgStartX) + 1;
+                bgStartY = Math.round(bgStartY) + 1;
+                bgEndX = Math.round(bgEndX) + 1;
+                bgEndY = Math.round(bgEndY) + 1;
                 _id('deleteButton3').disabled = false;
                 _id('doneIcon3').classList.remove('transparent');
+                console.log(bgStartX, bgStartY, bgEndX, bgEndY);
+                // console.log(data)
+                let selected = [];
+                for (let i = 0; i < 1024; i++) {
+                  for (let j = 0; j < 1024; j++) {
+                    if (bgStartX <= i && i <= bgEndX && bgStartY <= j && j <= bgEndY) {
+                      selected.push(data[j * 1024 + i]);
+                    }
+                  }
+                }
+                // console.log(selected);
+                _id('bgValue').innerHTML = `avg: ${Math.round((selected.reduce((a, b) => a + b) * 100) / selected.length) / 100}`;
               } else {
                 _id('doneIcon3').classList.add('transparent');
               }
