@@ -27,6 +27,8 @@
 
       let firstLine = [];
       let secondLine = [];
+      let kakomiLine = [];
+      let kakomiInfo = [];
       let currentDrawingLineNum = null;
 
       let selectBackgroundMode = false;
@@ -206,13 +208,14 @@
                 <div>
                   囲って選択してください（始点と終点が結ばれます）
                   <div>
-                    <button class="btn btn-flat" onclick="startSelectBG(this)" id="writeButton4">
+                    <button class="btn btn-flat" onclick="startDrawingLine(this, 3)" id="writeButton4">
                       <i class="material-icons grey-text text-darken-2" id="writeIcon4">create</i>
                     </button>
-                    <button class="btn btn-flat" disabled id="deleteButton4" onclick="">
+                    <button class="btn btn-flat" disabled id="deleteButton4" onclick="deleteLine(this, 3)">
                       <i class="material-icons grey-text" id="deleteIcon4">delete</i>
                     </button>
                   </div>
+                  <p id="kakomi"></p>
                 </div>
                 <!-- <div id="dropZone2" style="width: 110%; height: 100px; line-height: 50px; text-align: center; background: snow; border-radius: 6px; padding: 5px; transition: all 0.16s ease">
                   <span style="line-height: 1.3rem">
@@ -405,6 +408,8 @@
           firstLine.push([xx, yy]);
         } else if (currentDrawingLineNum === 2) {
           secondLine.push([xx, yy]);
+        } else if (currentDrawingLineNum === 3) {
+          kakomiLine.push([xx, yy]);
         }
       };
 
@@ -443,6 +448,8 @@
             firstLine = [];
           } else if (number === 2) {
             secondLine = [];
+          } else if (number === 3) {
+            kakomiLine = [];
           }
           redraw();
         }
@@ -661,6 +668,35 @@
                   secondLine = [];
                   alert('拡大するか、ゆっくり再描画してください');
                 }
+              } else if (currentDrawingLineNum === 3) {
+                // 囲み
+                // kakomiLine = shrink(kakomiLine, true);
+                // console.log(kakomiLine);
+                // bgEndX = (lastX - anchorX) / lastScale;
+                let xx = kakomiLine[0][0] * lastScale + anchorX;
+                let yy = kakomiLine[0][1] * lastScale + anchorX;
+                kakomiLine.push(kakomiLine[0]);
+                cc.closePath();
+                console.log(cc.isPointInPath(100 * lastScale + anchorX, 100 * lastScale + anchorY));
+                for (let i = 0; i < 1024; i++) {
+                  for (let j = 0; j < 1024; j++) {
+                    let px = i * lastScale + anchorX;
+                    let py = j * lastScale + anchorY;
+                    if (cc.isPointInPath(px, py)) {
+                      kakomiInfo.push([i + 1, j + 1, data[1024 * j + i]]);
+                    }
+                  }
+                }
+                console.log(kakomiInfo); // x, y
+                let d = {};
+                kakomiInfo.forEach((s) => {
+                  if (!d[String(s[1])]) d[String(s[1])] = [];
+                  d[String(s[1])].push(s[2]);
+                });
+                console.log(d);
+                for (const [key, value] of Object.entries(d)) {
+                  _id('kakomi').innerHTML += `<li>${key} ${value.reduce((a, b) => a + b)}</li>`;
+                }
               } else {
                 alert('no line?');
               }
@@ -781,6 +817,22 @@
           clickFlg = 1;
           for (let i = 0; i < secondLine.length; i++) {
             let [y, x] = secondLine[i];
+            y = parseFloat(y);
+            const pt = cc.transformedPoint(lastX, lastY);
+            if (dragging) {
+              let amountX = (pt.x - _dragStartX / lastScale) * lastScale;
+              let amountY = (pt.y - _dragStartY / lastScale) * lastScale;
+              draw(anchorX + x * lastScale + amountX + 0.5, anchorY + y * lastScale + amountY + 0.5);
+            } else {
+              draw(anchorX + x * lastScale + 0.5, anchorY + y * lastScale + 0.5);
+            }
+          }
+        }
+        if (kakomiLine.length) {
+          clickFlg = 1;
+          console.log('write');
+          for (let i = 0; i < kakomiLine.length; i++) {
+            let [x, y] = kakomiLine[i];
             y = parseFloat(y);
             const pt = cc.transformedPoint(lastX, lastY);
             if (dragging) {
