@@ -178,6 +178,7 @@
                     <i class="material-icons grey-text" id="deleteIcon3">delete</i>
                   </button>
                   <span id="bgValue"></span>
+                  <p id="bginfo"></p>
                 </div>
                 <h6>2. 積算範囲の選択</h6>
                 <div>
@@ -639,9 +640,6 @@
                 }
               } else if (currentDrawingLineNum === 3) {
                 // 囲み
-                // kakomiLine = shrink(kakomiLine, true);
-                // console.log(kakomiLine);
-                // bgEndX = (lastX - anchorX) / lastScale;
                 let xx = kakomiLine[0][0] * lastScale + anchorX;
                 let yy = kakomiLine[0][1] * lastScale + anchorX;
                 kakomiLine.push(kakomiLine[0]);
@@ -712,9 +710,18 @@
                 for (let i = 0; i < 1024; i++) {
                   for (let j = 0; j < 1024; j++) {
                     if (bgStartX <= i && i <= bgEndX && bgStartY <= j && j <= bgEndY) {
-                      selected.push(data[j * 1024 + i]);
+                      selected.push([i + 1, j + 1, data[j * 1024 + i]]);
                     }
                   }
+                }
+                const c = {};
+                selected.forEach((s) => {
+                  if (!c[String(s[1])]) c[String(s[1])] = [];
+                  c[String(s[1])].push(s[2]);
+                });
+                console.log(c);
+                for (const [key, value] of Object.entries(c)) {
+                  _id('bginfo').innerHTML += `<li>${key} ${value.reduce((a, b) => a + b)}</li>`;
                 }
                 // console.log(selected);
                 _id('bgValue').innerHTML = `avg: ${Math.round((selected.reduce((a, b) => a + b) * 100) / selected.length) / 100}`;
